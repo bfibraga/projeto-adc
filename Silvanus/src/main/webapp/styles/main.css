@@ -9,6 +9,10 @@
   --secundary-bg: 
 }
 
+html{
+  overflow: hidden;
+}
+
 .invisible{
     opacity: 0%;
 }
@@ -200,7 +204,7 @@
 
 .error-msg{
   color: red;
-  font-weight: bold;
+  font-weight: normal;
 }
 
 h1,p,label,a{
