@@ -30,9 +30,9 @@
   -->
   
   <!-- Main Login Menu -->
-  <form id="form" class="position-absolute center light rounded-3 shadow-sm" style="width: 25rem; height: 35rem;">
+  <form id="login" class="position-absolute center light rounded-3 shadow-sm" style="width: 25rem; height: 35rem;">
     <!-- Logo Image -->
-        <img id="logo" src="./media/imgs/logotipo.png" class="center-images d-block" style="height: 5rem; margin-top: 2rem;">
+        <img id="logo" src="./media/imgs/logo.png" class="center-images d-block" style="height: 5rem; margin-top: 2rem; transition: 100ms linear;">
         
         <!-- Login Message -->
         <h1 class="text-center" style="margin-top: 2.5rem; margin-bottom: 3rem; font-size: 2rem;">Bem-vindo de volta! &#128075</h1>
@@ -76,6 +76,34 @@
         <!-- Submit Button -->
         <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
           <input type="button" style="width: 20rem;" onclick="location.href='./app.html'" id="button-submit" class="btn btn-primary center-x rounded-pill" value="Login">
+        </div>
+        <a class="position-absolute center-x text-center" href="./register.html" style="font-size: 0.8rem;">Não tem conta registada?</a>
+  </form>
+  <!-- Forgot Password Menu -->
+  <form id="forgot-password" class="position-absolute center light rounded-3 shadow-sm d-none" style="width: 25rem; height: 27rem;">
+    <!-- Logo Image -->
+        <p class="text-center" style="font-size: 4.8rem;">&#128270</p>
+        <!-- Login Message -->
+        <h1 class="text-center" style="margin-top: 2.5rem; margin-bottom: 3rem; font-size: 1.8rem;">Esqueceu da password?</h1>
+        
+        <!-- Username Input -->
+        <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
+          <input id="usr_identifier" type="text" class="form-control rounded-pill" placeholder="Identificador">
+        </div>
+
+        <!--
+          <div  class="progress invisible" style="width: 20rem; margin-left: 1.7rem;  margin-bottom: 1rem;">
+          <div id="password-progress" class="progress-bar progress-bar-striped progress-bar-animated rounded bg-danger"></div>
+          </div>
+        -->
+        
+        <!-- Error Message -->
+        <p id="validation_error" class="text-center error-msg" style="height: 0.5rem; margin-bottom: 3rem; margin-top: 1rem;">
+        </p>
+
+        <!-- Submit Button -->
+        <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
+          <input type="button" style="width: 20rem;" onclick="location.href='./app.html'" id="button-submit" class="btn btn-primary center-x rounded-pill" value="Reconfigurar a minha palavra-passe">
         </div>
         <a class="position-absolute center-x text-center" href="./register.html" style="font-size: 0.8rem;">Não tem conta registada?</a>
   </form>
