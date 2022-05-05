@@ -3,6 +3,7 @@ const form_elem = document.getElementById("form");
 const bg_elem = document.getElementById("bg-image");
 
 const input_fields = {
+  "curr_step": document.getElementById("step-0"),
   "id": document.getElementById("usr_identifier"),
   "firstname": document.getElementById("usr_firstname"),
   "lastname": document.getElementById("usr_lastname"),
@@ -17,6 +18,7 @@ document.getElementById("button-submit").addEventListener("click", function(){
   document.getElementById("loader").classList.add("block");
 });
 
+//TODO Remove this
 /*document.getElementById("theme-switch").addEventListener("change", function(){
   if(this.checked){
     if(main_elem != null){
@@ -88,7 +90,6 @@ const nColors = 3;
 input_fields["password"].addEventListener("input", function(event){
   const n_letters = this.value.length;
   let percentage = Math.min(n_letters/min_letters*100, 100);
-  //console.log(percentage+"%");
 
   if (percentage <= 0){
     input_fields["password-bar"].parentNode.classList.add("invisible");
@@ -108,4 +109,31 @@ input_fields["password"].addEventListener("input", function(event){
   }
 
   input_fields["password-bar"].style.width = String(percentage + "%");
-})
+});
+
+function previousStep(){
+  const curr_number_step = input_fields["curr_step"].id;
+  let previousStep = curr_number_step.split("-")[1] -1;
+  console.log(nextStep);
+
+  //Change Menu
+  input_fields["curr_step"].classList.add("d-none");
+  input_fields["curr_step"] = document.getElementById("step-" + previousStep);
+  input_fields["curr_step"].classList.remove("d-none");
+}
+
+function nextStep(){
+  const curr_number_step = input_fields["curr_step"].id;
+  let nextStep = parseInt(curr_number_step.split("-")[1]) + 1;
+  console.log(nextStep);
+
+  //Change Menu
+  input_fields["curr_step"].classList.add("d-none");
+  input_fields["curr_step"] = document.getElementById("step-" + nextStep);
+  input_fields["curr_step"].classList.remove("d-none");
+}
+
+function loadAvatar(event){
+  const avatar = document.getElementById("usr_avatar");
+  avatar.src = URL.createObjectURL(event.target.files[0])
+}
