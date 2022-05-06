@@ -2,10 +2,6 @@ package pt.unl.fct.di.adc.silvanus.util;
 
 public interface Result<T> {
 
-	enum ErrorCode {
-		OK, CONFLICT, NOT_FOUND, BAD_REQUEST, FORBIDDEN, INTERNAL_ERROR, NOT_IMPLEMENTED
-	};
-
 	/**
 	 * Tests if the result is an error.
 	 */
@@ -25,7 +21,7 @@ public interface Result<T> {
 	 * @return the error code
 	 * 
 	 */
-	ErrorCode error();
+	Integer status();
 
 	/**
 	 * Convenience method for returning non error results of the given type
@@ -51,8 +47,8 @@ public interface Result<T> {
 	 * 
 	 * @return
 	 */
-	static <T> ResultERROR<T> error(ErrorCode error) {
-		return new ResultERROR<>(error);
+	static <T> ResultERROR<T> error(int status) {
+		return new ResultERROR<>(status);
 	}
 
 }

@@ -45,7 +45,7 @@ public class LoginData {
 	 * @return if the keyword is valid or not
 	 */
 	private boolean validField(String keyword) {
-		return !keyword.trim().equals("") || !(keyword == null);
+		return keyword != null && !keyword.trim().equals("");
 	}
 	
 	/**

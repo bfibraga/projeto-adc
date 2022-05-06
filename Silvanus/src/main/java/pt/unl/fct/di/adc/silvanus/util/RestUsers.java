@@ -29,7 +29,7 @@ public interface RestUsers {
 	@Path("/register")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	AuthToken register(UserData data);
+	String register(UserData data);
 
 	/**
 	 * This method takes in a userID and a password and generates a token to login
@@ -41,9 +41,9 @@ public interface RestUsers {
 	 * @return a token that will be used to login the user
 	 */
 	@POST
-	@Path("/login/{userID}")
+	@Path("/login")
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	AuthToken login(@PathParam("username") String userID, @QueryParam("password") String password);
+	String login(LoginData data);
 
 	/**
 	 * This method will be used to logout the user
@@ -52,7 +52,7 @@ public interface RestUsers {
 	@Path("/logout")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	void logout();
+	String logout();
 
 	/**
 	 * This method is used to promote a user to a role higher than his current one.
@@ -63,7 +63,7 @@ public interface RestUsers {
 	@Path("/promote/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	void promote(@PathParam("username") String username);
+	String promote(@PathParam("username") String username);
 
 	/**
 	 * This method is used to get the data of a particular user.
@@ -76,7 +76,7 @@ public interface RestUsers {
 	@Path("/get")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	UserData getUser(@QueryParam("username") String username);
+	String getUser(@QueryParam("username") String username);
 
 	/**
 	 * This method is used to obtain the authentitication token of a particular
@@ -89,7 +89,7 @@ public interface RestUsers {
 	@Path("/token/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	AuthToken getToken(@PathParam("username") String username);
+	String getToken(@PathParam("username") String username);
 
 	/**
 	 * This method is used to delete a user from the system's database.
@@ -99,7 +99,7 @@ public interface RestUsers {
 	@DELETE
 	@Path("/remove/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	void remove(@PathParam("username") String username);
+	String remove(@PathParam("username") String username);
 
 	/**
 	 * This method is used to validate the user. To give him access to the app.
@@ -125,7 +125,7 @@ public interface RestUsers {
 	@Path("/change")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	void changePassword(AuthToken token, @QueryParam("password") String new_password);
+	String changePassword(AuthToken token, @QueryParam("password") String new_password);
 
 	/**
 	 * This method is used to change all or some of the attributes of the user that are not
@@ -138,5 +138,5 @@ public interface RestUsers {
 	@Path("/change/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	void changeAttributes(@PathParam("username") String username);
+	String changeAttributes(@PathParam("username") String username);
 }

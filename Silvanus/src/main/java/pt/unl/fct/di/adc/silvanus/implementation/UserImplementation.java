@@ -32,6 +32,10 @@ public class UserImplementation implements Users {
 	private final KeyFactory userKeyFactory = this.datastore.newKeyFactory().setKind("UserCredentials");
 
 	private final Gson g = new Gson();
+	
+	public UserImplementation() {
+		
+	}
 
 	@Override
 	public Result<AuthToken> register(UserData data) {
@@ -41,7 +45,7 @@ public class UserImplementation implements Users {
 		if (data.validation()) {
 			LOG.warning(
 					"User: \"" + data.getUsername() + "\" tried to register with some empty important information.");
-			return null;
+			return Result.error(400);
 		}
 		String user_id = data.getUsername().trim();
 
@@ -67,7 +71,7 @@ public class UserImplementation implements Users {
 				txn.rollback();
 				LOG.fine("Username \"" + data.getUsername()
 						+ "\" already exists\nTry again with another fancy nickname");
-				return null;
+				return Result.error(404);
 			}
 
 			user = Entity.newBuilder(userKey).set("email", data.getEmail())
@@ -117,7 +121,7 @@ public class UserImplementation implements Users {
 		if (!data.validation()) {
 			LOG.warning(
 					"User: \"" + data.getUsername() + "\" tried to register with some empty important information.");
-			return null;
+			return Result.error(400);
 		}
 
 		LOG.fine("Login attempt by: " + data.getUsername());
@@ -137,7 +141,7 @@ public class UserImplementation implements Users {
 				// User doesn't exist
 				tnx.rollback();
 				LOG.warning("User: \"" + data.getUsername() + "\" is not available");
-				return null;
+				return Result.error(404);
 			}
 
 			String hashedPassword = user.getString("usr_password");
@@ -152,7 +156,7 @@ public class UserImplementation implements Users {
 
 				tnx.put(token);
 				tnx.commit();
-				Result<AuthToken> result = new ResultOK<AuthToken>(at);
+				Result<AuthToken> result = Result.ok(at);
 				return result;
 			} else {
 				LOG.warning("Wrong Password");

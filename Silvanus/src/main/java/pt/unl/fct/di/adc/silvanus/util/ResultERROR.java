@@ -2,10 +2,10 @@ package pt.unl.fct.di.adc.silvanus.util;
 
 public class ResultERROR<T> implements Result<T> {
 
-	final ErrorCode error;
+	final int status;
 
-	ResultERROR(ErrorCode error) {
-		this.error = error;
+	ResultERROR(int error) {
+		this.status = error;
 	}
 
 	@Override
@@ -15,16 +15,16 @@ public class ResultERROR<T> implements Result<T> {
 
 	@Override
 	public T value() {
-		throw new RuntimeException("Attempting to extract the value of an Error: " + error());
+		return null;
 	}
 
 	@Override
-	public ErrorCode error() {
-		return error;
+	public Integer status() {
+		return status;
 	}
 
 	public String toString() {
-		return "(" + error() + ")";
+		return "(" + this.status() + ")";
 	}
 
 }

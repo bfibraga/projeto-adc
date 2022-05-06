@@ -1,53 +1,74 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
+import java.util.logging.Logger;
+
+import com.google.gson.*;
+
 import pt.unl.fct.di.adc.silvanus.data.AuthToken;
+import pt.unl.fct.di.adc.silvanus.data.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.UserData;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.RestUsers;
+import pt.unl.fct.di.adc.silvanus.util.Result;
 
 public class UsersResource implements RestUsers {
 
+	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
 	private final UserImplementation impl = new UserImplementation();
+	private final Gson g = new Gson();
 
+	public UsersResource() {}
+	
 	@Override
-	public AuthToken register(UserData data) {
-		return impl.register(data).value();
+	public String register(UserData data) {
+		Result<AuthToken> result = impl.register(data);
+		
+		return g.toJson(result.value());
 	}
 
 	@Override
-	public AuthToken login(String userID, String password) {
-		// TODO Auto-generated method stub
-		return null;
+	public String login(LoginData data) {
+		
+		Result<AuthToken> result = impl.login(data);
+		
+		return g.toJson(result.value());
+	}
+
+
+	@Override
+	public String logout() {
+		Result<Void> result = impl.logout();
+		
+		return g.toJson(result.value());
 	}
 
 	@Override
-	public void logout() {
+	public String promote(String username) {
 		// TODO Auto-generated method stub
-		impl.logout();
+		Result<Void> result = impl.promote();
+		
+		return g.toJson(result.value());
 	}
 
 	@Override
-	public void promote(String username) {
-		// TODO Auto-generated method stub
-		impl.promote();
+	public String getUser(String username) {
+		Result<UserData> result = impl.getUser();
+		
+		return g.toJson(result.value());
 	}
 
 	@Override
-	public UserData getUser(String username) {
-		// TODO Auto-generated method stub
-		return impl.getUser().value();
+	public String getToken(String username) {
+		Result<AuthToken> result = impl.getToken();
+		
+		return g.toJson(result.value());
 	}
 
 	@Override
-	public AuthToken getToken(String username) {
-		// TODO Auto-generated method stub
-		return impl.getToken().value();
-	}
-
-	@Override
-	public void remove(String username) {
-		// TODO Auto-generated method stub
-		impl.remove();
+	public String remove(String username) {
+		Result<Void> result = impl.remove();
+		
+		return g.toJson(result.value());
 	}
 
 	/*
@@ -58,15 +79,17 @@ public class UsersResource implements RestUsers {
 	 */
 
 	@Override
-	public void changePassword(AuthToken token, String new_password) {
-		// TODO Auto-generated method stub
-		impl.changePassword();
+	public String changePassword(AuthToken token, String new_password) {
+		Result<Void> result = impl.changePassword();
+		
+		return g.toJson(result.value());
 	}
 
 	@Override
-	public void changeAttributes(String username) {
-		// TODO Auto-generated method stub
-		impl.changeAttributes();
+	public String changeAttributes(String username) {
+		Result<Void> result = impl.changeAttributes();
+		
+		return g.toJson(result.value());
 	}
 
 }
