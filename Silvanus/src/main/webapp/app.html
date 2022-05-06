@@ -1,70 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main App</title>
+<html>
+    <head>
+        <title>Main App</title>
+        <meta name="viewport" content="initial-scale=1.0">
+        <meta charset="utf-8">
 
-    <!-- BootStrap-->
+        
+    <!--BootStrap-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- MapBox -->
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.css" rel="stylesheet">
+    <!--Google Maps-->
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/pure/0.6.2/pure-min.css">
 
     <!--Aplication-->
-    <link href="/styles/main.css" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/map.css">
 
-</head>
-<body id="main" class="bg-normal">
-  <div id="loader" class="overlay none">
-    <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
-  </div>
 
-  <div id="welcome" class="overlay none">
-    <div id="form" class="container-fluid step1 menu absolute center light" style="width: 25rem; height: 33rem;">
-      <h1 class="text-center" style="margin-top: 1rem; font-family: 'Roboto Condensed', sans-serif; font-style: italic;">Welcome</h1>
+    </head>
+<body>
+
+    <!--Loader-->
+    <div id="loader" class="overlay none">
+        <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
     </div>
-  </div>
 
-  <!--Map-->
-  <div id='map' class="absolute" style='width: 100%; height: 100%;'></div>
-  <script async src="./js/mapbox.js"></script>
 
-  <!-- Offcanvas Sidebar -->
-  <div class="offcanvas offcanvas-start rounded-end w-sm-50 shadow-lg" id="demo">
-    <div class="offcanvas-header">
-      <div class="row d-flex justify-content-md-center align-items-center">
+    <!-- Offcanvas Sidebar -->
+    <div class="offcanvas offcanvas-start rounded-end w-sm-50 shadow-lg" id="demo">
+        <div class="offcanvas-header">
+            <div class="row d-flex justify-content-md-center align-items-center">
 
-        <div id="loader" class="overlay none">
-          <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
-        </div>
+                <div id="loader" class="overlay none">
+                    <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
+                </div>
 
-        <div class="col-6">
-          <img src="./resources/imgs/user.png" alt="User Avatar" class="rounded-circle shadow-lg me-4" style="width: 9rem; height: 9rem;">
-        </div>
-        <div class="col-6 text-center">
-          <p class="offcanvas-title" style="font-weight: 500; font-size: xx-large;">username</p>
-        </div>
-      </div>
+                <div class="col-6">
+                    <img src="./" alt="User Avatar" class="rounded-circle shadow-lg me-4" style="width: 9rem; height: 9rem;">
+                </div>
+                <div class="col-6 text-center">
+                    <p class="offcanvas-title" style="font-weight: 500; font-size: xx-large;">username</p>
+                </div>
+            </div>
       
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body">
-      <p>First Name: </p>
-      <p>Last Name: </p>
-    </div>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+
+        </div>
+
+        <div class="offcanvas-body">
+            <p>First Name: </p>
+            <p>Last Name: </p>
+        </div>
+
   </div>
 
-  <!-- Button to open the offcanvas sidebar -->
-  <button class="m-2 btn btn-primary position-absolute btn-success position-absolute rounded-circle" style="width: 2rem; height: 2rem;" type="button" data-bs-toggle="offcanvas" data-bs-target="#demo">
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-sliders2 d-flex justify-content-center align-content-center" viewBox="0 0 32 32">
-      <path fill-rule="evenodd" d="M10.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4H1.5a.5.5 0 0 1 0-1H10V1.5a.5.5 0 0 1 .5-.5ZM12 3.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5Zm-6.5 2A.5.5 0 0 1 6 6v1.5h8.5a.5.5 0 0 1 0 1H6V10a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5ZM1 8a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 1 8Zm9.5 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V13H1.5a.5.5 0 0 1 0-1H10v-1.5a.5.5 0 0 1 .5-.5Zm1.5 2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5Z"/>
-    </svg>
-  </button>
-  
-  <script src="./app.js"></script>
+    <!-- Button to open the offcanvas sidebar -->
+    <button class="m-2 btn btn-primary position-absolute btn-success position-absolute rounded-circle" style="width: 2rem; height: 2rem; z-index: 1; top: 3cm;" type="button" data-bs-toggle="offcanvas" data-bs-target="#demo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-sliders2 d-flex justify-content-center align-content-center" viewBox="0 0 32 32">
+          <path fill-rule="evenodd" d="M10.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4H1.5a.5.5 0 0 1 0-1H10V1.5a.5.5 0 0 1 .5-.5ZM12 3.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5Zm-6.5 2A.5.5 0 0 1 6 6v1.5h8.5a.5.5 0 0 1 0 1H6V10a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5ZM1 8a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 1 8Zm9.5 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V13H1.5a.5.5 0 0 1 0-1H10v-1.5a.5.5 0 0 1 .5-.5Zm1.5 2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5Z"/>
+        </svg>
+    </button>
+
+    <!--Map-->
+    <script type="text/javascript" src="./app.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFF-sduDxFSBjCD_C-leaSI-sTkoCNO6Y&callback=initMap"></script>
+    <div id="map"></div>    
+
+
 </body>
 </html>
