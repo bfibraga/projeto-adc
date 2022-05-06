@@ -1,71 +1,108 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Main App</title>
-        <meta name="viewport" content="initial-scale=1.0">
-        <meta charset="utf-8">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main App</title>
 
-        
-    <!--BootStrap-->
+    <!-- BootStrap-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!--Google Maps-->
+    <!-- Google Maps -->
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/pure/0.6.2/pure-min.css">
 
     <!--Aplication-->
-    <link rel="stylesheet" href="./styles/map.css">
+    <link href="./styles/main.css" rel="stylesheet">
+    <link href="./styles/map.css" rel="stylesheet">
 
+</head>
+<body id="main" class="">
+  <div id="loader" class="overlay none">
+    <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
+  </div>
 
-    </head>
-<body>
-
-    <!--Loader-->
-    <div id="loader" class="overlay none">
-        <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
+  <!-- Sidebar -->
+  <div class="d-flex flex-column flex-shrink-0 bg-light rounded-3 position-absolute" style="width: 4rem; height: 100vh; z-index: 3; transition: opacity 100 ms linear;">
+    <!-- Avatar Image -->
+    <a href="#" class="d-flex align-items-center justify-content-center p-3 text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#user-properties">
+      <div class="avatar-wrapper" style="width: 2rem; height: 2rem;">
+        <img id="usr_avatar" src="./media/imgs/user-avatar.jpg" class="rounded-circle shadow-sm" style="">
+      </div>
+    </a>
+    <ul class="nav nav-pills nav-flush flex-column mb-auto text-center border-top top-50">
+      <li class="nav-item">
+        <a href="#" class="nav-link active py-3" aria-current="page" title="Map" data-bs-toggle="offcanvas" data-bs-placement="right">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link py-3" title="List Properties" data-bs-toggle="offcanvas" data-bs-target="#list-properties" aria-controls="offcanvasScrolling" data-bs-placement="right">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-journal-album" viewBox="0 0 16 16">
+            <path d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5h-5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3z"/>
+            <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+            <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
+          </svg>     
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link py-3" title="Orders" data-bs-toggle="tooltip" data-bs-placement="right">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16">
+            <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/>
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link py-3" title="Customers" data-bs-toggle="tooltip" data-bs-placement="right">
+          <svg class="bi" width="24" height="24" role="img" aria-label="Customers"><use xlink:href="#people-circle"/></svg>
+        </a>
+      </li>
+    </ul>
+    <a href="#" class="nav-link py-3 text-center position-relative border-top" title="Products" data-bs-toggle="tooltip" data-bs-placement="right">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
+      </svg>
+      <span class="position-absolute translate-middle p-1 bg-danger border border-light rounded-circle">
+        <span class="visually-hidden">New alerts</span>
+      </span>
+    </a>
+    <a href="#" class="nav-link p-3 text-center" title="Customers" data-bs-toggle="tooltip" data-bs-placement="right">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
+        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+      </svg>
+    </a>
+    
+    <!-- User Properties Sidebar -->
+    <div class="offcanvas offcanvas-start rounded-3" style="z-index: -10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="user-properties" aria-labelledby="offcanvasScrollingLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">User Properties</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <p>Try scrolling the rest of the page to see this option in action.</p>
+      </div>
     </div>
-
-
-    <!-- Offcanvas Sidebar -->
-    <div class="offcanvas offcanvas-start rounded-end w-sm-50 shadow-lg" id="demo">
-        <div class="offcanvas-header">
-            <div class="row d-flex justify-content-md-center align-items-center">
-
-                <div id="loader" class="overlay none">
-                    <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
-                </div>
-
-                <div class="col-6">
-                    <img src="./" alt="User Avatar" class="rounded-circle shadow-lg me-4" style="width: 9rem; height: 9rem;">
-                </div>
-                <div class="col-6 text-center">
-                    <p class="offcanvas-title" style="font-weight: 500; font-size: xx-large;">username</p>
-                </div>
-            </div>
-      
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-
-        </div>
-
-        <div class="offcanvas-body">
-            <p>First Name: </p>
-            <p>Last Name: </p>
-        </div>
+    
+    <!-- List Properties Sidebar -->
+    <div class="offcanvas offcanvas-start rounded-3" style="z-index: -10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="list-properties" aria-labelledby="offcanvasScrollingLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">List of Properties</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <p>Try scrolling the rest of the page to see this option in action.</p>
+      </div>
+    </div>
 
   </div>
 
-    <!-- Button to open the offcanvas sidebar -->
-    <button class="m-2 btn btn-primary position-absolute btn-success position-absolute rounded-circle" style="width: 2rem; height: 2rem; z-index: 1; top: 3cm;" type="button" data-bs-toggle="offcanvas" data-bs-target="#demo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-sliders2 d-flex justify-content-center align-content-center" viewBox="0 0 32 32">
-          <path fill-rule="evenodd" d="M10.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4H1.5a.5.5 0 0 1 0-1H10V1.5a.5.5 0 0 1 .5-.5ZM12 3.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5Zm-6.5 2A.5.5 0 0 1 6 6v1.5h8.5a.5.5 0 0 1 0 1H6V10a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5ZM1 8a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 1 8Zm9.5 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V13H1.5a.5.5 0 0 1 0-1H10v-1.5a.5.5 0 0 1 .5-.5Zm1.5 2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5Z"/>
-        </svg>
-    </button>
-
-    <!--Map-->
-    <script type="text/javascript" src="./app.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFF-sduDxFSBjCD_C-leaSI-sTkoCNO6Y&callback=initMap"></script>
-    <div id="map"></div>    
-
-
+  <div id="map" class="position-absolute"></div>
+  <script src="./maps.js"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFF-sduDxFSBjCD_C-leaSI-sTkoCNO6Y&callback=initMap"></script>
+  
+  
 </body>
 </html>

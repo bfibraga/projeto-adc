@@ -213,9 +213,6 @@ h1,p,label,a{
 
 .avatar-wrapper{
   display: block;
-  padding-top: 0.3rem;
-  height: 7rem;
-  width: 7rem;
 }
 
 .avatar-wrapper img{
