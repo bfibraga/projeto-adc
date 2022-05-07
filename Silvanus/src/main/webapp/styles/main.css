@@ -220,3 +220,11 @@ h1,p,label,a{
   width: 100%;
   object-fit: cover;
 }
+
+.grow { 
+  transition: all .2s ease-in-out; 
+}
+
+.grow:hover { 
+  transform: scale(1.1); 
+}

@@ -19,13 +19,29 @@ function point(_lat, _lng){
     return {lat: _lat , lng: _lng};
 }
 
+function line(p1, p2){
+    return [p1,p2];
+}
+
 function addMarker(coords){
     const marker = new google.maps.Marker({
         position: coords,
         map,
       });
     markers.push(marker);
-    points.push(coords);
+}
+
+function addLine(coords, color){
+    const flightPath = new google.maps.Polyline({
+        path: coords,
+        geodesic: true,
+        strokeColor: color,
+        strokeOpacity: 1.0,
+        strokeWeight: 2,
+      });
+    
+      flightPath.setMap(map);
+    
 }
 
 function addPolygon(coords, center, color){
@@ -45,8 +61,15 @@ function addPolygon(coords, center, color){
 
 function createPolygon(){
     map.addListener("click", (mapsMouseEvent) => {
-        console.log(mapsMouseEvent.latLng);
-        addMarker(mapsMouseEvent.latLng);
+        const latLng = mapsMouseEvent.latLng;
+        points.push(latLng)
+        addMarker(latLng);
+        console.log(points);
+
+        if (points.length > 1){
+            const new_line = line(points[points.length-2], points[points.length-1]);
+            addLine(new_line, "#FFFF00");
+        }
     });
 }
 
