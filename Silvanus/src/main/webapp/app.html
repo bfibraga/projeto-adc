@@ -24,17 +24,21 @@
   </div>
 
   <!-- <Terrain> Properties Sidebar -->
-    <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
-      <div class="offcanvas-header justify-content-center position-relative">
-        <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
-          <img id="usr_avatar" src="./media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-        </div>
+    <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10; left: 4rem; width: calc(100% - 4rem);" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
+      <div class="offcanvas-header">
+        <h4>Property Name</h4>
         <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
         
-        
-        <p class="display-5">Try scrolling the rest of the page to see this option in action.</p>
+        <p>Description:</p>
+        <p>Conselho:</p>
+        <p>Freguesia:</p>
+        <p>Section:</p>
+        <p>Number Article:</p>
+        <p>Verification:</p>
+
+        <p>Other info of this terrain: Risco Incendio, Humidade, etc</p>
   
         <!-- Toast Handler-->
         
@@ -67,14 +71,14 @@
         </a>
       </li>
       <li>
-        <a href="#" class="nav-link py-3" title="Orders" data-bs-toggle="tooltip" data-bs-placement="right">
+        <a href="#" class="nav-link py-3" title="Pending Requests" data-bs-toggle="tooltip" data-bs-placement="right">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-send grow" viewBox="0 0 16 16">
             <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/>
           </svg>
         </a>
       </li>
       <li>
-        <a href="#" class="nav-link py-3" title="Customers" data-bs-toggle="tooltip" data-bs-placement="right">
+        <a href="#" class="nav-link py-3" title="Request a property" data-bs-toggle="tooltip" data-bs-placement="right">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-file-earmark-plus-fill grow" viewBox="0 0 16 16">
             <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM8.5 7v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 1 0z"/>
           </svg>
