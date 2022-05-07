@@ -9,118 +9,84 @@ public class RegisterData {
 	private String email;
 	private String name;
 	private String password;
-	// TODO verificar se e preciso | private String confirm;
+	private String confirm;
 	private String role;
-	// TODO verificar se e preciso | private String state;
-	// TODO acho que este nao e necessario | private String visibility;
+	private String state;
+	private String visibility;
 	private String telephone;
-	// TODO este nao e preciso se temos o outro private String smartphone;
+	private String smartphone;
 
 	public RegisterData() {
 
 	}
 
-	public RegisterData(String username, String email, String name, String password, String role, String telephone) {
+	public RegisterData(
+			String username,
+			String email, 
+			String name, 
+			String password,
+			String confirm,
+			String role,
+			String state,
+			String visibility,
+			String telephone,
+			String smartphone) {
 		this.username = username;
 		this.email = email;
 		this.name = name;
 		this.password = password;
-		// this.confirm = confirm;
+		this.confirm = confirm;
 		this.role = role;
-		// this.state = state;
-		// this.visibility = visibility;
+		this.state = state;
+		this.visibility = visibility;
 		this.telephone = telephone;
-		// this.smartphone = smartphone;
+		this.smartphone = smartphone;
 	}
-
-	/**
-	 * 
-	 * @return the user's username
-	 */
+	
 	public String getUsername() {
 		return this.username;
 	}
-
-	/**
-	 * 
-	 * @return the user's email
-	 */
+	
 	public String getEmail() {
 		return this.email;
 	}
-
-	/**
-	 * 
-	 * @return the user's name
-	 */
+	
 	public String getName() {
 		return this.name;
 	}
-
-	/**
-	 * 
-	 * @return the user's password
-	 */
+	
 	public String getPassword() {
 		return this.password;
 	}
-
-	/*
-	 * public String getConfirmation() { return this.confirm; }
-	 */
-
-	/**
-	 * 
-	 * @return the user's role
-	 */
+	
+	public String getConfirmation() {
+		return this.confirm;
+	}
+	
 	public String getRole() {
 		return this.role;
 	}
-
-	/*
-	 * public String getState() { return this.state; }
-	 */
-
-	/*
-	 * public String getVisibility() { return this.visibility; }
-	 */
-
-	/**
-	 * 
-	 * @return the user's telephone number
-	 */
+	
+	public String getState() {
+		return this.state;
+	}
+	
+	public String getVisibility() {
+		return this.visibility;
+	}
+	
 	public String getTelephone() {
 		return this.telephone;
 	}
-	/*
-	 * public String getSmartphone() { return this.smartphone; }
-	 */
+	
+	public String getSmartphone() {
+		return this.smartphone;
+	}
 
-	/**
-	 * Checks if the given keyword is not equal to an empty string or null
-	 * 
-	 * @param keyword to validate
-	 * @return if the keyword is valid or not
-	 */
 	private boolean validField(String keyword) {
-		return !keyword.trim().equals("") || !(keyword == null);
+		return !keyword.trim().equals("");
 	}
-
-	/**
-	 * Checks if the password has length greater than 5 and contains numbers and
-	 * letters.
-	 * 
-	 * @param password to validate
-	 * @return
-	 */
-	private boolean validPassword(String password) {
-		return password.length() > 5 && password.matches("/^[0-9A-Za-z]+$/");
-	}
-
-	/**
-	 * Checks if the user's info is valid.
-	 * @return if it is or not
-	 */
+	
 	public boolean validation() {
 		if (!validField(this.username)) {
 			return false;
@@ -131,10 +97,13 @@ public class RegisterData {
 		if (!validField(this.name)) {
 			return false;
 		}
-		if (!validField(this.password) || !validPassword(password)) {
+		if (!validField(this.password)) {
 			return false;
 		}
-
+		/*if(!(this.password.equals(confirm))) {
+			return ValidationDataCode.PM;
+		}*/
+		
 		return true;
 	}
 }

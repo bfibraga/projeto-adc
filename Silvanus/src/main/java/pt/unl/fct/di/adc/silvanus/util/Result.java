@@ -1,7 +1,8 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
-public interface Result<T> {
+import javax.ws.rs.core.Response;
 
+public interface Result<T> {
 	/**
 	 * Tests if the result is an error.
 	 */
@@ -21,7 +22,7 @@ public interface Result<T> {
 	 * @return the error code
 	 * 
 	 */
-	Integer status();
+	Response.Status error();
 
 	/**
 	 * Convenience method for returning non error results of the given type
@@ -47,8 +48,7 @@ public interface Result<T> {
 	 * 
 	 * @return
 	 */
-	static <T> ResultERROR<T> error(int status) {
-		return new ResultERROR<>(status);
+	static <T> ResultERROR<T> error(Response.Status error) {
+		return new ResultERROR<>(error, error.toString());
 	}
-
 }

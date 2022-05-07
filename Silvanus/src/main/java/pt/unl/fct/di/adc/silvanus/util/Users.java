@@ -1,12 +1,13 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
 import pt.unl.fct.di.adc.silvanus.data.AuthToken;
+
 import pt.unl.fct.di.adc.silvanus.data.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.UserData;
+import pt.unl.fct.di.adc.silvanus.data.RegisterData;
 
 public interface Users {
 
-	Result<AuthToken> register(UserData data);
+	Result<AuthToken> register(RegisterData data);
 	
 	Result<AuthToken> login(LoginData data);
 	
@@ -14,7 +15,7 @@ public interface Users {
 	
 	Result<Void> promote();
 	
-	Result<UserData> getUser();
+	Result<RegisterData> getUser();
 	
 	Result<AuthToken> getToken();
 	

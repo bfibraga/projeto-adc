@@ -1,95 +1,94 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
-import java.util.logging.Logger;
+import pt.unl.fct.di.adc.silvanus.util.Result;
 
-import com.google.gson.*;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
 
 import pt.unl.fct.di.adc.silvanus.data.AuthToken;
 import pt.unl.fct.di.adc.silvanus.data.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.UserData;
+import pt.unl.fct.di.adc.silvanus.data.RegisterData;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.RestUsers;
-import pt.unl.fct.di.adc.silvanus.util.Result;
 
+@Path("/user")
 public class UsersResource implements RestUsers {
 
-	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
 	private final UserImplementation impl = new UserImplementation();
-	private final Gson g = new Gson();
 
-	public UsersResource() {}
+	public UsersResource() {
+		
+	}
 	
 	@Override
-	public String register(UserData data) {
-		Result<AuthToken> result = impl.register(data);
+	public Response register(RegisterData data) {
+		Result result = impl.register(data);
 		
-		return g.toJson(result.value());
+		if (!result.isOK()) {
+			return Response.status(result.error()).build();
+		}
+		
+		return Response.ok().entity(result.value()).build();
 	}
 
 	@Override
-	public String login(LoginData data) {
+	public Response login(String userID, String password) {
+		Result result = impl.login(new LoginData(userID, "b", password));
 		
-		Result<AuthToken> result = impl.login(data);
+		if (!result.isOK()) {
+			return Response.status(result.error()).build();
+		}
 		
-		return g.toJson(result.value());
-	}
-
-
-	@Override
-	public String logout() {
-		Result<Void> result = impl.logout();
-		
-		return g.toJson(result.value());
+		return Response.ok().entity(result.value()).build();
 	}
 
 	@Override
-	public String promote(String username) {
+	public Response logout() {
 		// TODO Auto-generated method stub
-		Result<Void> result = impl.promote();
-		
-		return g.toJson(result.value());
+		return Response.ok().build();
 	}
 
 	@Override
-	public String getUser(String username) {
-		Result<UserData> result = impl.getUser();
-		
-		return g.toJson(result.value());
+	public Response promote(String username) {
+		// TODO Auto-generated method stub
+		return Response.ok().build();
 	}
 
 	@Override
-	public String getToken(String username) {
-		Result<AuthToken> result = impl.getToken();
-		
-		return g.toJson(result.value());
+	public Response getUser(String username) {
+		// TODO Auto-generated method stub
+		return Response.ok().build();
 	}
 
 	@Override
-	public String remove(String username) {
-		Result<Void> result = impl.remove();
-		
-		return g.toJson(result.value());
-	}
-
-	/*
-	 * @Override public void activate(String username, boolean value) { // TODO
-	 * Auto-generated method stub
-	 * 
-	 * }
-	 */
-
-	@Override
-	public String changePassword(AuthToken token, String new_password) {
-		Result<Void> result = impl.changePassword();
-		
-		return g.toJson(result.value());
+	public Response getToken(String username) {
+		// TODO Auto-generated method stub
+		return Response.ok().build();
 	}
 
 	@Override
-	public String changeAttributes(String username) {
-		Result<Void> result = impl.changeAttributes();
-		
-		return g.toJson(result.value());
+	public Response remove(String username) {
+		// TODO Auto-generated method stub
+		return Response.ok().build();
 	}
 
+	@Override
+	public Response activate(String username, boolean value) {
+		// TODO Auto-generated method stub
+		return Response.ok().build();
+	}
+
+	@Override
+	public Response changePassword(AuthToken token, String new_password) {
+		// TODO Auto-generated method stub
+		return Response.ok().build();
+	}
+
+	@Override
+	public Response changeAttributes(String username) {
+		// TODO Auto-generated method stub
+		return Response.ok().build();
+	}
+
+	
 }

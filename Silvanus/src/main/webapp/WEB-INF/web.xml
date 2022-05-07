@@ -33,7 +33,7 @@
 		</init-param>
 		<init-param>
 			<param-name>jersey.config.servlet.filter.contextPath</param-name>
-			<param-value>/rest/*</param-value>
+			<param-value>/api/*</param-value>
 		</init-param>
 		<init-param>
 			<param-name>jersey.config.server.tracing.type</param-name>
@@ -43,7 +43,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>jerseyServlet</servlet-name>
-		<url-pattern>/rest/*</url-pattern>
+		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
 
 	<security-constraint>

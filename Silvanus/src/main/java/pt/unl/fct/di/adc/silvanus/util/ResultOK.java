@@ -4,28 +4,29 @@ import javax.ws.rs.core.Response;
 
 public class ResultOK<T> implements Result<T> {
 
-	private final T result;
+	final T result;
 
 	public ResultOK(T result) {
 		this.result = result;
 	}
 
+	@Override
 	public boolean isOK() {
 		return true;
 	}
 
+	@Override
 	public T value() {
 		return result;
 	}
 
+	@Override
+	public Response.Status error() {
+		return Response.Status.OK;
+	}
 
 	public String toString() {
 		return "(OK, " + value() + ")";
-	}
-
-	@Override
-	public Integer status() {
-		return Response.Status.OK.getStatusCode();
 	}
 
 }
