@@ -1,7 +1,11 @@
 let map;
 let markers = [];
+
+let last_index = 0;
+let other_markers = 0;
 let points = [];
-let polygons = {};
+let lines = [];
+let polygons = [];
 
 let click_listener;
 
@@ -22,7 +26,7 @@ function initMap()
         zoom: 15
     });
 
-    createPolygon("#00aaff");
+    clearListeners(map, "click");
 }
 
 function point(_lat, _lng){
@@ -46,7 +50,7 @@ function addMarker(coords){
 }
 
 function addLine(coords, color){
-    const flightPath = new google.maps.Polyline({
+    const _line = new google.maps.Polyline({
         path: coords,
         geodesic: true,
         strokeColor: color,
@@ -54,12 +58,13 @@ function addLine(coords, color){
         strokeWeight: 2,
       });
     
-      flightPath.setMap(map);
-    
+    _line.setMap(map);
+    lines.push(_line);
 }
 
-function addPolygon(coords, center, color){
-    new google.maps.Polygon({
+function addPolygon(coords, _center, color){
+    const polygon = { 
+        data: new google.maps.Polygon({
         map,
         paths: coords,
         strokeColor: color,
@@ -68,9 +73,13 @@ function addPolygon(coords, center, color){
         fillColor: color,
         fillOpacity: 0.30,
         geodesic: true,
-      });
+        editable: true,
+      }),
+      center: _center
+    };
     
-      addMarker(center);
+    polygons.push(polygon);
+    //addMarker(_center);
 }
 
 function center(given_points){
@@ -85,7 +94,8 @@ function center(given_points){
 }
 
 function createPolygon(color){
-    let other_markers = markers.length;
+    other_markers = markers.length;
+    last_index = lines.length;
     click_listener = map.addListener("click", (mapsMouseEvent) => {
         const latLng = mapsMouseEvent.latLng;
         points.push(latLng);
@@ -96,6 +106,9 @@ function createPolygon(color){
             //
             const dist = distanceSquared(points[0].toJSON(), points[points.length-1].toJSON());
             if (dist < 5.0e-7){
+                //Vaditation of the polygon
+
+                //Creation of the polygon
                 const polygon_center = center(points);
                 console.log(polygon_center);
                 setMarkers(other_markers, markers.length, null);
@@ -107,6 +120,12 @@ function createPolygon(color){
             }
         }
     });
+}
+
+function clearTemporaryData(){
+    setLines(last_index, lines.length, null);
+    setMarkers(last_index, markers.length, null);
+    points=[];
 }
 
 function clearListeners(component, type){
@@ -129,4 +148,17 @@ function setMarkers(low_index, high_index, value){
     for (let i = low_index; i < high_index; i++) {
         markers[i].setMap(value);
     }
+    if (value == null){
+        lines = lines.slice(0, low_index-1);
+    }
+}
+
+function setLines(low_index, high_index, value){
+    for(let i = low_index ; i < high_index ; i++){
+        lines[i].setMap(value);
+    }
+    if (value == null){
+        lines = lines.slice(0, low_index-1);
+    }
+    console.log(lines);
 }
