@@ -1,6 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
 import pt.unl.fct.di.adc.silvanus.data.AuthToken;
+
 import pt.unl.fct.di.adc.silvanus.data.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.UserData;
 
@@ -10,22 +11,20 @@ public interface Users {
 	
 	Result<AuthToken> login(LoginData data);
 	
-	Result<Void> logout();
+	Result<Void> logout(AuthToken token);
 	
-	Result<Void> promote();
+	Result<Void> promote(AuthToken token, String username, String new_role);
 	
-	Result<UserData> getUser();
+	Result<UserData> getUser(String username);
 	
-	Result<AuthToken> getToken();
+	Result<AuthToken> getToken(String username);
 	
-	Result<Void> remove();
+	Result<Void> remove(AuthToken token, String username);
 	
-	Result<Void> activate();
+	Result<Void> activate(AuthToken token, String username);
 	
-	Result<Void> deactivate();
+	Result<Void> changePassword(AuthToken token, String new_password);
 	
-	Result<Void> changePassword();
-	
-	Result<Void> changeAttributes();
+	Result<Void> changeAttributes(AuthToken token, String target_username, String list_json);
 	
 }

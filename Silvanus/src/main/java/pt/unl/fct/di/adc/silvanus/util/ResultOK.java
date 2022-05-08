@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
+import javax.ws.rs.core.Response;
+
 public class ResultOK<T> implements Result<T> {
 
 	final T result;
@@ -19,8 +21,8 @@ public class ResultOK<T> implements Result<T> {
 	}
 
 	@Override
-	public ErrorCode error() {
-		return ErrorCode.OK;
+	public Response.Status error() {
+		return Response.Status.OK;
 	}
 
 	public String toString() {

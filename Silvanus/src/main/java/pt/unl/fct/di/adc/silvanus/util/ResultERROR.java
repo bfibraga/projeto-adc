@@ -1,11 +1,14 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
+import javax.ws.rs.core.Response;
+
 public class ResultERROR<T> implements Result<T> {
+	final Response.Status error;
+	final String response;
 
-	final ErrorCode error;
-
-	ResultERROR(ErrorCode error) {
+	ResultERROR(Response.Status error, String response) {
 		this.error = error;
+		this.response = response;
 	}
 
 	@Override
@@ -19,12 +22,15 @@ public class ResultERROR<T> implements Result<T> {
 	}
 
 	@Override
-	public ErrorCode error() {
+	public Response.Status error() {
 		return error;
+	}
+	
+	public String response() {
+		return response;
 	}
 
 	public String toString() {
 		return "(" + error() + ")";
 	}
-
 }
