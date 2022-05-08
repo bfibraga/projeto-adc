@@ -21,7 +21,7 @@ const ROLE_COLOR = {
 	SU: "rgb(200,200,250)"
 }
 
-const base_uri = "https://apdc-2022-ai.appspot.com";
+const base_uri = "https://projeto-adc.appspot.com";
 var xmlhttp = new XMLHttpRequest();
 
 let res = "";
@@ -45,17 +45,19 @@ function checkUndefined(keyword) {
 }
 
 function register() {
-	let u_username = new String(document.getElementById("username").value);
-	let u_email = new String(document.getElementById("email").value);
-	let u_name = new String(document.getElementById("name").value);
-	let u_password = new String(document.getElementById("password").value);
-	let u_confirm = new String(document.getElementById("confirm").value);
+	let u_username = new String(document.getElementById("usr_identifier").value);
+	let u_email = new String(document.getElementById("usr_email").value);
+	let u_name = new String(document.getElementById("usr_firstname").value + " " + document.getElementById("usr_lastname").value);
+	let u_password = new String(document.getElementById("usr_password").value);
+	let u_confirm = new String(document.getElementById("usr_confirm").value);
 
 	let u_role = "USER";
-	let u_state = "INATIVE";
-	let u_visibility = document.getElementById("visibility").checked ? "PRIVATE" : "PUBLIC";
-	let u_telephone = checkUndefined(new String(document.getElementById("telephone").value));
-	let u_smartphone = checkUndefined(new String(document.getElementById("smartphone").value));
+	let u_state = "ACTIVE";
+	let u_visibility = "PUBLIC";
+	let u_telephone = checkUndefined(new String(document.getElementById("usr_telephone").value));
+	let u_smartphone = "911";
+	let u_nif = new String(document.getElementById("usr_id").value);
+	let u_address = new String(document.getElementById("usr_adress").value);
 
 	let obj = {
 		"username": u_username,
@@ -66,6 +68,8 @@ function register() {
 		"role": u_role,
 		"state": u_state,
 		"visibility": u_visibility,
+		"nif": u_nif,
+		"address": u_address,
 		"telephone": u_telephone,
 		"smartphone": u_smartphone,
 	}
@@ -75,30 +79,23 @@ function register() {
 			if (xmlhttp.readyState === 4) {
 				switch (xmlhttp.status) {
 					case HTTP_RESPONSE["OK"]:
-						//Debug purposes
-						/*for (let i = 0; i < response.length; i++) {
-							res.push(response[i]);
-						}*/
-
 						window.location.replace(base_uri + "/validation.html");
-
-
 						break;
 					default:
-						document.getElementById("info").innerText = new String(xmlhttp.responseText);
+						console.log(JSON.parse(xmlhttp.statusText));
 				}
 			}
 		}
 
 		obj = JSON.stringify(obj);
 
-		xmlhttp.open("POST", base_uri + "/rest/user/register");
+		xmlhttp.open("POST", base_uri + "/api/user/register");
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(obj);
 	}
 }
 
-function notActive() {
+/*function notActive() {
 	logout(time);
 }
 
@@ -114,11 +111,6 @@ function isActive() {
 					case HTTP_RESPONSE["OK"]:
 						//Debug purposes
 
-						/*let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-						sessionStorage.setItem("username_token", null);
-						sessionStorage.setItem("token", null);*/
-
 						let response = JSON.parse(xmlhttp.responseText);
 						console.log(response);
 
@@ -136,20 +128,16 @@ function isActive() {
 
 		obj = JSON.stringify(obj);
 		let query = sessionStorage.getItem("username_token");
-		xmlhttp.open("GET", base_uri + "/rest/user/get?user=" + query);
+		xmlhttp.open("GET", base_uri + "/api/user/get?user=" + query);
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(null);
 	}
-}
+}*/
 
 function activate() {
 
 	let u_target_username = new String(document.getElementById("username").value);
 
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
 	if (xmlhttp) {
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState === 4) {
@@ -167,24 +155,17 @@ function activate() {
 
 						break;
 					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0); 
-						}
+						console.log(xmlhttp.responseText)
 				}
 			}
 		}
 
 
 		obj = JSON.stringify(obj);
-		let query = sessionStorage.getItem("username_token");
-		xmlhttp.open("PUT", base_uri + "/rest/user/activate/" + u_target_username);
+		xmlhttp.open("PUT", base_uri + "/api/user/activate/" + u_target_username);
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(obj);
 	}
-
-
 }
 
 function login() {
@@ -223,7 +204,7 @@ function login() {
 
 		obj = JSON.stringify(obj);
 
-		xmlhttp.open("POST", base_uri + "/rest/user/login/");
+		xmlhttp.open("POST", base_uri + "/api/user/login/");
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(obj);
 	}
@@ -280,7 +261,7 @@ function getTime() {
 			}
 		}
 
-		xmlhttp.open("GET", base_uri + "/rest/utils/time");
+		xmlhttp.open("GET", base_uri + "/api/utils/time");
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(null);
 	}
@@ -297,11 +278,6 @@ function getInfo() {
 				switch (xmlhttp.status) {
 					case HTTP_RESPONSE["OK"]:
 						//Debug purposes
-
-						/*let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-						sessionStorage.setItem("username_token", null);
-						sessionStorage.setItem("token", null);*/
 
 						let response = JSON.parse(xmlhttp.responseText);
 						console.log(response);
@@ -328,7 +304,7 @@ function getInfo() {
 
 		obj = JSON.stringify(obj);
 		let query = sessionStorage.getItem("username_token");
-		xmlhttp.open("GET", base_uri + "/rest/user/get?user=" + query);
+		xmlhttp.open("GET", base_uri + "/api/user/get?user=" + query);
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(null);
 	}
@@ -349,7 +325,7 @@ function logout(time) {
 
 		obj = JSON.stringify(obj);
 
-		xmlhttp.open("POST", base_uri + "/rest/user/logout/");
+		xmlhttp.open("POST", base_uri + "/api/user/logout/");
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(obj);
 	}
@@ -383,7 +359,7 @@ function change_password() {
 
 		obj = JSON.stringify(obj);
 
-		xmlhttp.open("PUT", base_uri + "/rest/user/change?password=" + u_new_password);
+		xmlhttp.open("PUT", base_uri + "/api/user/change?password=" + u_new_password);
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(obj);
 	}
@@ -427,7 +403,7 @@ function changing_att() {
 		}
 		obj = JSON.stringify(obj);
 
-			let final_uri = base_uri + "/rest/user/change/" + u_target_username + "?attributes=";
+			let final_uri = base_uri + "/api/user/change/" + u_target_username + "?attributes=";
 
 			xmlhttp.open("PUT", final_uri + query);
 			xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -467,7 +443,7 @@ function listUsers() {
 
 		obj = JSON.stringify(obj);
 
-		xmlhttp.open("GET", base_uri + "/rest/user/list/");
+		xmlhttp.open("GET", base_uri + "/api/user/list/");
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(obj);
 	}
@@ -507,7 +483,7 @@ function remove() {
 
 		obj = JSON.stringify(obj);
 
-		let final_uri = base_uri + "/rest/user/remove/" + u_target_username;
+		let final_uri = base_uri + "/api/user/remove/" + u_target_username;
 
 		xmlhttp.open("DELETE", final_uri);
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -547,11 +523,18 @@ function promote() {
 
 		obj = JSON.stringify(obj);
 
-		let final_uri = base_uri + "/rest/user/promote/" + u_target_username;
+		let final_uri = base_uri + "/api/user/promote/" + u_target_username;
 
 		xmlhttp.open("PUT", final_uri + "?role=" + u_role);
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(obj);
 	}
+}
+
+
+//--- Terrain ----
+
+function submitTerrain(){
+
 }
 
