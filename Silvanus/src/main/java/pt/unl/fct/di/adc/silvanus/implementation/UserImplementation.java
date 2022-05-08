@@ -27,7 +27,7 @@ public class UserImplementation implements Users{
 	private final Gson g = new Gson();
 	
 	@Override
-	public Result<AuthToken> register(RegisterData data) {
+	public Result<AuthToken> register(UserData data) {
 		LOG.fine("Resgiter user " + data.getUsername());
 
 		boolean validation_code = data.validation();
@@ -75,8 +75,8 @@ public class UserImplementation implements Users{
 					.set("usr_name", data.getName())
 					.set("usr_telephone", data.getTelephone())
 					.set("usr_smartphone", data.getSmartphone())
-					// .set("usr_address", data.getAddress())
-					// .set("usr_NIF", data.getNIF())
+					.set("usr_address", data.getAddress())
+					.set("usr_NIF", data.getNif())
 					.build();
 			
 			String verified = "";
@@ -150,11 +150,6 @@ public class UserImplementation implements Users{
 						.build();
 				Entity usrInfo = tnx.get(userInfoKey);
 				
-				/*.set("usr_visibility", data.getVisibility())
-					.set("usr_name", data.getName())
-					.set("usr_telephone", data.getTelephone())
-					.set("usr_smartphone", data.getSmartphone())*/
-				
 				tnx.put(token);
 				tnx.commit();
 				//return Response.ok(g.toJson(at)).build();
@@ -173,57 +168,554 @@ public class UserImplementation implements Users{
 	}
 
 	@Override
-	public Result<Void> logout() {
-		// TODO Auto-generated method stub
-		return null;
+	public Result<Void> logout(AuthToken token) {
+
+		LOG.fine("Logout attempt");
+		
+		Key usrCurrentToken = datastore.newKeyFactory()
+				.setKind("UserToken")
+				.newKey(token.username.trim());
+
+		// Create new transation
+		Transaction tnx = datastore.newTransaction();
+
+		try {
+			
+			Entity token_entity = tnx.get(usrCurrentToken);
+			
+			if (token_entity == null) {
+				tnx.rollback();
+				LOG.warning("Token invalid");
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
+			
+			if (!token.tokenID.equals(token_creation.tokenID)) {
+				tnx.rollback();
+				LOG.warning("Token invalid");
+				return Result.error(Status.NOT_ACCEPTABLE);
+			}	
+			
+			tnx.delete(usrCurrentToken);
+			tnx.commit();
+			return Result.ok();
+		} finally {
+			if (tnx.isActive()) {
+				tnx.rollback();
+			}
+		}
 	}
 
 	@Override
-	public Result<Void> promote() {
-		// TODO Auto-generated method stub
-		return null;
+	public Result<Void> promote(AuthToken token, String username, String new_role) {
+		LOG.fine("Verification user " + username + "by " + token.username);
+
+		// User to verify
+		String user_id = username.trim();
+		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
+		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
+		Key usrCurrentToken = datastore.newKeyFactory()
+				.setKind("UserToken")
+				.newKey(token.username.trim());
+		
+		// Higher priority user
+		String high_user_id = token.username.trim();
+		Key high_usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(high_user_id);
+		Key high_usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(high_user_id);
+
+		if (user_id.equals(high_user_id)) {
+			LOG.warning("Same user");
+			return Result.error(Status.BAD_REQUEST);
+		}
+		
+		// Create new transation
+		Transaction tnx = datastore.newTransaction();
+
+		try {
+			Entity user_verify = tnx.get(usrPermissionkey);
+			Entity user_role = tnx.get(usrRoleKey);
+
+			if (user_verify == null || user_role == null) {
+				// User doesn't exist
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			Entity token_entity = tnx.get(usrCurrentToken);
+			
+			if (token_entity == null) {
+				tnx.rollback();
+				LOG.warning("Token invalid");
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
+			long curr_time = System.currentTimeMillis();
+			
+			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
+				tnx.rollback();
+				LOG.warning("Token invalid");
+				return Result.error(Status.NOT_FOUND);
+			}	
+
+			Entity high_user_verify = tnx.get(high_usrPermissionkey);
+			Entity high_user_role = tnx.get(high_usrRoleKey);
+
+			if (high_user_verify == null || high_user_role == null) {
+				// Given higher priority User doesn't exist
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			UserRole role = UserRole.compareType(new_role);
+			long high_role_priority = high_user_role.getLong("role_priority");
+			
+			if (high_role_priority <= user_role.getLong("role_priority") || role.getPriority() > high_role_priority) {
+				tnx.rollback();
+				LOG.warning("");
+				return Result.error(Status.NOT_ACCEPTABLE);
+			}
+
+			// Super user not active
+			if (!high_user_verify.getString("usr_state").equals("ACTIVE")) {
+				tnx.rollback();
+				LOG.warning("User " + token.username + " not active");
+				return Result.error(Status.BAD_REQUEST);
+			}
+
+			// Success
+			user_role = Entity.newBuilder(usrRoleKey)
+					.set("role_name", role.toString())
+					.set("role_priority", role.getPriority()).build();
+
+			tnx.put(user_role);
+			tnx.commit();
+			return Result.ok();
+		} finally {
+			if (tnx.isActive()) {
+				tnx.rollback();
+			}
+		}
 	}
 
 	@Override
-	public Result<RegisterData> getUser() {
-		// TODO Auto-generated method stub
-		return null;
+	public Result<UserData> getUser(String username) {
+		String user_id = username.trim();
+		Key userKey = userKeyFactory.newKey(user_id);
+		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
+		Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
+		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
+		
+		Transaction txn = datastore.newTransaction();
+		
+		try {
+			Entity user = txn.get(userKey);
+			
+			if (user == null) {
+				txn.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			Entity userInfo = txn.get(userInfoKey);
+			Entity userRole = txn.get(userRoleKey);
+			Entity userPermission = txn.get(userPermissionKey);
+			
+			String[] response = {
+					userInfo.getString("usr_visibility"),
+					userInfo.getString("usr_name"),
+					userPermission.getString("usr_state"),
+					userInfo.getString("usr_telephone"),
+					userInfo.getString("usr_smartphone"),
+					userRole.getString("role_name")
+				};
+			
+			return Result.ok();
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+			}
+		}
 	}
 
 	@Override
-	public Result<AuthToken> getToken() {
-		// TODO Auto-generated method stub
-		return null;
+	public Result<AuthToken> getToken(String username) {
+		String user_id = username.trim();
+		Key usrCurrentToken = datastore.newKeyFactory()
+				.setKind("UserToken")
+				.newKey(user_id);
+		
+		Transaction txn = datastore.newTransaction();
+		
+		try {
+			Entity token = txn.get(usrCurrentToken);
+			
+			if (token == null) {
+				txn.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			return Result.ok();
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+			}
+		}
 	}
 
 	@Override
-	public Result<Void> remove() {
-		// TODO Auto-generated method stub
-		return null;
+	public Result<Void> remove(AuthToken token, String username) {
+		LOG.fine("Removing user " + username);
+		
+		String user_id = token.username.trim();
+		String remove_id = username.trim();
+		
+		
+		
+		Key userKey = userKeyFactory.newKey(user_id);
+		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
+		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
+		
+		Key usrCurrentToken = datastore.newKeyFactory()
+				.setKind("UserToken")
+				.newKey(user_id);
+		
+		
+		Key remove_userKey = userKeyFactory.newKey(remove_id);
+		Key remove_userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(remove_id);
+		Key remove_userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(remove_id);
+		Key remove_userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(remove_id);
+		Key remove_usrCurrentToken = datastore.newKeyFactory()
+				.setKind("UserToken")
+				.newKey(user_id);
+		
+		Transaction txn = datastore.newTransaction();
+
+		try {
+			// TODO Testing
+			Entity token_entity = txn.get(usrCurrentToken);
+			
+			if (token_entity == null) {
+				txn.rollback();
+				LOG.fine("Username " + token.username + "not logged in");
+				return Result.error(Status.NOT_ACCEPTABLE);
+			}
+			
+			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
+			long curr_time = System.currentTimeMillis();
+			
+			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
+				txn.rollback();
+				LOG.warning("Token invalid");
+				return Result.error(Status.NOT_FOUND);
+			}	
+			
+			Entity userRole = txn.get(userRoleKey);
+			
+			if (user_id.equals(remove_id) && userRole.getLong("role_priority") <= 0) {
+				
+				Key userInfoKey = datastore.newKeyFactory().setKind("UserInfo").newKey(user_id);
+				
+				txn.delete(userKey, userRoleKey, userPermissionKey, userInfoKey, usrCurrentToken);
+				txn.commit();
+				return Result.ok();
+			} 
+			
+			Entity userPermission = txn.get(userPermissionKey);
+			
+			// Super user not active
+			if (!userPermission.getString("usr_state").equals("ACTIVE")) {
+				txn.rollback();
+				LOG.warning("User " + token.username + " not active");
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			Entity remove;
+			Entity remove_userRole;
+			
+			
+			remove = txn.get(remove_userKey);
+			
+			if (remove == null) {
+				txn.rollback();
+				LOG.fine("Username " + username + "doens't exists");
+				return Result.error(Status.NOT_ACCEPTABLE);
+			}
+			
+			remove_userRole = txn.get(remove_userRoleKey);
+			
+			if (userRole.getLong("role_priority") < remove_userRole.getLong("role_priority")) {
+				txn.rollback();
+				LOG.warning("User to be removed has higher role then this logged in user");
+				return Result.error(Status.NOT_ACCEPTABLE);
+			}
+			
+			txn.delete(remove_userKey, remove_userRoleKey, remove_userPermissionKey, remove_userInfoKey, remove_usrCurrentToken);
+			txn.commit();
+			return Result.ok();
+			
+			
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+			}
+		}
 	}
 
 	@Override
-	public Result<Void> activate() {
-		// TODO Auto-generated method stub
-		return null;
+	public Result<Void> activate(AuthToken token, String username) {
+		LOG.fine("Verification user " + username + "by " + token.username);
+
+		// Create key outside of this transaction
+		// User to verify
+		String user_id = username.trim();
+		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
+		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
+		Key usrCurrentToken = datastore.newKeyFactory()
+				.setKind("UserToken")
+				.newKey(token.username.trim());
+		
+		// Higher priority user
+		String high_user_id = token.username.trim();
+		Key high_usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(high_user_id);
+		Key high_usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(high_user_id);
+
+		// Create new transation
+		Transaction tnx = datastore.newTransaction();
+
+		try {
+			Entity user_verify = tnx.get(usrPermissionkey);
+			Entity user_role = tnx.get(usrRoleKey);
+
+			if (user_verify == null || user_role == null) {
+				// User doesn't exist
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			Entity token_entity = tnx.get(usrCurrentToken);
+			
+			if (token_entity == null) {
+				tnx.rollback();
+				LOG.warning("Token invalid");
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
+			long curr_time = System.currentTimeMillis();
+			
+			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
+				tnx.rollback();
+				LOG.warning("Token invalid");
+				return Result.error(Status.NOT_FOUND);
+			}	
+
+			Entity high_user_verify = tnx.get(high_usrPermissionkey);
+			Entity high_user_role = tnx.get(high_usrRoleKey);
+
+			if (high_user_verify == null || high_user_role == null) {
+				// Given higher priority User doesn't exist
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+
+			Key superUsrCredentialsKey  = userKeyFactory.newKey(high_user_id);
+			Entity superUsr = tnx.get(superUsrCredentialsKey);
+			if (high_user_role.getLong("role_priority") <= user_role.getLong("role_priority")) {
+				tnx.rollback();
+				LOG.warning("");
+				return Result.error(Status.NOT_ACCEPTABLE);
+			}
+
+			// Already active user
+			if (user_verify.getString("usr_state").equals("ACTIVE")) {
+				tnx.rollback();
+				LOG.warning("User " + username + " already active");
+				return Result.error(Status.BAD_REQUEST);
+			}
+
+			// Super user not active
+			if (!high_user_verify.getString("usr_state").equals("ACTIVE")) {
+				tnx.rollback();
+				LOG.warning("User " + token.username + " not active");
+				return Result.error(Status.BAD_REQUEST);
+			}
+
+			// Success
+			String usrs_valid = token.username.trim();
+			Entity userPermission = Entity.newBuilder(usrPermissionkey).set("usr_state", "ACTIVE")
+					.set("list_usr_validation", usrs_valid).build();
+
+			tnx.put(userPermission);
+			tnx.commit();
+			return Result.ok();
+		} finally {
+			if (tnx.isActive()) {
+				tnx.rollback();
+			}
+		}
 	}
 
 	@Override
-	public Result<Void> deactivate() {
-		// TODO Auto-generated method stub
-		return null;
+	public Result<Void> changePassword(AuthToken token, String new_password) {
+		LOG.fine("Changing password");
+		
+		String user_id = token.username.trim();
+		
+		if (!user_id.equals(token.tokenID.trim())) {
+			return Result.error(Status.BAD_REQUEST);
+		}
+		
+		Key usrkey = userKeyFactory.newKey(user_id);
+		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
+		Key usrCurrentToken = datastore.newKeyFactory()
+				.setKind("UserToken")
+				.newKey(token.username.trim());
+		
+		// Create new transation
+		Transaction tnx = datastore.newTransaction();
+		
+		try {
+			if (new_password.trim().equals("")) {
+				// New password is empty
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			Entity user = tnx.get(usrkey);
+			if (user == null) {
+				// User doesn't exist
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			Entity userToken = tnx.get(usrCurrentToken);
+			if (userToken == null) {
+				// User doesn't exist
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
+			long curr_time = System.currentTimeMillis();
+			
+			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
+				LOG.warning("Token invalid");
+				return Result.error(Status.NOT_FOUND);
+			}	
+			
+			Entity user_permission = tnx.get(usrPermissionkey);
+			// Super user not active
+			if (!user_permission.getString("usr_state").equals("ACTIVE")) {
+				tnx.rollback();
+				LOG.warning("User " + token.username + " not active");
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			user = Entity.newBuilder(usrkey)
+					.set("usr_email", user.getString("usr_email"))
+					.set("usr_password", DigestUtils.sha512Hex(new_password))
+					// .set("usr_confirmation", DigestUtils.sha512Hex(data.getConfirmation()))
+					.build();
+			tnx.put(user);
+			tnx.commit();
+			return Result.ok();
+		} finally {
+			if (tnx.isActive()) {
+				tnx.rollback();
+			}
+		}
 	}
 
 	@Override
-	public Result<Void> changePassword() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Result<Void> changeAttributes() {
-		// TODO Auto-generated method stub
-		return null;
+	public Result<Void> changeAttributes(AuthToken token, String target_username, String list_json) {
+		LOG.fine("Changing " + target_username + "'s aditional atributes");
+		
+		String user_id = token.username.trim();
+		Key usrkey = userKeyFactory.newKey(user_id);
+		Key usrKey_role = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
+		Key usrTokenKey = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
+		
+		String target_user_id = target_username.trim();
+		Key target_user_key = userKeyFactory.newKey(target_user_id);
+		Key target_usrKey_role = datastore.newKeyFactory().setKind("UserRole").newKey(target_user_id);
+		Key target_usrKey_info = datastore.newKeyFactory().setKind("UserPerfil").newKey(target_user_id);
+		
+		// Create new transation
+		Transaction tnx = datastore.newTransaction();
+		
+		try {
+			Entity user = tnx.get(usrkey);
+			if (user == null) {
+				// User doesn't exist
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			Entity userToken = tnx.get(usrTokenKey);
+			if (userToken == null) {
+				// User isn't login
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
+			long curr_time = System.currentTimeMillis();
+			
+			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
+				tnx.rollback();
+				LOG.warning("Token invalid");
+				return Result.error(Status.NOT_FOUND);
+			}	
+			
+			String hashedPassword = user.getString("usr_password");
+			if (!hashedPassword.equals(DigestUtils.sha512Hex(token.username))) {
+				tnx.rollback();
+				LOG.warning("Wrong parameters of " + token.username);
+				return Result.error(Status.FORBIDDEN);
+			}
+			
+			Entity target_user = tnx.get(target_user_key);
+			if (target_user == null) {
+				// Target user doesn't exist
+				tnx.rollback();
+				return Result.error(Status.BAD_REQUEST);
+			}
+			
+			Entity user_role = tnx.get(usrKey_role);
+			Entity target_user_role = tnx.get(target_usrKey_role);
+			
+			if (!user_role.equals(target_user) &&
+					target_user_role.getLong("role_priority") > user_role.getLong("role_priority")) {
+				tnx.rollback();
+				LOG.warning(target_username + "has higher role then " + token.username);
+				return Result.error(Status.NOT_ACCEPTABLE);
+			}
+			
+			Entity target = tnx.get(target_usrKey_info);
+			final String[] list_att = {"usr_visibility","usr_name","usr_telephone","usr_smartphone", "usr_address", "usr_NIF"};
+			String[] attributes = g.fromJson(list_json, String[].class);
+			for (int i = 0 ; i < attributes.length ; i++) {
+				attributes[i] = attributes[i].trim().equals("") ? target.getString(list_att[i]) : attributes[i];
+			}
+			
+			target = Entity.newBuilder(target_usrKey_info)
+					.set("usr_visibility", attributes[0])
+					.set("usr_name", attributes[1])
+					.set("usr_telephone", attributes[2])
+					.set("usr_smartphone", attributes[3])
+					.set("usr_address", attributes[4])
+					.set("usr_NIF", attributes[5])
+					.build();
+			
+			tnx.put(target);
+			tnx.commit();
+			return Result.ok();
+		} finally {
+			if (tnx.isActive()) {
+				tnx.rollback();
+			}
+		}
 	}
 
 }

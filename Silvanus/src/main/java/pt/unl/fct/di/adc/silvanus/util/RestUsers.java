@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 
 import pt.unl.fct.di.adc.silvanus.data.AuthToken;
 import pt.unl.fct.di.adc.silvanus.data.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.RegisterData;
+import pt.unl.fct.di.adc.silvanus.data.UserData;
 
 //TODO Review all Rest operations 
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -25,7 +25,7 @@ public interface RestUsers {
 	@Path("/register")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response register(RegisterData data);
+	Response register(UserData data);
 	
 	@POST
 	@Path("/login/{userID}")
@@ -42,7 +42,7 @@ public interface RestUsers {
 	@Path("/promote/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response promote(@PathParam("username") String username);
+	Response promote(@PathParam("username") String username, @QueryParam("new_role") String new_role);
 	
 	@GET
 	@Path("/get")
@@ -65,7 +65,7 @@ public interface RestUsers {
 	@Path("/activate/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response activate(@PathParam("username") String username, @QueryParam("value") boolean value);
+	Response activate(@PathParam("username") String username);
 	
 	@PUT
 	@Path("/change")
@@ -77,5 +77,5 @@ public interface RestUsers {
 	@Path("/change/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response changeAttributes(@PathParam("username") String username);
+	Response changeAttributes(@PathParam("username") String username, @QueryParam("attributes") String list_json);
 }
