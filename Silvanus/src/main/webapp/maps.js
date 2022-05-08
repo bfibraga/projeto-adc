@@ -162,3 +162,15 @@ function setLines(low_index, high_index, value){
     }
     console.log(lines);
 }
+
+function submitPolygon(){
+	let points_data = [];
+	for (let i = 0 ; i < points.length ; i++){
+		const curr_point = points[i];
+		points_data.push(curr_point.lat);
+		points_data.push(curr_point.lng);
+	}
+	
+	points_data = JSON.stringify(points_data);
+	submitTerrain(points_data);
+}

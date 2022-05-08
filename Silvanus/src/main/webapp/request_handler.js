@@ -79,10 +79,10 @@ function register() {
 			if (xmlhttp.readyState === 4) {
 				switch (xmlhttp.status) {
 					case HTTP_RESPONSE["OK"]:
-						window.location.replace(base_uri + "/validation.html");
+						window.location.replace(base_uri + "/login.html");
 						break;
 					default:
-						console.log(JSON.parse(xmlhttp.statusText));
+						console.log(xmlhttp.statusText);
 				}
 			}
 		}
@@ -169,17 +169,8 @@ function activate() {
 }
 
 function login() {
-	let u_identifier = new String(document.getElementById("identifier").value);
-	let u_password = checkUndefined(new String(document.getElementById("password").value));
-
-	let obj;
-
-	//TODO: Verify if given identifier is a username or a email
-	obj = {
-		"username": u_identifier,
-		"email": "UNDEFINED",
-		"password": u_password
-	}
+	let u_identifier = new String(document.getElementById("usr_identifier").value);
+	let u_password = checkUndefined(new String(document.getElementById("usr_password").value));
 
 	if (xmlhttp) {
 		xmlhttp.onreadystatechange = function() {
@@ -197,16 +188,16 @@ function login() {
 
 						break;
 					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
+						document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
+
 				}
+				document.getElementById("loader").classList.add("d-none");
 			}
 		}
 
-		obj = JSON.stringify(obj);
-
-		xmlhttp.open("POST", base_uri + "/api/user/login/");
+		xmlhttp.open("POST", base_uri + "/api/user/login/" + u_identifier + "?password=" + u_password);
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
+		xmlhttp.send(null);
 	}
 }
 
@@ -255,7 +246,7 @@ function getTime() {
 						document.getElementById("info").innerHTML = new String(xmlhttp.response);
 						if (xmlhttp.response == "Token invalid") {
 							alert("Token invalid");
-							logout(0); 
+							logout(0);
 						}
 				}
 			}
@@ -286,17 +277,24 @@ function getInfo() {
 							window.location.replace(base_uri.concat("/validation.html"));
 						}
 
-						document.getElementById("visibility").innerText = new String(response[0]);
-						document.getElementById("username").innerText = new String("Welcome " + response[1]);
-						document.getElementById("role").innerText = new String(response[5]);
-						document.getElementById("main").style = "background-color: " + ROLE_COLOR[response[5]];
+						document.getElementById("usr_username").innerText = new String(response[0]);
+						document.getElementById("usr_mail").innerText = new String(response[1]);
+
+						const name = response[2].split(" ");
+						document.getElementById("usr_firstname").innerText = new String("Primeiro Nome: " + name[0]);
+						document.getElementById("usr_lastname").innerText = new String("Último Nome:" + name[1]);
+						document.getElementById("usr_id").innerText = new String("NIF: " + response[3]);
+						document.getElementById("usr_phone").innerText = new String("Número de telefone: " + response[4]);
+						document.getElementById("usr_address").innerText = new String("Morada: " + response[5]);
+
+						document.getElementById("loader").classList.add("d-none");
 
 						break;
 					default:
 						document.getElementById("info").innerHTML = new String(xmlhttp.response);
 						if (xmlhttp.response == "Token invalid") {
 							alert("Token invalid");
-							logout(0); 
+							logout(0);
 						}
 				}
 			}
@@ -304,7 +302,7 @@ function getInfo() {
 
 		obj = JSON.stringify(obj);
 		let query = sessionStorage.getItem("username_token");
-		xmlhttp.open("GET", base_uri + "/api/user/get?user=" + query);
+		xmlhttp.open("GET", base_uri + "/api/user/get?username=" + query);
 		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xmlhttp.send(null);
 	}
@@ -351,7 +349,7 @@ function change_password() {
 						document.getElementById("info").innerHTML = new String(xmlhttp.response);
 						if (xmlhttp.response == "Token invalid") {
 							alert("Token invalid");
-							logout(0); 
+							logout(0);
 						}
 				}
 			}
@@ -394,20 +392,20 @@ function changing_att() {
 						document.getElementById("info").innerHTML = new String(xmlhttp.response);
 						if (xmlhttp.response == "Token invalid") {
 							alert("Token invalid");
-							logout(0); 
+							logout(0);
 						}
 				}
 			}
 
-			
+
 		}
 		obj = JSON.stringify(obj);
 
-			let final_uri = base_uri + "/api/user/change/" + u_target_username + "?attributes=";
+		let final_uri = base_uri + "/api/user/change/" + u_target_username + "?attributes=";
 
-			xmlhttp.open("PUT", final_uri + query);
-			xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-			xmlhttp.send(obj);
+		xmlhttp.open("PUT", final_uri + query);
+		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xmlhttp.send(obj);
 	}
 
 }
@@ -435,7 +433,7 @@ function listUsers() {
 						document.getElementById("info").innerHTML = new String(xmlhttp.response);
 						if (xmlhttp.response == "Token invalid") {
 							alert("Token invalid");
-							logout(0); 
+							logout(0);
 						}
 				}
 			}
@@ -472,9 +470,9 @@ function remove() {
 						document.getElementById("info").innerHTML = new String(xmlhttp.response);
 						if (xmlhttp.response == "Token invalid") {
 							alert("Token invalid");
-							logout(0); 
+							logout(0);
 						}
-						if (u_target_username == sessionStorage.getItem("username")){
+						if (u_target_username == sessionStorage.getItem("username")) {
 							logout(0);
 						}
 				}
@@ -534,7 +532,59 @@ function promote() {
 
 //--- Terrain ----
 
-function submitTerrain(){
+function submitTerrain(points_data) {
+	
+	let _id_of_owner = new String(document.getElementById("usr_username").value);
+	let _name_of_terrain = new String(document.getElementById("name-terrain").value);
+	let _description_of_terrain = new String(document.getElementById("description-terrain").value);
+	let _conselho_of_terrain = new String(document.getElementById("conselho-terrain").value);
+	let _freguesia_of_terrain = new String(document.getElementById("freguesia-terrain").value);
+	let _section_of_terrain = new String(document.getElementById("section-terrain").value);
+	let _number_article_terrain = new String(document.getElementById("number-article-terrain").value);
+	let _verification_document_of_terrain = new String(document.getElementById("documentation-validation-terrain").value);
+	let _type_of_soil_coverage = "";
+	let _current_use_of_soil = "";
+	let _previous_use_of_soil = "";
 
+	const obj = {
+		"parcela": points_data,
+		"id_of_owner": "GPrata",
+		"name_of_terrain": "Terreno do GPrata",
+		"description_of_terrain": "Descricao do Terreno",
+		"conselho_of_terrain": "Conselho do Terreno",
+		"freguesia_of_terrain": "Freguesia do Terreno",
+		"section_of_terrain": "Seccao do Terreno",
+		"number_article_terrain": "Numero Artigo do Terreno",
+		"verification_document_of_terrain": "Documento Verificacao do Terreno",
+		"type_of_soil_coverage": "Tipo de Cobertura do Solo do Terreno",
+		"current_use_of_soil": "Uso Currente do solo do Terreno",
+		"previous_use_of_soil": "Uso Previo do solo do Terreno"
+	}
+
+	if (xmlhttp) {
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === 4) {
+				switch (xmlhttp.status) {
+					case HTTP_RESPONSE["OK"]:
+						console.log("Parcela Criada com Sucesso");
+						break;
+					default:
+						console.log(xmlhttp.statusText);
+						if (xmlhttp.response == "Token invalid") {
+							alert("Token invalid");
+							logout(0);
+						}
+				}
+			}
+		}
+
+		obj = JSON.stringify(data);
+
+		let final_uri = base_uri + "/api/parcela/create/";
+
+		xmlhttp.open("POST", final_uri);
+		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xmlhttp.send(obj);
+	}
 }
 

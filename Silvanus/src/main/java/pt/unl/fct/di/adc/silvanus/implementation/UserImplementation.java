@@ -31,7 +31,7 @@ public class UserImplementation implements Users{
 		LOG.fine("Resgiter user " + data.getUsername());
 
 		boolean validation_code = data.validation();
-		if (validation_code == false) {
+		if (validation_code) {
 			LOG.warning("User " + data.getUsername() + "tryied to register with some empty important information");
 			return Result.error(Response.Status.BAD_REQUEST);
 		}
@@ -58,7 +58,7 @@ public class UserImplementation implements Users{
 				LOG.fine("Username " + data.getUsername() + "already exists\nTry again with another fancy nickname");
 				/*return Response.status(Status.NOT_ACCEPTABLE)
 						.entity("Username " + data.getUsername() + " already exists").build();*/
-				return Result.error(Response.Status.BAD_REQUEST);
+				return Result.error(Response.Status.FORBIDDEN);
 			}
 
 			user = Entity.newBuilder(userKey)
@@ -112,7 +112,7 @@ public class UserImplementation implements Users{
 	@Override
 	public Result<AuthToken> login(LoginData data) {
 		boolean validation_code = data.validation();
-		if (validation_code == false) {
+		if (validation_code) {
 			return Result.error(Response.Status.BAD_REQUEST);
 		}
 
@@ -300,7 +300,7 @@ public class UserImplementation implements Users{
 	}
 
 	@Override
-	public Result<UserData> getUser(String username) {
+	public Result<String[]> getUser(String username) {
 		String user_id = username.trim();
 		Key userKey = userKeyFactory.newKey(user_id);
 		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
@@ -322,15 +322,16 @@ public class UserImplementation implements Users{
 			Entity userPermission = txn.get(userPermissionKey);
 			
 			String[] response = {
-					userInfo.getString("usr_visibility"),
+					username,
+					user.getString("usr_email"),
 					userInfo.getString("usr_name"),
-					userPermission.getString("usr_state"),
 					userInfo.getString("usr_telephone"),
 					userInfo.getString("usr_smartphone"),
-					userRole.getString("role_name")
-				};
+					userInfo.getString("usr_address"),
+					userInfo.getString("usr_NIF"),
+				};			
 			
-			return Result.ok();
+			return Result.ok(response);
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();

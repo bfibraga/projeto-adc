@@ -15,7 +15,7 @@ public interface Users {
 	
 	Result<Void> promote(AuthToken token, String username, String new_role);
 	
-	Result<UserData> getUser(String username);
+	Result<String[]> getUser(String username);
 	
 	Result<AuthToken> getToken(String username);
 	

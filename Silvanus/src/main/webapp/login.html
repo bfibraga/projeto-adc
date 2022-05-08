@@ -70,12 +70,12 @@
         
         <!-- Error Message -->
         <p id="validation_error" class="text-center error-msg" style="height: 0.5rem; margin-bottom: 3rem; margin-top: 1rem;">
-          Erro estupido :(
+          
         </p>
 
         <!-- Submit Button -->
         <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
-          <input type="button" style="width: 20rem;" onclick="location.href='./app.html'" id="button-submit" class="btn btn-primary center-x rounded-pill" value="Entrar">
+          <input type="button" style="width: 20rem;" onclick="login()" id="button-submit" class="btn btn-primary center-x rounded-pill" value="Login">
         </div>
         <a class="position-absolute center-x text-center" href="./register.html" style="font-size: 0.8rem;">Não tem conta registada?</a>
   </form>
@@ -102,12 +102,11 @@
         <p id="validation_error" class="text-center error-msg" style="height: 0.5rem; margin-bottom: 3rem; margin-top: 1rem;">
         </p>
 
+      <script src="request_handler.js"></script>
         <!-- Submit Button -->
         <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
-          <input type="button" style="width: 20rem;" onclick="location.href='./app.html'" id="button-submit" class="btn btn-primary center-x rounded-pill" value="Reconfigurar a minha palavra-passe">
+          <input type="button" style="width: 20rem;" onclick="location.href='./login.html'" id="button-submit" class="btn btn-primary center-x rounded-pill" value="Reconfigurar a minha palavra-passe">
         </div>
-
-        <!-- Register Redirect -->
         <a class="position-absolute center-x text-center" href="./register.html" style="font-size: 0.8rem;">Não tem conta registada?</a>
   </form>
   <script src="./input_handler.js"></script>

@@ -105,7 +105,7 @@ public class UserData {
 		if (!validField(this.username)) {
 			return false;
 		}
-		if (!validField(this.email) || !(this.email.matches("(.*)@(.*)"))) {
+		if (!validField(this.email)) {
 			return false;
 		}
 		if (!validField(this.name)) {

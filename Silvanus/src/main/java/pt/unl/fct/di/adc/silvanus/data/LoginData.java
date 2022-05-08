@@ -45,7 +45,7 @@ public class LoginData {
 	 * @return if the keyword is valid or not
 	 */
 	private boolean validField(String keyword) {
-		return keyword != null && !keyword.trim().equals("");
+		return !keyword.trim().equals("");
 	}
 	
 	/**
@@ -62,10 +62,7 @@ public class LoginData {
 	 * @return if they are or not
 	 */
 	public boolean validation() {
-		if(!validField(username) || !validField(email) || !validField(password) || !validPassword(password)) {
-			return false;
-		}
-		return true;
+		return validField(username) && validField(email) && validField(password) && validPassword(password);
 	}
 
 }

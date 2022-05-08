@@ -34,7 +34,7 @@ public class UsersResource implements RestUsers {
 
 	@Override
 	public Response login(String userID, String password) {
-		Result result = impl.login(new LoginData(userID, "b", password));
+		Result result = impl.login(new LoginData(userID, "email@domain.com", password));
 		
 		if (!result.isOK()) {
 			return Response.status(result.error()).build();
