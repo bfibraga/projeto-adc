@@ -78,7 +78,9 @@ function addPolygon(coords, _center, color){
       center: _center
     };
     
+    polygons.push(coords);
     polygons.push(polygon);
+
     //addMarker(_center);
 }
 
@@ -164,13 +166,8 @@ function setLines(low_index, high_index, value){
 }
 
 function submitPolygon(){
-	let points_data = [];
-	for (let i = 0 ; i < points.length ; i++){
-		const curr_point = points[i];
-		points_data.push(curr_point.lat);
-		points_data.push(curr_point.lng);
-	}
-	
-	points_data = JSON.stringify(points_data);
-	submitTerrain(points_data);
+    console.log(polygons[0]);
+    const data = polygons[0];
+    //TODO Apply to all polygons
+	submitTerrain(JSON.stringify(data));
 }

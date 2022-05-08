@@ -546,19 +546,19 @@ function submitTerrain(points_data) {
 	let _current_use_of_soil = "";
 	let _previous_use_of_soil = "";
 
-	const obj = {
+	let obj = {
 		"parcela": points_data,
-		"id_of_owner": "GPrata",
-		"name_of_terrain": "Terreno do GPrata",
-		"description_of_terrain": "Descricao do Terreno",
-		"conselho_of_terrain": "Conselho do Terreno",
-		"freguesia_of_terrain": "Freguesia do Terreno",
-		"section_of_terrain": "Seccao do Terreno",
-		"number_article_terrain": "Numero Artigo do Terreno",
-		"verification_document_of_terrain": "Documento Verificacao do Terreno",
-		"type_of_soil_coverage": "Tipo de Cobertura do Solo do Terreno",
-		"current_use_of_soil": "Uso Currente do solo do Terreno",
-		"previous_use_of_soil": "Uso Previo do solo do Terreno"
+		"id_of_owner": _id_of_owner,
+		"name_of_terrain": _name_of_terrain,
+		"description_of_terrain": _description_of_terrain,
+		"conselho_of_terrain": _conselho_of_terrain,
+		"freguesia_of_terrain": _freguesia_of_terrain,
+		"section_of_terrain": _section_of_terrain,
+		"number_article_terrain": _number_article_terrain,
+		"verification_document_of_terrain": _verification_document_of_terrain,
+		"type_of_soil_coverage": _type_of_soil_coverage,
+		"current_use_of_soil": _current_use_of_soil,
+		"previous_use_of_soil": _previous_use_of_soil
 	}
 
 	if (xmlhttp) {
@@ -578,7 +578,8 @@ function submitTerrain(points_data) {
 			}
 		}
 
-		obj = JSON.stringify(data);
+		console.log(obj);
+		obj = JSON.stringify(obj);
 
 		let final_uri = base_uri + "/api/parcela/create/";
 
