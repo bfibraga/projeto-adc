@@ -1,0 +1,6 @@
+#map {
+    overflow: hidden;
+    height: 100%;
+    width: calc(100% - 4rem);
+    left: 4rem;
+}
