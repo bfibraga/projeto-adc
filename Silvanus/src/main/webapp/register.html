@@ -30,21 +30,21 @@
         <img id="logo" src="./media/imgs/logo.png" class="center-images d-block" style="height: 5rem; margin-top: 2rem;">
         
         <!-- Registration Message -->
-        <h1 style="margin-top: 2.5rem; margin-bottom: 2.1rem; font-size: 2rem;">Create new account</h1>
+        <h1 class = "text-center" style="margin-top: 2.5rem; margin-bottom: 2.1rem; font-size: 2rem;">Criar nova conta</h1>
 
         <!-- Username Input -->
         <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
-          <input id="usr_identifier" type="text" class="form-control rounded-pill" placeholder="Username">
+          <input id="usr_identifier" type="text" class="form-control rounded-pill" placeholder="Nome de utilizador">
         </div>
 
         <!-- Email Input -->
         <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
-          <input id="usr_email" type="email" class="form-control rounded-pill" placeholder="Email">
+          <input id="usr_email" type="email" class="form-control rounded-pill" placeholder="Endereço de email">
         </div>
 
         <!-- Password Input -->
         <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
-          <input id="usr_password" type="password" class="form-control rounded-pill" placeholder="Password">
+          <input id="usr_password" type="password" class="form-control rounded-pill" placeholder="Palavra-passe">
           <a id="password-visible" class="position-absolute center-y" style="right:2rem; bottom:0.01rem ; z-index: 0;">
             <svg id="check-password" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-fill position-absolute" viewBox="0 0 16 16">
               <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
@@ -59,7 +59,7 @@
 
         <!-- Confirm Password Input -->
         <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
-          <input id="usr_confirm" type="password" class="form-control rounded-pill" placeholder="Confirm Password">
+          <input id="usr_confirm" type="password" class="form-control rounded-pill" placeholder="Confirmar palavra-passe">
         </div>
 
         <!-- Password Strength -->
@@ -69,12 +69,12 @@
 
         <!-- Civil Servant Redirection -->
         <div class="text-center">
-          <a href="#" style="font-size: 2vh;">Are you a civil servant?</a>
+          <a href="#" style="font-size: 2vh;">É um funcionário público?</a>
         </div>
         
         <!-- Submit Button -->
-        <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
-          <input type="button" style="width: 20rem;" id="next-submit-0" onclick="nextStep()" class="btn btn-primary center-x rounded-pill" value="Next">
+        <div class="input-group center-x" style="width: 20rem; margin-top: 0.5rem; margin-bottom: 1rem;">
+          <input type="button" style="width: 20rem;" id="next-submit-0" onclick="nextStep()" class="btn btn-primary center-x rounded-pill" value="Avançar">
         </div>
 
       </div>
@@ -82,7 +82,7 @@
   </form>
 
   <!-- Additional Info Menu-->
-  <form id="step-1"; class="d-flex justify-content-center position-absolute center light rounded-3 shadow-sm d-none" style="width: 25rem; height: 35rem;">
+  <form id="step-1"; class="d-flex justify-content-center position-absolute center light rounded-3 shadow-sm d-none" style="width: 25rem; height: 41rem;">
 
     <div>
 
@@ -100,12 +100,28 @@
 
       <!-- First & Last Name Input -->
       <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
-        <input id="usr_firstname" type="text" class="form-control rounded-pill" placeholder="First Name">
-        <input id="usr_lastname" type="text" class="form-control rounded-pill" placeholder="Last Name">
+        <input id="usr_firstname" type="text" class="form-control rounded-pill" placeholder="Primeiro Nome">
+        <input id="usr_lastname" type="text" class="form-control rounded-pill" placeholder="Apelido">
       </div>
 
+      <!-- Phone Number Input -->
+      <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
+        <input id="usr_telephone" type="text" class="form-control rounded-pill" placeholder="Contacto Telefónico">
+      </div>
 
-  
+      <!-- NIF Input -->
+      <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
+        <input id="usr_id" type="text" class="form-control rounded-pill" placeholder="NIF">
+      </div>
+
+      <!-- Address Input -->
+      <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
+        <input id="usr_adress" type="text" class="form-control rounded-pill" placeholder="Morada">
+      </div>      
+
+
+      <!-- Avatar Message -->
+      <h1 class="text-center" style="margin-top: 2rem; margin-bottom: 1rem; font-size: 1.0rem;">Imagem de Perfil</h1>      
 
       <!-- Avatar Input-->
       <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
@@ -114,8 +130,8 @@
 
       <!-- Submit Button -->
       <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
-        <input type="button" style="width: 10rem;" onclick="previousStep()" id="previous-submit-1" class="btn btn-primary rounded-pill" value="Previous">
-        <input type="button" style="width: 10rem;" id="button-submit" class="btn btn-primary rounded-pill" value="Next">
+        <input type="button" style="width: 10rem;" onclick="previousStep()" id="previous-submit-1" class="btn btn-primary rounded-pill" value="Voltar atrás">
+        <input type="button" style="width: 10rem;" id="button-submit" class="btn btn-primary rounded-pill" value="Registar">
       </div>
 
     </div>
