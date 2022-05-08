@@ -171,29 +171,37 @@
         <div class="card pb-3" style="width: 20rem;">
           <img src="./media/imgs/dark-blurry-gradient-haikei.png" class="card-img-top" alt=".">
           <div class="card-body">
-            <h5 class="card-title">Property 1</h5>
-            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-            <a href="#" class="btn btn-primary">Go there</a>
-            <a href="#" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#terrain-properties" aria-controls="offcanvasStart">Info</a>
+            <h5 class="card-title">Propriedade 1</h5>
+            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <a href="#" class="btn btn-primary">Ver no mapa</a>
+            <a href="#" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#terrain-properties" aria-controls="offcanvasStart">Detalhes</a>
           </div>
         </div>
         <div class="card pb-3" style="width: 20rem;">
           <img src="./media/imgs/register-wallpaper.jpg" class="card-img-top" alt=".">
           <div class="card-body">
-            <h5 class="card-title">Property 2</h5>
-            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-            <a href="#" class="btn btn-primary">Go there</a>
-            <a href="#" class="btn btn-primary">Info</a>
+            <h5 class="card-title">Terreno 2</h5>
+            <p class="card-text">Aliquam tincidunt metus ante, et euismod dui ultricies nec. Integer id pellentesque odio.</p>
+            <a href="#" class="btn btn-primary">Ver no mapa</a>
+            <a href="#" class="btn btn-primary">Detalhes</a>
           </div>
+
+        <!-- Add New Property Button -->
+        <div class="input-group center-x" style="width: 17rem; margin-top: 1.5rem; margin-bottom: 1rem;" id="request-property" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling">
+          <input type="button" style="width: 20rem;" class="btn btn-primary center-x rounded-pill" value="Registar novo terreno">
         </div>
-        <p>Try scrolling the rest of the page to see this option in action.</p>
+
+        </div>
+        
+
+
       </div>
     </div>
 
     <!-- Request Terrain Sidebar -->
     <div class="offcanvas offcanvas-end rounded-3" style="z-index: -10; width: 20rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="request-terrain-offcanvas" aria-labelledby="offcanvasScrollingLabel">
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Request Properties </h5>
+        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Novo Terreno</h5>
         <button id="request-terrain-btn-close" type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
@@ -225,7 +233,12 @@
           <label for="documentation-validation-terrain" class="form-label">Documentos de Validação do Terreno</label>
           <input type="file" class="form-control rounded-pill" id="documentation-validation-terrain">
         </div>
-        <p>Try scrolling the rest of the page to see this option in action.</p>
+        
+        <!-- Register Property Button -->
+        <div class="input-group center-x" style="width: 17rem; margin-top: 1.5rem; margin-bottom: 1rem;">
+          <input type="button" style="width: 20rem;" class="btn btn-primary center-x rounded-pill" value="Registar">
+        </div>
+
       </div>
     </div>
 
