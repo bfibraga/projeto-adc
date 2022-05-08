@@ -128,10 +128,11 @@
         <input id="usr_avatar" type="file" accept="image/jpeg, image/png" onchange="loadAvatar(event)" class="form-control rounded-pill" placeholder="Avatar">
       </div>
 
+      <script src="request_handler.js"></script>
       <!-- Submit Button -->
       <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
         <input type="button" style="width: 10rem;" onclick="previousStep()" id="previous-submit-1" class="btn btn-primary rounded-pill" value="Voltar atrás">
-        <input type="button" style="width: 10rem;" id="button-submit" class="btn btn-primary rounded-pill" value="Registar">
+        <input type="button" style="width: 10rem;" onclick="register()" id="button-submit" class="btn btn-primary rounded-pill" value="Registar">
       </div>
 
     </div>
