@@ -49,12 +49,12 @@
   <!-- Sidebar -->
   <div class="d-flex flex-column flex-shrink-0 bg-light rounded-3 position-absolute" style="width: 4rem; height: 100vh; z-index: 10; transition: opacity 100 ms linear;">
     <!-- Avatar Image -->
-    <a href="#" class="nav-link d-flex align-items-center justify-content-center p-3 text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#user-properties">
+    <a href="#" style="z-index: -10;" title="Perfil" class="nav-link d-flex align-items-center justify-content-center p-3 text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#user-properties">
       <div class="avatar-wrapper" style="width: 2rem; height: 2rem;">
         <img id="usr_avatar" src="./media/imgs/user.png" class="rounded-circle shadow-sm grow" style="">
       </div>
     </a>
-    <ul class="nav nav-pills nav-flush flex-column mb-auto text-center border-top top-50">
+    <ul style="z-index: -10;" class="nav nav-pills nav-flush flex-column mb-auto text-center border-top top-50">
       <li class="nav-item">
 
         <!-- Map Button -->
@@ -72,7 +72,7 @@
             <path d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5h-5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3z"/>
             <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
             <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
-          </svg>     
+          </svg> 
         </a>
       </li>
       <li>
@@ -84,10 +84,20 @@
           </svg>
         </a>
       </li>
+
+      <li>
+
+        <!-- Verification Property Button -->
+        <a href="#" id="verification-property" class="nav-link py-3" title="Verificar algum Pedido" data-bs-toggle="offcanvas" data-bs-target="#verification-terrain-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-envelope-paper grow" viewBox="0 0 16 16">
+            <path d="M4 0a2 2 0 0 0-2 2v1.133l-.941.502A2 2 0 0 0 0 5.4V14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5.4a2 2 0 0 0-1.059-1.765L14 3.133V2a2 2 0 0 0-2-2H4Zm10 4.267.47.25A1 1 0 0 1 15 5.4v.817l-1 .6v-2.55Zm-1 3.15-3.75 2.25L8 8.917l-1.25.75L3 7.417V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v5.417Zm-11-.6-1-.6V5.4a1 1 0 0 1 .53-.882L2 4.267v2.55Zm13 .566v5.734l-4.778-2.867L15 7.383Zm-.035 6.88A1 1 0 0 1 14 15H2a1 1 0 0 1-.965-.738L8 10.083l6.965 4.18ZM1 13.116V7.383l4.778 2.867L1 13.117Z"/>
+          </svg>
+        </a>
+      </li>
     </ul>
 
     <!-- Notifications Button -->
-    <a href="#" class="nav-link py-3 text-center position-relative" title="Notificações" data-bs-toggle="tooltip" data-bs-placement="right">
+    <a href="#" style="z-index: -10;"  class="nav-link py-3 text-center position-relative border-top" title="Notificações" data-bs-toggle="offcanvas" data-bs-target="#list-notifications" aria-controls="offcanvasScrolling" data-bs-placement="right">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell-fill grow" viewBox="0 0 16 16">
         <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
       </svg>
@@ -96,36 +106,84 @@
       </span>
     </a>
 
+    <!-- Notification Offcanvas-->
+    <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="list-notifications" aria-labelledby="offcanvasScrollingLabel">
+      <div class="offcanvas-header">
+        <h4>Notificações</h4>
+        <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Special title treatment</h5>
+                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Special title treatment</h5>
+                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Settings Button -->
-    <a href="#" class="nav-link p-3 text-center" title="Definições" data-bs-toggle="tooltip" data-bs-placement="right">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-gear-fill grow" viewBox="0 0 16 16">
-        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
-      </svg>
-    </a>
+    <div class="dropend" style="z-index: -10;">
+      <a id="settings-btn" href="#"  class="nav-link p-3 text-center dropdown-toggle" title="Definições" data-bs-toggle="dropdown" data-bs-placement="right">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-gear-fill grow" viewBox="0 0 16 16">
+          <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+        </svg>
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="settings-btn">
+        <li><a class="dropdown-item disabled" href="#">Tema</a></li>
+        <li><a class="dropdown-item" href="#" data-bs-toggle="offcanvas" data-bs-target="#help-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Ajuda</a></li>
+        <li><a class="dropdown-item" href="#" data-bs-toggle="offcanvas" data-bs-target="#about-us-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Sobre nós</a></li>
+      </ul>
+    </div>
+    
 
     <!-- Logout Button -->
-    <a href="#" class="nav-link p-3 text-center" title="Sair" onclick="logout()" data-bs-toggle="tooltip" data-bs-placement="right">
+    <a href="#" style="z-index: -10;"  class="nav-link p-3 text-center grow" title="Sair" onclick="logout()" data-bs-toggle="tooltip" data-bs-placement="right">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
         <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
         <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
       </svg>
-    </a>    
-
-    <!-- Help Button -->
-    <a href="#" class="nav-link p-3 text-center border-top" title="Ajuda" data-bs-toggle="tooltip" data-bs-placement="right">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-journal-text grow" viewBox="0 0 16 16">
-        <path d="M5 10.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
-        <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
-        <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
-      </svg>
     </a>
+
+    <!-- Help Offcanvas -->
+    <div class="offcanvas offcanvas-bottom rounded-3" style="z-index: 10; left: 4rem; height: 100vh;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="help-offcanvas" aria-labelledby="offcanvasScrollingLabel">
+      <div class="offcanvas-header">
+        <h4>Ajuda</h4>
+        <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
         
-    <!-- About Us Button -->
-    <a href="#" class="nav-link p-3 text-center" title="Sobre nós" data-bs-toggle="tooltip" data-bs-placement="right">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle-fill grow" viewBox="0 0 16 16">
-        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-      </svg>
-    </a>    
+        <p> Tutorial of this application </p>
+
+        
+        
+      </div>
+    </div>
+    
+    <!-- About us Offcanvas -->
+    <div class="offcanvas offcanvas-bottom rounded-3" style="z-index: 10; left: 4rem; height: 100vh;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="about-us-offcanvas" aria-labelledby="offcanvasScrollingLabel">
+      <div class="offcanvas-header">
+        <h4>Sobre nós</h4>
+        <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <p> Toda informação sobre nos </p>
+      </div>
+    </div>
     
     <!-- User Properties Sidebar -->
     <div class="offcanvas offcanvas-start rounded-3" style="z-index: -10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-5" id="user-properties" aria-labelledby="offcanvasScrollingLabel">
@@ -229,8 +287,42 @@
        	</div> 
       </div>
     </div>
+
+    <!-- Verification Terrain Sidebar -->
+    <div class="offcanvas offcanvas-start rounded-3" style="z-index: -10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="verification-terrain-offcanvas" aria-labelledby="offcanvasScrollingLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Lista de Verificações</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Special title treatment</h5>
+                <span class="badge rounded-pill bg-danger pb-1">Não aprovado</span>
+                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Special title treatment</h5>
+                <span class="badge rounded-pill bg-warning pb-1">Pendente</span>
+                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                <a href="#" class="btn btn-success">Aprovar</a>
+                <a href="#" class="btn btn-danger">Não Aprovar</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
+
+  <!-- Maps -->
   <div id="map" class="position-absolute"></div>
   <script src="./maps.js"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFF-sduDxFSBjCD_C-leaSI-sTkoCNO6Y&callback=initMap"></script>
