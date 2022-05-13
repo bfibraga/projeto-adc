@@ -1,5 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -7,19 +8,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
-import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.Transaction;
+import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Query.*;
+import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.adc.silvanus.data.*;
-import pt.unl.fct.di.adc.silvanus.data.user.AuthToken;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserRole;
+import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 import pt.unl.fct.di.adc.silvanus.util.*;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
@@ -44,9 +43,9 @@ public class UserImplementation implements Users {
 		boolean validation_code = data.validation();
 		if (validation_code) {
 			LOG.warning("User " + data.getUsername() + "tryied to register with some empty important information");
-			return Result.error(Response.Status.BAD_REQUEST);
+			return Result.error(Response.Status.BAD_REQUEST, "User " + data.getUsername() + "tryied to register with some empty important information");
 		}
-		String user_id = data.getUsername().hashCode() + "/" + data.getEmail().hashCode();
+		String user_id = data.getUsername();
 
 		Key userKey = userKeyFactory.newKey(user_id);
 		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
@@ -65,7 +64,7 @@ public class UserImplementation implements Users {
 			if (user != null) {
 				txn.rollback();
 				LOG.fine("Username " + data.getUsername() + "already exists\nTry again with another fancy nickname");
-				return Result.error(Response.Status.FORBIDDEN);
+				return Result.error(Response.Status.FORBIDDEN, "Username " + data.getUsername() + "already exists\nTry again with another fancy nickname");
 			}
 
 			// Create a new User
@@ -124,12 +123,12 @@ public class UserImplementation implements Users {
 	public Result<AuthToken> login(LoginData data) {
 		boolean validation_code = data.validation();
 		if (validation_code) {
-			return Result.error(Response.Status.BAD_REQUEST);
+			return Result.error(Response.Status.BAD_REQUEST, "Invalid parameters");
 		}
 
 		LOG.fine("Login attempt by: " + data.getUsername());
 
-		String user_id = data.getUsername().hashCode() + "/" + data.getEmail().hashCode();
+		String user_id = data.getUsername();
 
 		UserData userData = this.userInfo.get(user_id);
 
@@ -141,14 +140,49 @@ public class UserImplementation implements Users {
 			Key usrkey = userKeyFactory.newKey(user_id);
 			//Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 
-			Entity user = datastore.get(usrkey);
+			//Get user by email or username
+			/*Entity user = datastore.get(usrkey);
+			
 
 			if (user == null) {
 				// User doesn't exist
-				return Result.error(Response.Status.BAD_REQUEST);
+				return Result.error(Response.Status.BAD_REQUEST, "User doens't exist");
+			}
+			hashedPassword = user.getString("usr_password");*/
+
+			
+			
+			Query<Entity> query = null;
+			QueryResults<Entity> result;
+			
+			if (data.getUsername().equals("UNDEFINED")) {
+				query = Query.newEntityQueryBuilder().setKind("UserCredentials")
+	                    .setFilter(PropertyFilter.eq("usr_email", data.getEmail()))
+	                    .setLimit(5)
+	                    .build();
 			}
 			
-			hashedPassword = user.getString("usr_password");
+			if (data.getEmail().equals("UNDEFINED")) {
+				query = Query.newEntityQueryBuilder().setKind("UserCredentials")
+	                    .setFilter(PropertyFilter.eq("__key__", userKeyFactory.newKey(user_id)))
+	                    .setLimit(5)
+	                    .build();
+			}
+			
+			if (query == null){
+				return Result.error(Status.BAD_REQUEST, "");
+			}
+			
+			result = datastore.run(query);
+			if (result == null) {
+				// User doesn't exist
+				return Result.error(Response.Status.NOT_FOUND, "User " + data.getUsername() + " doens't exist");
+			}
+						
+			hashedPassword =  result.next().getString("usr_password");
+
+			
+			
 		}
 
 		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
@@ -177,7 +211,7 @@ public class UserImplementation implements Users {
 				LOG.warning("Wrong Password");
 				tnx.rollback();
 				// return Response.status(Status.FORBIDDEN).entity("Wrong password").build();
-				return Result.error(Status.FORBIDDEN);
+				return Result.error(Status.FORBIDDEN, "Wrong Password");
 			}
 		} finally {
 			if (tnx.isActive()) {
@@ -204,7 +238,7 @@ public class UserImplementation implements Users {
 			if (token_entity == null) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "Token Invalid");
 			}
 
 			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
@@ -212,7 +246,7 @@ public class UserImplementation implements Users {
 			if (!token.tokenID.equals(token_creation.tokenID)) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_ACCEPTABLE);
+				return Result.error(Status.NOT_ACCEPTABLE, "Token Invalid");
 			}
 
 			tnx.delete(usrCurrentToken);
@@ -243,7 +277,7 @@ public class UserImplementation implements Users {
 
 		if (user_id.equals(high_user_id)) {
 			LOG.warning("Same user");
-			return Result.error(Status.BAD_REQUEST);
+			return Result.error(Status.BAD_REQUEST, "Same user");
 		}
 
 		// Create new transation
@@ -256,7 +290,7 @@ public class UserImplementation implements Users {
 			if (user_verify == null || user_role == null) {
 				// User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "User " + username + "doens't exist");
 			}
 
 			Entity token_entity = tnx.get(usrCurrentToken);
@@ -264,7 +298,7 @@ public class UserImplementation implements Users {
 			if (token_entity == null) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "Token invalid");
 			}
 
 			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
@@ -273,7 +307,7 @@ public class UserImplementation implements Users {
 			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_FOUND);
+				return Result.error(Status.NOT_FOUND, "Token invalid");
 			}
 
 			Entity high_user_verify = tnx.get(high_usrPermissionkey);
@@ -282,7 +316,7 @@ public class UserImplementation implements Users {
 			if (high_user_verify == null || high_user_role == null) {
 				// Given higher priority User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "User " + token.username + "doens't exist");
 			}
 
 			UserRole role = UserRole.compareType(new_role);
@@ -291,14 +325,14 @@ public class UserImplementation implements Users {
 			if (high_role_priority <= user_role.getLong("role_priority") || role.getPriority() > high_role_priority) {
 				tnx.rollback();
 				LOG.warning("");
-				return Result.error(Status.NOT_ACCEPTABLE);
+				return Result.error(Status.NOT_ACCEPTABLE, "");
 			}
 
 			// Super user not active
 			if (!high_user_verify.getString("usr_state").equals("ACTIVE")) {
 				tnx.rollback();
 				LOG.warning("User " + token.username + " not active");
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "User " + token.username + " not active");
 			}
 
 			// Success
@@ -330,7 +364,7 @@ public class UserImplementation implements Users {
 
 			if (user == null) {
 				txn.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			Entity userInfo = txn.get(userInfoKey);
@@ -361,7 +395,7 @@ public class UserImplementation implements Users {
 
 			if (token == null) {
 				txn.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST,"");
 			}
 
 			return Result.ok();
@@ -400,7 +434,7 @@ public class UserImplementation implements Users {
 			if (token_entity == null) {
 				txn.rollback();
 				LOG.fine("Username " + token.username + "not logged in");
-				return Result.error(Status.NOT_ACCEPTABLE);
+				return Result.error(Status.NOT_ACCEPTABLE,"");
 			}
 
 			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
@@ -409,7 +443,7 @@ public class UserImplementation implements Users {
 			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				txn.rollback();
 				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_FOUND);
+				return Result.error(Status.NOT_FOUND, "");
 			}
 
 			Entity userRole = txn.get(userRoleKey);
@@ -429,7 +463,7 @@ public class UserImplementation implements Users {
 			if (!userPermission.getString("usr_state").equals("ACTIVE")) {
 				txn.rollback();
 				LOG.warning("User " + token.username + " not active");
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			Entity remove;
@@ -440,7 +474,7 @@ public class UserImplementation implements Users {
 			if (remove == null) {
 				txn.rollback();
 				LOG.fine("Username " + username + "doens't exists");
-				return Result.error(Status.NOT_ACCEPTABLE);
+				return Result.error(Status.NOT_ACCEPTABLE, "");
 			}
 
 			remove_userRole = txn.get(remove_userRoleKey);
@@ -448,7 +482,7 @@ public class UserImplementation implements Users {
 			if (userRole.getLong("role_priority") < remove_userRole.getLong("role_priority")) {
 				txn.rollback();
 				LOG.warning("User to be removed has higher role then this logged in user");
-				return Result.error(Status.NOT_ACCEPTABLE);
+				return Result.error(Status.NOT_ACCEPTABLE, "");
 			}
 
 			txn.delete(remove_userKey, remove_userRoleKey, remove_userPermissionKey, remove_userInfoKey,
@@ -489,7 +523,7 @@ public class UserImplementation implements Users {
 			if (user_verify == null || user_role == null) {
 				// User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			Entity token_entity = tnx.get(usrCurrentToken);
@@ -497,7 +531,7 @@ public class UserImplementation implements Users {
 			if (token_entity == null) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
@@ -506,7 +540,7 @@ public class UserImplementation implements Users {
 			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_FOUND);
+				return Result.error(Status.NOT_FOUND, "");
 			}
 
 			Entity high_user_verify = tnx.get(high_usrPermissionkey);
@@ -515,7 +549,7 @@ public class UserImplementation implements Users {
 			if (high_user_verify == null || high_user_role == null) {
 				// Given higher priority User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			Key superUsrCredentialsKey = userKeyFactory.newKey(high_user_id);
@@ -523,21 +557,21 @@ public class UserImplementation implements Users {
 			if (high_user_role.getLong("role_priority") <= user_role.getLong("role_priority")) {
 				tnx.rollback();
 				LOG.warning("");
-				return Result.error(Status.NOT_ACCEPTABLE);
+				return Result.error(Status.NOT_ACCEPTABLE, "");
 			}
 
 			// Already active user
 			if (user_verify.getString("usr_state").equals("ACTIVE")) {
 				tnx.rollback();
 				LOG.warning("User " + username + " already active");
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			// Super user not active
 			if (!high_user_verify.getString("usr_state").equals("ACTIVE")) {
 				tnx.rollback();
 				LOG.warning("User " + token.username + " not active");
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			// Success
@@ -562,7 +596,7 @@ public class UserImplementation implements Users {
 		String user_id = token.username.trim();
 
 		if (!user_id.equals(token.tokenID.trim())) {
-			return Result.error(Status.BAD_REQUEST);
+			return Result.error(Status.BAD_REQUEST, "");
 		}
 
 		Key usrkey = userKeyFactory.newKey(user_id);
@@ -576,21 +610,21 @@ public class UserImplementation implements Users {
 			if (new_password.trim().equals("")) {
 				// New password is empty
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			Entity user = tnx.get(usrkey);
 			if (user == null) {
 				// User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			Entity userToken = tnx.get(usrCurrentToken);
 			if (userToken == null) {
 				// User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
@@ -598,7 +632,7 @@ public class UserImplementation implements Users {
 
 			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_FOUND);
+				return Result.error(Status.NOT_FOUND, "");
 			}
 
 			Entity user_permission = tnx.get(usrPermissionkey);
@@ -606,7 +640,7 @@ public class UserImplementation implements Users {
 			if (!user_permission.getString("usr_state").equals("ACTIVE")) {
 				tnx.rollback();
 				LOG.warning("User " + token.username + " not active");
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			user = Entity.newBuilder(usrkey).set("usr_email", user.getString("usr_email"))
@@ -645,14 +679,14 @@ public class UserImplementation implements Users {
 			if (user == null) {
 				// User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			Entity userToken = tnx.get(usrTokenKey);
 			if (userToken == null) {
 				// User isn't login
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
@@ -661,21 +695,21 @@ public class UserImplementation implements Users {
 			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_FOUND);
+				return Result.error(Status.NOT_FOUND, "");
 			}
 
 			String hashedPassword = user.getString("usr_password");
 			if (!hashedPassword.equals(DigestUtils.sha512Hex(token.username))) {
 				tnx.rollback();
 				LOG.warning("Wrong parameters of " + token.username);
-				return Result.error(Status.FORBIDDEN);
+				return Result.error(Status.FORBIDDEN, "");
 			}
 
 			Entity target_user = tnx.get(target_user_key);
 			if (target_user == null) {
 				// Target user doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST);
+				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			Entity user_role = tnx.get(usrKey_role);
@@ -685,7 +719,7 @@ public class UserImplementation implements Users {
 					&& target_user_role.getLong("role_priority") > user_role.getLong("role_priority")) {
 				tnx.rollback();
 				LOG.warning(target_username + "has higher role then " + token.username);
-				return Result.error(Status.NOT_ACCEPTABLE);
+				return Result.error(Status.NOT_ACCEPTABLE, "");
 			}
 
 			Entity target = tnx.get(target_usrKey_info);

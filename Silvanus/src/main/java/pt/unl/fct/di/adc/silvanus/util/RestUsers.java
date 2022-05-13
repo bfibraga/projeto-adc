@@ -13,9 +13,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import pt.unl.fct.di.adc.silvanus.data.user.AuthToken;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
+import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 
 //TODO Review all Rest operations 
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -28,9 +28,10 @@ public interface RestUsers {
 	Response register(UserData data);
 	
 	@POST
-	@Path("/login/{userID}")
+	@Path("/login")
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response login(@PathParam("userID") String userID, @QueryParam("password") String password);
+	Response login(LoginData data);
 	
 	@POST
 	@Path("/logout")

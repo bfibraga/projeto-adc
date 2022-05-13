@@ -23,6 +23,12 @@ public interface Result<T> {
 	 * 
 	 */
 	Response.Status error();
+	
+	/**
+	 * 
+	 * @return
+	 */
+	String statusMessage();
 
 	/**
 	 * Convenience method for returning non error results of the given type
@@ -48,7 +54,7 @@ public interface Result<T> {
 	 * 
 	 * @return
 	 */
-	static <T> ResultERROR<T> error(Response.Status error) {
-		return new ResultERROR<>(error, error.toString());
+	static <T> ResultERROR<T> error(Response.Status error, String message) {
+		return new ResultERROR<>(error, message);
 	}
 }

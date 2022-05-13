@@ -29,4 +29,9 @@ public class ResultOK<T> implements Result<T> {
 		return "(OK, " + value() + ")";
 	}
 
+	@Override
+	public String statusMessage() {
+		return "OK";
+	}
+
 }

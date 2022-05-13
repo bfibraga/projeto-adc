@@ -33,4 +33,10 @@ public class ResultERROR<T> implements Result<T> {
 	public String toString() {
 		return "(" + error() + ")";
 	}
+
+	@Override
+	public String statusMessage() {
+		// TODO Auto-generated method stub
+		return response;
+	}
 }

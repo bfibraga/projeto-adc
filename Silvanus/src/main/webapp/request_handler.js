@@ -21,7 +21,7 @@ const ROLE_COLOR = {
 	SU: "rgb(200,200,250)"
 }
 
-const base_uri = "https://projeto-adc.appspot.com";
+const base_uri = "http://localhost:8080";
 var xmlhttp = new XMLHttpRequest();
 
 let res = "";
