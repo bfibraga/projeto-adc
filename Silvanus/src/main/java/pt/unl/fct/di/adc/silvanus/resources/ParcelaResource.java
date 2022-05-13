@@ -18,6 +18,7 @@ import com.google.cloud.datastore.Transaction;
 import com.google.gson.Gson;
 
 import pt.unl.fct.di.adc.silvanus.data.*;
+import pt.unl.fct.di.adc.silvanus.data.parcel.ParcelaData;
 
 @Path("/parcela")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

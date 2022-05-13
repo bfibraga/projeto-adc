@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.data;
+package pt.unl.fct.di.adc.silvanus.data.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -102,22 +102,13 @@ public class UserData {
 	}
 	
 	public boolean validation() {
-		if (!validField(this.username)) {
-			return false;
-		}
-		if (!validField(this.email)) {
-			return false;
-		}
-		if (!validField(this.name)) {
-			return false;
-		}
-		if (!validField(this.password)) {
-			return false;
-		}
-		if(!(this.password.equals(confirm))) {
-			return false;
-		}
+		boolean valid = 
+				validField(this.username) 
+				&& validField(this.email)
+				&& validField(this.name)
+				&& validField(this.password)
+				&& this.password.equals(confirm);
 		
-		return true;
+		return valid;
 	}
 }

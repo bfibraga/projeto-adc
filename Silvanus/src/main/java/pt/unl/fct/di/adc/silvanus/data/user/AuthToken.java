@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.data;
+package pt.unl.fct.di.adc.silvanus.data.user;
 
 import java.util.UUID;
 

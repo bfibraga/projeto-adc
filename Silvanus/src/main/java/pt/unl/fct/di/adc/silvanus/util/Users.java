@@ -1,9 +1,9 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
-import pt.unl.fct.di.adc.silvanus.data.AuthToken;
-
-import pt.unl.fct.di.adc.silvanus.data.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.UserData;
+import pt.unl.fct.di.adc.silvanus.data.user.AuthToken;
+import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
+import pt.unl.fct.di.adc.silvanus.data.user.UserData;
+import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 public interface Users {
 

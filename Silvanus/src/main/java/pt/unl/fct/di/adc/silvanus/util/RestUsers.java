@@ -13,9 +13,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import pt.unl.fct.di.adc.silvanus.data.AuthToken;
-import pt.unl.fct.di.adc.silvanus.data.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.UserData;
+import pt.unl.fct.di.adc.silvanus.data.user.AuthToken;
+import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
+import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 
 //TODO Review all Rest operations 
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

@@ -1,15 +1,14 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
-import pt.unl.fct.di.adc.silvanus.util.Result;
-
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-import pt.unl.fct.di.adc.silvanus.data.AuthToken;
-import pt.unl.fct.di.adc.silvanus.data.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.UserData;
+import pt.unl.fct.di.adc.silvanus.data.user.AuthToken;
+import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
+import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.RestUsers;
+import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 @Path("/user")
 public class UsersResource implements RestUsers {
