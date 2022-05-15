@@ -97,6 +97,11 @@ public class UserData {
 		return this.smartphone;
 	}
 
+	public String getID(){
+		return this.getUsername().hashCode() + "." +
+				this.getEmail().hashCode() + ".";
+	}
+
 	private boolean validField(String keyword) {
 		return !keyword.trim().equals("");
 	}

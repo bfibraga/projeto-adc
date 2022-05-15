@@ -9,7 +9,7 @@ public interface Users {
 
 	Result<AuthToken> register(UserData data);
 	
-	Result<AuthToken> login(LoginData data);
+	Result<String> login(LoginData data);
 	
 	Result<Void> logout(AuthToken token);
 	

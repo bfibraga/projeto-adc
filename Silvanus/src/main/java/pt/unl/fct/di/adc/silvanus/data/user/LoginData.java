@@ -2,6 +2,7 @@ package pt.unl.fct.di.adc.silvanus.data.user;
 
 public class LoginData {
 
+	public final static String NOT_DEFINED = "~~";
 	private String username;
 	private String email;
 	private String password;
@@ -65,4 +66,8 @@ public class LoginData {
 		return validField(username) && validField(email) && validField(password) && validPassword(password);
 	}
 
+	public String getID(){
+		return this.getUsername().hashCode() + "." +
+				this.getEmail().hashCode() + ".";
+	}
 }
