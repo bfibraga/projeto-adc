@@ -184,7 +184,7 @@ function login() {
 						sessionStorage.setItem("username_token", response.username);
 						sessionStorage.setItem("token", xmlhttp.responseText);
 
-						window.location.replace(base_uri.concat("/app.html"));
+						window.location.replace(base_uri.concat("/app"));
 
 						break;
 					default:
@@ -212,7 +212,7 @@ function init() {
 
 	if (token.expirationDate < curr_time) {
 		alert("Session Expired! Try login again");
-		window.location.replace(base_uri.concat("/app.html"));
+		window.location.replace(base_uri.concat("/app"));
 	} else {
 		getInfo();
 	}
@@ -386,7 +386,7 @@ function changing_att() {
 						console.log("Attributes changed successfully")
 						document.getElementById("info").innerText = "Attributes changed successfully";
 						sleep(1000);
-						window.location.replace(base_uri.concat("/app.html"));
+						window.location.replace(base_uri.concat("/app"));
 						break;
 					default:
 						document.getElementById("info").innerHTML = new String(xmlhttp.response);
@@ -464,7 +464,7 @@ function remove() {
 						console.log("Attributes changed successfully")
 						document.getElementById("info").innerText = "Attributes changed successfully";
 						sleep(1000);
-						window.location.replace(base_uri.concat("/app.html"));
+						window.location.replace(base_uri.concat("/app"));
 						break;
 					default:
 						document.getElementById("info").innerHTML = new String(xmlhttp.response);
@@ -507,7 +507,7 @@ function promote() {
 						console.log("Attributes changed successfully")
 						document.getElementById("info").innerText = "Attributes changed successfully";
 						sleep(1000);
-						window.location.replace(base_uri.concat("/app.html"));
+						window.location.replace(base_uri.concat("/app"));
 						break;
 					default:
 						document.getElementById("info").innerHTML = new String(xmlhttp.response);

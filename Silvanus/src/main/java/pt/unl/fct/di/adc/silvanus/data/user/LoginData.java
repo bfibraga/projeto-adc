@@ -3,6 +3,7 @@ package pt.unl.fct.di.adc.silvanus.data.user;
 public class LoginData {
 
 	public final static String NOT_DEFINED = "~~";
+	public final static String EMAIL_REGEX = "^(.+)@(.+)$";
 	private String username;
 	private String email;
 	private String password;
@@ -68,6 +69,6 @@ public class LoginData {
 
 	public String getID(){
 		return this.getUsername().hashCode() + "." +
-				this.getEmail().hashCode() + ".";
+				this.getEmail().hashCode();
 	}
 }

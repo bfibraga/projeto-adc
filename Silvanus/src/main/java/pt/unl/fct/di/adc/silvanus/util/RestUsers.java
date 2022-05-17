@@ -1,82 +1,80 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
-import javax.ws.rs.Consumes;
+import javax.ws.rs.*;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
-import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
+
+import static pt.unl.fct.di.adc.silvanus.util.RestUsers.CHARSET;
 
 //TODO Review all Rest operations 
-@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+@Produces(MediaType.APPLICATION_JSON + CHARSET)
 public interface RestUsers {
-	
+	String CHARSET = ";charset=utf-8";
+
 	@POST
 	@Path("/register")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
 	Response register(UserData data);
 	
 	@POST
-	@Path("/login")
+	@Path("/login/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response login(LoginData data);
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response login(@PathParam("identifier") String identifier, @QueryParam("password") String password);
 	
 	@POST
 	@Path("/logout")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response logout();
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response logout(String token);
 	
 	@PUT
 	@Path("/promote/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response promote(@PathParam("username") String username, @QueryParam("new_role") String new_role);
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response promote(String token, @PathParam("username") String username, @QueryParam("new_role") String new_role);
 	
 	@GET
 	@Path("/get")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
 	Response getUser(@QueryParam("username") String username);
+
+	@GET
+	@Path("/refresh_token")
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response refresh_token(@CookieParam("rt") String old_refresh_token);
 	
 	@GET
-	@Path("/token/{username}")
+	@Path("/token/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response getToken(@PathParam("username") String username);
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response getToken(@PathParam("identifier") String identifier);
 	
 	@DELETE
-	@Path("/remove/{username}")
+	@Path("/remove/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	Response remove(@PathParam("username") String username);
+	Response remove(@PathParam("identifier") String username);
 	
 	@PUT
-	@Path("/activate/{username}")
+	@Path("/activate/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response activate(@PathParam("username") String username);
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response activate(@PathParam("identifier") String identifier, String token);
 	
 	@PUT
 	@Path("/change")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response changePassword(AuthToken token, @QueryParam("password") String new_password);
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response changePassword(String token, @QueryParam("password") String new_password);
 	
 	@PUT
-	@Path("/change/{username}")
+	@Path("/change/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	Response changeAttributes(@PathParam("username") String username, @QueryParam("attributes") String list_json);
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response changeAttributes(@PathParam("identifier") String identifier, @QueryParam("attributes") String list_json, String token);
 }

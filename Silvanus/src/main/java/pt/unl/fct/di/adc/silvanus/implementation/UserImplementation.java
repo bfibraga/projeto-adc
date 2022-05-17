@@ -1,5 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
+import java.security.KeyPair;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -8,13 +9,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+import com.google.auth.oauth2.JwtClaims;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.Query.*;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.gson.Gson;
 
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import pt.unl.fct.di.adc.silvanus.data.*;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
@@ -29,6 +32,9 @@ public class UserImplementation implements Users {
 	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
 	private final Gson g = new Gson();
 
+	//Key: refresh_token , Value: jwt
+	private final KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.ES256);
+
 	// Datastore
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private final KeyFactory userKeyFactory = this.datastore.newKeyFactory().setKind("UserCredentials");
@@ -38,7 +44,7 @@ public class UserImplementation implements Users {
 	private ConcurrentHashMap<String, String> userToken = new ConcurrentHashMap<>();
 
 	@Override
-	public Result<AuthToken> register(UserData data) {
+	public Result<String> register(UserData data) {
 		LOG.fine("Resgiter user " + data.getUsername());
 
 		boolean validation_code = data.validation();
@@ -110,12 +116,11 @@ public class UserImplementation implements Users {
 			}
 
 			//TODO: First Registration information
+			String jws = this.createNewJWS(user_id);
 
-
-			AuthToken at = new AuthToken(user_id);
 			Entity token = Entity.newBuilder(usrCurrentToken)
-					.set("usr_username", data.getUsername())
-					.set("creation_data", g.toJson(at))
+					//.set("refresh_token", refresh_token)
+					.set("jwt", jws)
 					.build();
 
 			txn.put(user, userRole, userInfo, userPermission);
@@ -124,7 +129,7 @@ public class UserImplementation implements Users {
 			this.userInfo.putIfAbsent(user_id, data);
 
 			LOG.info("User resgisted " + data.getUsername() + " successfully");
-			return Result.ok(at);
+			return Result.ok(jws);
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();
@@ -150,19 +155,6 @@ public class UserImplementation implements Users {
 		if (userData != null) {
 			hashedPassword = userData.getPassword();
 		} else {
-			//Key usrkey = userKeyFactory.newKey(user_id);
-			//Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
-
-			//Get user by email or username
-			/*Entity user = datastore.get(usrkey);
-			
-
-			if (user == null) {
-				// User doesn't exist
-				return Result.error(Response.Status.BAD_REQUEST, "User doens't exist");
-			}
-			hashedPassword = user.getString("usr_password");*/
-
 			Query<Entity> query = null;
 			QueryResults<Entity> result;
 			
@@ -209,21 +201,16 @@ public class UserImplementation implements Users {
 						// Return token
 						LOG.info("User " + data.getUsername() + "logged in successfully");
 
-						Date creationDate = new Date();
-						Date expirationDate = new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME);
-						String jws = Jwts.builder()
-								.setSubject(user_id)
-								.setExpiration(expirationDate) //a java.util.Date
-								.setIssuedAt(creationDate) // for example, now
-								.setId(UUID.randomUUID().toString())
-								.compact(); //just an example id
+						String jws = this.createNewJWS(user_id);
 
+						String refresh_token = this.newRefreshToken();
 						//AuthToken at = new AuthToken(user_id);
 
-						this.userToken.put("", jws);
+						this.userToken.put(refresh_token, jws);
 
 						Entity token = Entity.newBuilder(usrCurrentToken)
-								.set("creation_data", jws)
+								//.set("refresh_token", refresh_token)
+								.set("jwt", jws)
 								.build();
 
 						tnx.put(token);
@@ -234,7 +221,7 @@ public class UserImplementation implements Users {
 
 				LOG.warning("Wrong Password");
 				tnx.rollback();
-				return Result.error(Status.FORBIDDEN, "Wrong Password");
+				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
 			} finally {
 				if (tnx.isActive()) {
 					tnx.rollback();
@@ -245,11 +232,24 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> logout(AuthToken token) {
+	public Result<Void> logout(String token) {
 
 		LOG.fine("Logout attempt");
-				
-		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token.username.trim());
+		Jws<Claims> jws;
+		String jwsString = "";
+		String user_id = "";
+
+		try{
+			jws = Jwts.parserBuilder()  // (1)
+					.setSigningKey(keyPair.getPublic())         // (2)
+					.build()                    // (3)
+					.parseClaimsJws(jwsString); // (4)
+			user_id = jws.getBody().getId();
+		} catch (JwtException e){
+			return Result.error(Status.FORBIDDEN, "Invalid token");
+		}
+
+		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
 
 		// Create new transation
 		Transaction tnx = datastore.newTransaction();
@@ -266,14 +266,14 @@ public class UserImplementation implements Users {
 
 			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
 
-			if (!token.tokenID.equals(token_creation.tokenID)) {
+			/*if (!token.tokenID.equals(token_creation.tokenID)) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
 				return Result.error(Status.NOT_ACCEPTABLE, "Token Invalid");
-			}
+			}*/
 
 			tnx.delete(usrCurrentToken);
-			userToken.remove(token.tokenID);
+			//userToken.remove(user_id);
 			tnx.commit();
 			return Result.ok();
 		} finally {
@@ -284,14 +284,28 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> promote(AuthToken token, String username, String new_role) {
-		LOG.fine("Verification user " + username + "by " + token.username);
+	public Result<Void> promote(String token, String username, String new_role) {
+
+		Jws<Claims> jws;
+		String jwsString = "";
+		String user_id = "";
+
+		try{
+			jws = Jwts.parserBuilder()  // (1)
+					.setSigningKey(keyPair.getPublic())         // (2)
+					.build()                    // (3)
+					.parseClaimsJws(jwsString); // (4)
+			user_id = jws.getBody().getId();
+		} catch (JwtException e){
+			return Result.error(Status.FORBIDDEN, "Invalid token");
+		}
+
+		LOG.fine("Promotion of user " + username);
 
 		// User to verify
-		String user_id = username.trim();
 		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
-		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token.username.trim());
+		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token);
 
 		// Higher priority user
 		String high_user_id = token.username.trim();
@@ -406,6 +420,25 @@ public class UserImplementation implements Users {
 		}
 	}
 
+	//TODO
+	@Override
+	public Result<String> refresh_token(String old_refresh_token) {
+		return Result.ok(this.newRefreshToken());
+	}
+
+	private String newRefreshToken(){
+		Date creationDate = new Date();
+		Date expirationDate = new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME);
+		String refresh_token = Jwts.builder()
+				.setExpiration(expirationDate) //a java.util.Date
+				.setIssuedAt(creationDate) // for example, now
+				.claim("pbk", keyPair.getPublic())
+				.signWith(keyPair.getPrivate())
+				.setId(UUID.randomUUID().toString())
+				.compact(); //just an example id
+		return refresh_token;
+	}
+
 	@Override
 	public Result<AuthToken> getToken(String username) {
 		String user_id = username.trim();
@@ -430,7 +463,7 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> remove(AuthToken token, String username) {
+	public Result<Void> remove(String token, String username) {
 		LOG.fine("Removing user " + username);
 
 		String user_id = token.username.trim();
@@ -521,7 +554,7 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> activate(AuthToken token, String username) {
+	public Result<Void> activate(String token, String username) {
 		LOG.fine("Verification user " + username + "by " + token.username);
 
 		// Create key outside of this transaction
@@ -613,7 +646,7 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> changePassword(AuthToken token, String new_password) {
+	public Result<Void> changePassword(String token, String new_password) {
 		LOG.fine("Changing password");
 
 		String user_id = token.username.trim();
@@ -681,7 +714,7 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> changeAttributes(AuthToken token, String target_username, String list_json) {
+	public Result<Void> changeAttributes(String token, String target_username, String list_json) {
 		LOG.fine("Changing " + target_username + "'s aditional atributes");
 
 		String user_id = token.username.trim();
@@ -768,4 +801,16 @@ public class UserImplementation implements Users {
 		}
 	}
 
+	private String createNewJWS(String user_id){
+		Date creationDate = new Date();
+		Date expirationDate = new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME);
+		String jws = Jwts.builder()
+				.setSubject(user_id)
+				.setExpiration(expirationDate) //a java.util.Date
+				.setIssuedAt(creationDate) // for example, now
+				.setId(UUID.randomUUID().toString())
+				.signWith(keyPair.getPrivate()) //sign a created token with private key
+				.compact(); //just an example id
+		return jws;
+	}
 }

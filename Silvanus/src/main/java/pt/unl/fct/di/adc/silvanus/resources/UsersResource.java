@@ -1,6 +1,8 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
@@ -14,8 +16,6 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 public class UsersResource implements RestUsers {
 
 	private final UserImplementation impl = new UserImplementation();
-	private AuthToken token;
-
 	public UsersResource() {
 
 	}
@@ -32,21 +32,26 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response login(LoginData data) {
+	public Response login(String identifier, String password) {
 
-		Result result = impl.login(data);
+		LoginData data = identifier.matches(LoginData.EMAIL_REGEX) ?
+				new LoginData(LoginData.NOT_DEFINED, identifier, password) :
+				new LoginData(identifier, LoginData.NOT_DEFINED, password);
+		Result<String[]> result = impl.login(data);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
+		String[] result_value = result.value();
 		//token = (AuthToken) result.value();
+		//Add http-only cookie
 
-		return Response.ok().entity(result.value()).build();
+		return Response.ok().entity(result_value[0]).cookie(new NewCookie("new_cookie", "Test")).build();
 	}
 
 	@Override
-	public Response logout() {
+	public Response logout(String token) {
 		Result result = impl.logout(token);
 
 		if (!result.isOK()) {
@@ -57,19 +62,19 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response promote(String username, String new_role) {
+	public Response promote(String token, String username, String new_role) {
 		Result result = impl.promote(token, username, new_role);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-		return Response.ok().entity("User " + username + "was promoted to " + new_role).build();
+		return Response.ok().entity(result.statusMessage()).build();
 	}
 
 	@Override
-	public Response getUser(String username) {
-		Result result = impl.getUser(username);
+	public Response getUser(String identifier) {
+		Result result = impl.getUser(identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -79,8 +84,14 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response getToken(String username) {
-		Result result = impl.getToken(username);
+	public Response refresh_token(String old_refresh_token) {
+		Result<String> result = impl.refresh_token(old_refresh_token);
+		return Response.ok().entity(result.value()).build();
+	}
+
+	@Override
+	public Response getToken(String identifier) {
+		Result result = impl.getToken(identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -101,8 +112,8 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response activate(String username) {
-		Result result = impl.activate(token, username);
+	public Response activate(String identifier, String token) {
+		Result result = impl.activate(token, identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -112,7 +123,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response changePassword(AuthToken token, String new_password) {
+	public Response changePassword(String token, String new_password) {
 		Result result = impl.changePassword(token, new_password);
 
 		if (!result.isOK()) {
@@ -123,8 +134,8 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response changeAttributes(String username, String list_json) {
-		Result result = impl.changeAttributes(token, username, list_json);
+	public Response changeAttributes(String identifier, String list_json, String token) {
+		Result result = impl.changeAttributes(token, identifier, list_json);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();

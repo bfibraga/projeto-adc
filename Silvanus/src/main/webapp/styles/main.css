@@ -6,7 +6,7 @@
 }
 .dark-mode{
   --primary-bg: rgb(30,30,30);
-  --secundary-bg: 
+  --secundary-bg: rgb(20,20,20)
 }
 
 html{
@@ -222,9 +222,9 @@ h1,p,label,a{
 }
 
 .grow { 
-  transition: all .2s ease-in-out; 
+  transition: all .2s ease-in-out;
 }
 
-.grow:hover { 
-  transform: scale(1.1); 
+.grow:hover {
+  transform: scale(1.1);
 }
