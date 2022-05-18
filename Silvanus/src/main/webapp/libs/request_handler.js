@@ -79,7 +79,7 @@ function register() {
 			if (xmlhttp.readyState === 4) {
 				switch (xmlhttp.status) {
 					case HTTP_RESPONSE["OK"]:
-						window.location.replace(base_uri + "/login.html");
+						window.location.replace(base_uri + "/login");
 						break;
 					default:
 						console.log(xmlhttp.statusText);
@@ -316,8 +316,15 @@ function logout(time) {
 	if (xmlhttp) {
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState === 4) {
-				sleep(time);
-				window.location.replace(base_uri.concat("/"));
+				switch (xmlhttp.status){
+					case HTTP_RESPONSE["OK"]:
+						sleep(time);
+						window.location.replace(base_uri.concat("/"));
+						break;
+					default:
+						console.log(xmlhttp.status);
+				}
+
 			}
 		}
 

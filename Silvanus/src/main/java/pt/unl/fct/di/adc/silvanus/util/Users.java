@@ -1,9 +1,13 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
+
+import javax.ws.rs.core.Context;
 
 public interface Users {
 
@@ -15,7 +19,7 @@ public interface Users {
 	
 	Result<Void> promote(String token, String username, String new_role);
 	
-	Result<String> getUser(String username);
+	Result<String[]> getUser(String username);
 
 	Result<String> refresh_token(String old_refresh_token);
 	

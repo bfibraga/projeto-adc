@@ -1,7 +1,10 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -24,13 +27,14 @@ public interface RestUsers {
 	@Path("/login/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response login(@PathParam("identifier") String identifier, @QueryParam("password") String password);
+	Response login(@PathParam("identifier") String identifier, @QueryParam("password") String password,
+				   HttpServletResponse response);
 	
 	@POST
 	@Path("/logout")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response logout(String token);
+	Response logout(@Context HttpServletRequest request);
 	
 	@PUT
 	@Path("/promote/{username}")
@@ -39,10 +43,10 @@ public interface RestUsers {
 	Response promote(String token, @PathParam("username") String username, @QueryParam("new_role") String new_role);
 	
 	@GET
-	@Path("/get")
+	@Path("/{username}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response getUser(@QueryParam("username") String username);
+	Response getUser(@PathParam("username") String username);
 
 	@GET
 	@Path("/refresh_token")

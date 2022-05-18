@@ -1,6 +1,10 @@
+:root{
+    --nav-bar-len: 4rem;
+}
+
 #map {
     overflow: hidden;
     height: 100%;
-    width: calc(100% - 4rem);
-    left: 4rem;
+    width: calc(100% - var(--nav-bar-len));
+    left: var(--nav-bar-len);
 }

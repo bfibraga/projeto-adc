@@ -1,16 +1,22 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
+import org.checkerframework.checker.units.qual.C;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.RestUsers;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
+
+import java.util.Date;
 
 @Path("/user")
 public class UsersResource implements RestUsers {
@@ -32,33 +38,36 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response login(String identifier, String password) {
+	public Response login(String identifier, String password, HttpServletResponse response) {
 
 		LoginData data = identifier.matches(LoginData.EMAIL_REGEX) ?
 				new LoginData(LoginData.NOT_DEFINED, identifier, password) :
 				new LoginData(identifier, LoginData.NOT_DEFINED, password);
-		Result<String[]> result = impl.login(data);
+		Result<String> result = impl.login(data);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-		String[] result_value = result.value();
 		//token = (AuthToken) result.value();
 		//Add http-only cookie
+		NewCookie tkn_cookie = new NewCookie( "tkn", result.value(), "/api/user", "", 1, "", 100000, new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME), false, true );
 
-		return Response.ok().entity(result_value[0]).cookie(new NewCookie("new_cookie", "Test")).build();
+		return Response.ok().entity(tkn_cookie).cookie(tkn_cookie).build();
 	}
 
 	@Override
-	public Response logout(String token) {
+	public Response logout(HttpServletRequest request) {
+		String token = request.getCookies()[0].getValue();
+		System.out.println(token);
 		Result result = impl.logout(token);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
+		NewCookie empty_tkn_cookie = new NewCookie("tkn", "");
 
-		return Response.ok().entity("User sucessfully logged out").build();
+		return Response.ok().entity(result.statusMessage()).cookie(empty_tkn_cookie).build();
 	}
 
 	@Override
@@ -97,12 +106,12 @@ public class UsersResource implements RestUsers {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-		return Response.ok().entity(token).build();
+		return Response.ok().entity(result.statusMessage()).build();
 	}
 
 	@Override
 	public Response remove(String username) {
-		Result result = impl.remove(token, username);
+		Result result = impl.remove("", username);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();

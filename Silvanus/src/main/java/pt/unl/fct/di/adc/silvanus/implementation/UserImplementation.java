@@ -1,24 +1,20 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
-import java.security.KeyPair;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import javax.crypto.SecretKey;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
-import com.google.auth.oauth2.JwtClaims;
 import com.google.cloud.datastore.*;
-import com.google.cloud.datastore.Query.*;
-import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.gson.Gson;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import pt.unl.fct.di.adc.silvanus.data.*;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserRole;
@@ -32,8 +28,7 @@ public class UserImplementation implements Users {
 	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
 	private final Gson g = new Gson();
 
-	//Key: refresh_token , Value: jwt
-	private final KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.ES256);
+	private final SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
 	// Datastore
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
@@ -169,7 +164,7 @@ public class UserImplementation implements Users {
 			if (data.getEmail().equals(LoginData.NOT_DEFINED)) {
 				query = Query.newEntityQueryBuilder()
 						.setKind("UserCredentials")
-	                    .setFilter(PropertyFilter.eq("__key__", userKeyFactory.newKey(user_id)))
+	                    .setFilter(PropertyFilter.eq("usr_username", data.getUsername()))
 	                    .setLimit(5)
 	                    .build();
 			}
@@ -235,19 +230,13 @@ public class UserImplementation implements Users {
 	public Result<Void> logout(String token) {
 
 		LOG.fine("Logout attempt");
-		Jws<Claims> jws;
-		String jwsString = "";
-		String user_id = "";
+		Claims jws = this.verifyToken(token);
 
-		try{
-			jws = Jwts.parserBuilder()  // (1)
-					.setSigningKey(keyPair.getPublic())         // (2)
-					.build()                    // (3)
-					.parseClaimsJws(jwsString); // (4)
-			user_id = jws.getBody().getId();
-		} catch (JwtException e){
-			return Result.error(Status.FORBIDDEN, "Invalid token");
+		if (jws == null){
+			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
+
+		String user_id = jws.getId();
 
 		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
 
@@ -263,8 +252,6 @@ public class UserImplementation implements Users {
 				LOG.warning("Token invalid");
 				return Result.error(Status.BAD_REQUEST, "Token Invalid");
 			}
-
-			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
 
 			/*if (!token.tokenID.equals(token_creation.tokenID)) {
 				tnx.rollback();
@@ -288,16 +275,25 @@ public class UserImplementation implements Users {
 
 		Jws<Claims> jws;
 		String jwsString = "";
-		String user_id = "";
+		String user_id = username;
+		String high_user_id = "";
 
 		try{
 			jws = Jwts.parserBuilder()  // (1)
-					.setSigningKey(keyPair.getPublic())         // (2)
+					.setSigningKey(key)         // (2)
 					.build()                    // (3)
 					.parseClaimsJws(jwsString); // (4)
+
 			user_id = jws.getBody().getId();
 		} catch (JwtException e){
 			return Result.error(Status.FORBIDDEN, "Invalid token");
+		}
+
+		long curr_time = System.currentTimeMillis();
+		long expirationData = jws.getBody().getExpiration().getTime();
+		if (curr_time > expirationData) {
+			LOG.warning("Token invalid");
+			return Result.error(Status.NOT_FOUND, "Token invalid");
 		}
 
 		LOG.fine("Promotion of user " + username);
@@ -308,7 +304,6 @@ public class UserImplementation implements Users {
 		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token);
 
 		// Higher priority user
-		String high_user_id = token.username.trim();
 		Key high_usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(high_user_id);
 		Key high_usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(high_user_id);
 
@@ -338,22 +333,13 @@ public class UserImplementation implements Users {
 				return Result.error(Status.BAD_REQUEST, "Token invalid");
 			}
 
-			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
-			long curr_time = System.currentTimeMillis();
-
-			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
-				tnx.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_FOUND, "Token invalid");
-			}
-
 			Entity high_user_verify = tnx.get(high_usrPermissionkey);
 			Entity high_user_role = tnx.get(high_usrRoleKey);
 
 			if (high_user_verify == null || high_user_role == null) {
 				// Given higher priority User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST, "User " + token.username + "doens't exist");
+				return Result.error(Status.BAD_REQUEST, "User doens't exist");
 			}
 
 			UserRole role = UserRole.compareType(new_role);
@@ -368,8 +354,8 @@ public class UserImplementation implements Users {
 			// Super user not active
 			if (!high_user_verify.getString("usr_state").equals("ACTIVE")) {
 				tnx.rollback();
-				LOG.warning("User " + token.username + " not active");
-				return Result.error(Status.BAD_REQUEST, "User " + token.username + " not active");
+				LOG.warning("User not active");
+				return Result.error(Status.BAD_REQUEST, "User not active");
 			}
 
 			// Success
@@ -406,11 +392,18 @@ public class UserImplementation implements Users {
 
 			Entity userInfo = txn.get(userInfoKey);
 			Entity userRole = txn.get(userRoleKey);
-			Entity userPermission = txn.get(userPermissionKey);
+			//Entity userPermission = txn.get(userPermissionKey);
 
-			String[] response = { username, user.getString("usr_email"), userInfo.getString("usr_name"),
-					userInfo.getString("usr_telephone"), userInfo.getString("usr_smartphone"),
-					userInfo.getString("usr_address"), userInfo.getString("usr_NIF"), };
+			String[] response = {
+					username,
+					user.getString("usr_email"),
+					userInfo.getString("usr_name"),
+					userInfo.getString("usr_telephone"),
+					userInfo.getString("usr_smartphone"),
+					userInfo.getString("usr_address"),
+					userInfo.getString("usr_NIF"),
+					userRole.getString("role_name")
+			};
 
 			return Result.ok(response);
 		} finally {
@@ -432,8 +425,7 @@ public class UserImplementation implements Users {
 		String refresh_token = Jwts.builder()
 				.setExpiration(expirationDate) //a java.util.Date
 				.setIssuedAt(creationDate) // for example, now
-				.claim("pbk", keyPair.getPublic())
-				.signWith(keyPair.getPrivate())
+				.signWith(key)
 				.setId(UUID.randomUUID().toString())
 				.compact(); //just an example id
 		return refresh_token;
@@ -466,7 +458,21 @@ public class UserImplementation implements Users {
 	public Result<Void> remove(String token, String username) {
 		LOG.fine("Removing user " + username);
 
-		String user_id = token.username.trim();
+		String jwsString = "";
+		Claims jws = this.verifyToken(token);
+
+		if (jws == null){
+			return Result.error(Status.FORBIDDEN, "Invalid Token");
+		}
+
+		long curr_time = System.currentTimeMillis();
+		long expirationData = jws.getExpiration().getTime();
+		if (curr_time > expirationData) {
+			LOG.warning("Token invalid");
+			return Result.error(Status.NOT_FOUND, "Token invalid");
+		}
+
+		String user_id = jws.getId();
 		String remove_id = username.trim();
 
 		Key userKey = userKeyFactory.newKey(user_id);
@@ -489,17 +495,8 @@ public class UserImplementation implements Users {
 
 			if (token_entity == null) {
 				txn.rollback();
-				LOG.fine("Username " + token.username + "not logged in");
+				LOG.fine("Username not logged in");
 				return Result.error(Status.NOT_ACCEPTABLE,"");
-			}
-
-			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
-			long curr_time = System.currentTimeMillis();
-
-			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
-				txn.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_FOUND, "");
 			}
 
 			Entity userRole = txn.get(userRoleKey);
@@ -518,7 +515,7 @@ public class UserImplementation implements Users {
 			// Super user not active
 			if (!userPermission.getString("usr_state").equals("ACTIVE")) {
 				txn.rollback();
-				LOG.warning("User " + token.username + " not active");
+				LOG.warning("User not active");
 				return Result.error(Status.BAD_REQUEST, "");
 			}
 
@@ -555,17 +552,24 @@ public class UserImplementation implements Users {
 
 	@Override
 	public Result<Void> activate(String token, String username) {
-		LOG.fine("Verification user " + username + "by " + token.username);
+		LOG.fine("Verification user " + username);
+
+		/*long curr_time = System.currentTimeMillis();
+		long expirationData = jws.getBody().getExpiration().getTime();
+		if (curr_time > expirationData) {
+			LOG.warning("Token invalid");
+			return Result.error(Status.NOT_FOUND, "Token invalid");
+		}*/
 
 		// Create key outside of this transaction
 		// User to verify
 		String user_id = username.trim();
 		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
-		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token.username.trim());
+		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token);
 
 		// Higher priority user
-		String high_user_id = token.username.trim();
+		String high_user_id = "";
 		Key high_usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(high_user_id);
 		Key high_usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(high_user_id);
 
@@ -588,15 +592,6 @@ public class UserImplementation implements Users {
 				tnx.rollback();
 				LOG.warning("Token invalid");
 				return Result.error(Status.BAD_REQUEST, "");
-			}
-
-			AuthToken token_creation = g.fromJson(token_entity.getString("creation_data"), AuthToken.class);
-			long curr_time = System.currentTimeMillis();
-
-			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
-				tnx.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_FOUND, "");
 			}
 
 			Entity high_user_verify = tnx.get(high_usrPermissionkey);
@@ -626,12 +621,12 @@ public class UserImplementation implements Users {
 			// Super user not active
 			if (!high_user_verify.getString("usr_state").equals("ACTIVE")) {
 				tnx.rollback();
-				LOG.warning("User " + token.username + " not active");
+				LOG.warning("User not active");
 				return Result.error(Status.BAD_REQUEST, "");
 			}
 
 			// Success
-			String usrs_valid = token.username.trim();
+			String usrs_valid = "";
 			Entity userPermission = Entity.newBuilder(usrPermissionkey).set("usr_state", "ACTIVE")
 					.set("list_usr_validation", usrs_valid).build();
 
@@ -649,15 +644,15 @@ public class UserImplementation implements Users {
 	public Result<Void> changePassword(String token, String new_password) {
 		LOG.fine("Changing password");
 
-		String user_id = token.username.trim();
+		String user_id = "";
 
-		if (!user_id.equals(token.tokenID.trim())) {
+		/*if (!user_id.equals(token.tokenID.trim())) {
 			return Result.error(Status.BAD_REQUEST, "");
-		}
+		}*/
 
 		Key usrkey = userKeyFactory.newKey(user_id);
 		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
-		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token.username.trim());
+		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token);
 
 		// Create new transation
 		Transaction tnx = datastore.newTransaction();
@@ -686,16 +681,16 @@ public class UserImplementation implements Users {
 			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
 			long curr_time = System.currentTimeMillis();
 
-			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
+			/*if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				LOG.warning("Token invalid");
 				return Result.error(Status.NOT_FOUND, "");
-			}
+			}*/
 
 			Entity user_permission = tnx.get(usrPermissionkey);
 			// Super user not active
 			if (!user_permission.getString("usr_state").equals("ACTIVE")) {
 				tnx.rollback();
-				LOG.warning("User " + token.username + " not active");
+				LOG.warning("User not active");
 				return Result.error(Status.BAD_REQUEST, "");
 			}
 
@@ -717,7 +712,7 @@ public class UserImplementation implements Users {
 	public Result<Void> changeAttributes(String token, String target_username, String list_json) {
 		LOG.fine("Changing " + target_username + "'s aditional atributes");
 
-		String user_id = token.username.trim();
+		String user_id = "";
 		Key usrkey = userKeyFactory.newKey(user_id);
 		Key usrKey_role = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
 		Key usrTokenKey = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
@@ -748,18 +743,18 @@ public class UserImplementation implements Users {
 			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
 			long curr_time = System.currentTimeMillis();
 
-			if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
+			/*if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
 				return Result.error(Status.NOT_FOUND, "");
-			}
+			}*/
 
-			String hashedPassword = user.getString("usr_password");
+			/*String hashedPassword = user.getString("usr_password");
 			if (!hashedPassword.equals(DigestUtils.sha512Hex(token.username))) {
 				tnx.rollback();
 				LOG.warning("Wrong parameters of " + token.username);
 				return Result.error(Status.FORBIDDEN, "");
-			}
+			}*/
 
 			Entity target_user = tnx.get(target_user_key);
 			if (target_user == null) {
@@ -774,7 +769,7 @@ public class UserImplementation implements Users {
 			if (!user_role.equals(target_user)
 					&& target_user_role.getLong("role_priority") > user_role.getLong("role_priority")) {
 				tnx.rollback();
-				LOG.warning(target_username + "has higher role then " + token.username);
+				LOG.warning(target_username + "has higher role then ");
 				return Result.error(Status.NOT_ACCEPTABLE, "");
 			}
 
@@ -809,8 +804,23 @@ public class UserImplementation implements Users {
 				.setExpiration(expirationDate) //a java.util.Date
 				.setIssuedAt(creationDate) // for example, now
 				.setId(UUID.randomUUID().toString())
-				.signWith(keyPair.getPrivate()) //sign a created token with private key
+				.signWith(key) //sign a created token with private key
 				.compact(); //just an example id
+		return jws;
+	}
+
+	private Claims verifyToken(String jwsString){
+		Claims jws = null;
+		try{
+			jws = Jwts.parserBuilder()  // (1)
+					.setSigningKey(key)         // (2)
+					.build()
+					.parseClaimsJws(jwsString)
+					.getBody();// (4)
+		} catch (JwtException e){
+			System.out.println(e.getMessage());
+			return null;
+		}
 		return jws;
 	}
 }
