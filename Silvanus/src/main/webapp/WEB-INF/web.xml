@@ -45,7 +45,15 @@
 		<servlet-name>jerseyServlet</servlet-name>
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
+	<servlet>
+		<servlet-name>storage-servlet</servlet-name>
+		<servlet-class>pt.unl.fct.di.adc.silvanus.resources.MediaResourceServlet</servlet-class>
+	</servlet>
 
+	<servlet-mapping>
+		<servlet-name>storage-servlet</servlet-name>
+		<url-pattern>/gcs/*</url-pattern>
+	</servlet-mapping>
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Restricted Area</web-resource-name>
