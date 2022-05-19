@@ -179,10 +179,10 @@ function login() {
 					case HTTP_RESPONSE["OK"]:
 						//Debug purposes
 
-						let response = JSON.parse(xmlhttp.responseText);
+						/*let response = JSON.parse(xmlhttp.responseText);
 						console.log(response);
 						sessionStorage.setItem("username_token", response.username);
-						sessionStorage.setItem("token", xmlhttp.responseText);
+						sessionStorage.setItem("token", xmlhttp.responseText);*/
 
 						window.location.replace(base_uri.concat("/app"));
 

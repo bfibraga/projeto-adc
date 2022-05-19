@@ -113,6 +113,57 @@ html{
 
 /*----*/
 
+/* Pulse Spinner */
+
+@keyframes ldio-l8gploe0c9 {
+    0% {
+        top: 96px;
+        left: 96px;
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        top: 18px;
+        left: 18px;
+        width: 156px;
+        height: 156px;
+        opacity: 0;
+    }
+}.ldio-l8gploe0c9 div {
+     position: absolute;
+     border-width: 4px;
+     border-style: solid;
+     opacity: 1;
+     border-radius: 50%;
+     animation: ldio-l8gploe0c9 1s cubic-bezier(0,0.2,0.8,1) infinite;
+ }.ldio-l8gploe0c9 div:nth-child(1) {
+      border-color: #f1f1f1;
+      animation-delay: 0s;
+  }
+.ldio-l8gploe0c9 div:nth-child(2) {
+    border-color: #f1f1f1;
+    animation-delay: -0.5s;
+}
+.loadingio-spinner-ripple-vhyb23pytl {
+    width: 200px;
+    height: 200px;
+    display: inline-block;
+    overflow: hidden;
+    background: none;
+}
+.ldio-l8gploe0c9 {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform: translateZ(0) scale(1);
+    backface-visibility: hidden;
+    transform-origin: 0 0; /* see note above */
+}
+.ldio-l8gploe0c9 div { box-sizing: content-box; }
+
+/*----*/
+
   @keyframes fadeIn {
     0% {
       opacity: 0%;
@@ -227,4 +278,21 @@ h1,p,label,a{
 
 .grow:hover {
   transform: scale(1.1);
+}
+
+ul.nav li a, ul.nav li a:visited {
+    color: #00dd00 !important;
+}
+
+ul.nav li a:hover, ul.nav li a:active {
+    color: #00aa00 !important;
+}
+
+ul.nav li.active a {
+    color: #00dd00 !important;
+}
+
+.btn-primary {
+    background-color: #00dd00 !important;
+    border-color: #00dd00 !important;
 }

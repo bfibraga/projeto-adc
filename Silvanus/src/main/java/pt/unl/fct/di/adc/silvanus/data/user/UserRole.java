@@ -1,19 +1,18 @@
 package pt.unl.fct.di.adc.silvanus.data.user;
 
 public enum UserRole {
-	USER("User", "#ff0000"),
-	GBO("User", "#00ff00"),
-	GS("User", "#0000ff"),
-	SU("User", "#ffffff");
+	USER("User", "#6aa84f"),
+	FUNC_CONS("Funcionario Conselho", "#6fa8dc"),
+	FUNC_DIST("Funcionario Distrito", "#c27ba0"),
+	GOV("Governo", "#e69138"),
+	ADMIN("Admin", "#cc0000");
 
 	private String role_name;
 	private String role_color;
-	private Permission[] permissions;
 
-	UserRole(String role_name, String role_color, Permission... permissions){
+	UserRole(String role_name, String role_color){
 		this.role_name = role_name;
 		this.role_color = role_color;
-		this.permissions = permissions;
 	}
 
 	public static UserRole compareType(String type) {
@@ -26,7 +25,15 @@ public enum UserRole {
 	}
 	
 	public String toString() {
-		return this.name();
+		return this.role_name;
+	}
+
+	public String getRoleName(){
+		return this.role_name;
+	}
+
+	public String getRoleColor(){
+		return this.role_color;
 	}
 	
 	public int getPriority() {

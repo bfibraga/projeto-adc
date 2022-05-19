@@ -5,9 +5,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.bind.DatatypeConverter;
 
+import com.google.appengine.api.users.User;
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
@@ -26,9 +29,9 @@ public class UserImplementation implements Users {
 
 	// Util classes
 	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
-	private final Gson g = new Gson();
+	private final Gson g;
 
-	private final SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+	private final SecretKey key;
 
 	// Datastore
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
@@ -38,6 +41,10 @@ public class UserImplementation implements Users {
 	private ConcurrentHashMap<String, UserData> userInfo = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, String> userToken = new ConcurrentHashMap<>();
 
+	public UserImplementation(){
+		this.g = new Gson();
+		this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+	}
 	@Override
 	public Result<String> register(UserData data) {
 		LOG.fine("Resgiter user " + data.getUsername());
@@ -184,7 +191,7 @@ public class UserImplementation implements Users {
 					.newKey(user_id);
 
 			// Create new transation
-			Transaction tnx = datastore.newTransaction();
+			//Transaction tnx = datastore.newTransaction();
 
 			try {
 				while (result.hasNext()){
@@ -203,24 +210,24 @@ public class UserImplementation implements Users {
 
 						this.userToken.put(refresh_token, jws);
 
-						Entity token = Entity.newBuilder(usrCurrentToken)
+						/*Entity token = Entity.newBuilder(usrCurrentToken)
 								//.set("refresh_token", refresh_token)
 								.set("jwt", jws)
 								.build();
 
 						tnx.put(token);
-						tnx.commit();
+						tnx.commit();*/
 						return Result.ok(jws);
 					}
 				}
 
 				LOG.warning("Wrong Password");
-				tnx.rollback();
+				//tnx.rollback();
 				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
 			} finally {
-				if (tnx.isActive()) {
+				/*if (tnx.isActive()) {
 					tnx.rollback();
-				}
+				}*/
 			}
 		}
 		return Result.error(Status.BAD_REQUEST, "Oops");
@@ -797,26 +804,33 @@ public class UserImplementation implements Users {
 	}
 
 	private String createNewJWS(String user_id){
-		Date creationDate = new Date();
-		Date expirationDate = new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME);
-		String jws = Jwts.builder()
+		long nowMillis = System.currentTimeMillis();
+		Date now = new Date(nowMillis);
+		Date expiration = new Date(nowMillis + AuthToken.EXPIRATION_TIME);
+
+		//Let's set the JWT Claims
+		JwtBuilder builder = Jwts.builder()
+				.setId(String.valueOf(UUID.randomUUID()))
 				.setSubject(user_id)
-				.setExpiration(expirationDate) //a java.util.Date
-				.setIssuedAt(creationDate) // for example, now
-				.setId(UUID.randomUUID().toString())
-				.signWith(key) //sign a created token with private key
-				.compact(); //just an example id
-		return jws;
+				.setIssuedAt(now)
+				.setExpiration(expiration)
+				.signWith(key);
+
+		//Builds the JWT and serializes it to a compact, URL-safe string
+		//this.verifyToken(builder.compact());
+		System.out.println(builder.compact());
+		return builder.compact();
 	}
 
 	private Claims verifyToken(String jwsString){
 		Claims jws = null;
 		try{
-			jws = Jwts.parserBuilder()  // (1)
-					.setSigningKey(key)         // (2)
-					.build()
-					.parseClaimsJws(jwsString)
-					.getBody();// (4)
+			jws = Jwts.parserBuilder()
+							.setSigningKey(key)
+									.build()
+											.parseClaimsJws(jwsString)
+													.getBody();
+			System.out.println(jws.getSubject());
 		} catch (JwtException e){
 			System.out.println(e.getMessage());
 			return null;

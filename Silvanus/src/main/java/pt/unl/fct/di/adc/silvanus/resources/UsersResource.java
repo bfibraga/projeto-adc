@@ -1,14 +1,12 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
-import org.checkerframework.checker.units.qual.C;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
@@ -21,9 +19,9 @@ import java.util.Date;
 @Path("/user")
 public class UsersResource implements RestUsers {
 
-	private final UserImplementation impl = new UserImplementation();
+	private final UserImplementation impl;
 	public UsersResource() {
-
+		impl = new UserImplementation();
 	}
 
 	@Override
@@ -51,23 +49,39 @@ public class UsersResource implements RestUsers {
 
 		//token = (AuthToken) result.value();
 		//Add http-only cookie
-		NewCookie tkn_cookie = new NewCookie( "tkn", result.value(), "/api/user", "", 1, "", 100000, new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME), false, true );
+		NewCookie tkn_cookie = new NewCookie( "tkn",
+				result.value(),
+				"/",
+				null,
+				1,
+				"",
+				1000000,
+				new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME),
+				false,
+				true );
 
-		return Response.ok().entity(tkn_cookie).cookie(tkn_cookie).build();
+		//TODO Change entity
+		return Response.ok().entity(result.value()).cookie(tkn_cookie).build();
 	}
 
 	@Override
 	public Response logout(HttpServletRequest request) {
-		String token = request.getCookies()[0].getValue();
-		System.out.println(token);
-		Result result = impl.logout(token);
+		String token = "";
+		for (Cookie cookie: request.getCookies()) {
+			System.out.println(cookie.getValue());
+			if (cookie.getName().equals("tkn")){
+				token = cookie.getValue();
+			}
+		}
+
+		Result<Void> result = impl.logout(token);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
-		NewCookie empty_tkn_cookie = new NewCookie("tkn", "");
 
-		return Response.ok().entity(result.statusMessage()).cookie(empty_tkn_cookie).build();
+
+		return Response.ok().entity(result.statusMessage()).build();
 	}
 
 	@Override
