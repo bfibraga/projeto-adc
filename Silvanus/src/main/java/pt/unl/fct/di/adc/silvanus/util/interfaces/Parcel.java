@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.util;
+package pt.unl.fct.di.adc.silvanus.util.interfaces;
 
 import javax.ws.rs.core.Response;
 
