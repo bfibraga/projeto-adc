@@ -27,8 +27,7 @@ public interface RestUsers {
 	@Path("/login/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response login(@PathParam("identifier") String identifier, @QueryParam("password") String password,
-				   HttpServletResponse response);
+	Response login(@PathParam("identifier") String identifier, @QueryParam("password") String password);
 	
 	@POST
 	@Path("/logout")
@@ -43,7 +42,7 @@ public interface RestUsers {
 	Response promote(String token, @PathParam("username") String username, @QueryParam("new_role") String new_role);
 	
 	@GET
-	@Path("/{username}")
+	@Path("/info")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
 	Response getUser(@PathParam("username") String username);

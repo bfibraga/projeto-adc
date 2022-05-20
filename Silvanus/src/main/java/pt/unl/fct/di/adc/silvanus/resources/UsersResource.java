@@ -36,7 +36,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response login(String identifier, String password, HttpServletResponse response) {
+	public Response login(String identifier, String password) {
 
 		LoginData data = identifier.matches(LoginData.EMAIL_REGEX) ?
 				new LoginData(LoginData.NOT_DEFINED, identifier, password) :
@@ -47,33 +47,26 @@ public class UsersResource implements RestUsers {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
+		System.out.println(result.value());
 		//token = (AuthToken) result.value();
 		//Add http-only cookie
-		NewCookie tkn_cookie = new NewCookie( "tkn",
-				result.value(),
-				"/",
-				null,
-				1,
-				"",
-				1000000,
-				new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME),
-				false,
-				true );
-
 		//TODO Change entity
-		return Response.ok().entity(result.value()).cookie(tkn_cookie).build();
+		return Response.ok().header("Set-Cookie", "tkn=" + result.value() + "; HttpOnly ; Max-Age=1000*60*60").build();
 	}
 
 	@Override
 	public Response logout(HttpServletRequest request) {
 		String token = "";
+
+		//TODO Debug
 		for (Cookie cookie: request.getCookies()) {
-			System.out.println(cookie.getValue());
+			System.out.println(cookie.getName() + " -> " + cookie.getValue());
 			if (cookie.getName().equals("tkn")){
 				token = cookie.getValue();
 			}
 		}
 
+		System.out.println(token);
 		Result<Void> result = impl.logout(token);
 
 		if (!result.isOK()) {
@@ -81,7 +74,7 @@ public class UsersResource implements RestUsers {
 		}
 
 
-		return Response.ok().entity(result.statusMessage()).build();
+		return Response.ok().entity(result.statusMessage()).header("Set-Cookie", null).build();
 	}
 
 	@Override

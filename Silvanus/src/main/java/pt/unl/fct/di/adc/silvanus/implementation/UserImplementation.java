@@ -37,10 +37,6 @@ public class UserImplementation implements Users {
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private final KeyFactory userKeyFactory = this.datastore.newKeyFactory().setKind("UserCredentials");
 
-	// User info
-	private ConcurrentHashMap<String, UserData> userInfo = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, String> userToken = new ConcurrentHashMap<>();
-
 	public UserImplementation(){
 		this.g = new Gson();
 		this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
@@ -128,9 +124,7 @@ public class UserImplementation implements Users {
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
 
-			this.userInfo.putIfAbsent(user_id, data);
-
-			LOG.info("User resgisted " + data.getUsername() + " successfully");
+			LOG.info("User register " + data.getUsername() + " successfully");
 			return Result.ok(jws);
 		} finally {
 			if (txn.isActive()) {
@@ -150,87 +144,67 @@ public class UserImplementation implements Users {
 
 		String user_id = data.getID();
 
-		UserData userData = this.userInfo.get(user_id);
-
 		// Verify if the user is in cache
 		String hashedPassword = "";
-		if (userData != null) {
-			hashedPassword = userData.getPassword();
-		} else {
-			Query<Entity> query = null;
-			QueryResults<Entity> result;
-			
-			if (data.getUsername().equals(LoginData.NOT_DEFINED)) {
-				query = Query.newEntityQueryBuilder()
-						.setKind("UserCredentials")
-	                    .setFilter(PropertyFilter.eq("usr_email", data.getEmail()))
-	                    .setLimit(5)
-	                    .build();
-			}
-			
-			if (data.getEmail().equals(LoginData.NOT_DEFINED)) {
-				query = Query.newEntityQueryBuilder()
-						.setKind("UserCredentials")
-	                    .setFilter(PropertyFilter.eq("usr_username", data.getUsername()))
-	                    .setLimit(5)
-	                    .build();
-			}
-			
-			if (query == null){
-				return Result.error(Status.BAD_REQUEST, "Something went wrong getting a list of users...");
-			}
-			
-			result = datastore.run(query);
-			if (result == null) {
-				// User doesn't exist
-				return Result.error(Response.Status.NOT_FOUND, "User " + data.getUsername() + " doens't exist");
-			}
+		Query<Entity> query = null;
+		QueryResults<Entity> result;
 
-			Key usrCurrentToken = datastore.newKeyFactory()
-					.setKind("UserToken")
-					.newKey(user_id);
+		if (data.getUsername().equals(LoginData.NOT_DEFINED)) {
+			query = Query.newEntityQueryBuilder()
+					.setKind("UserCredentials")
+					.setFilter(PropertyFilter.eq("usr_email", data.getEmail()))
+					.setLimit(5)
+					.build();
+		}
 
-			// Create new transation
-			//Transaction tnx = datastore.newTransaction();
+		if (data.getEmail().equals(LoginData.NOT_DEFINED)) {
+			query = Query.newEntityQueryBuilder()
+					.setKind("UserCredentials")
+					.setFilter(PropertyFilter.eq("usr_username", data.getUsername()))
+					.setLimit(5)
+					.build();
+		}
 
-			try {
-				while (result.hasNext()){
-					hashedPassword =  result.next().getString("usr_password");
+		if (query == null){
+			return Result.error(Status.BAD_REQUEST, "Something went wrong getting a list of users...");
+		}
 
-					if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))) {
-						// Correct password
+		result = datastore.run(query);
+		if (result == null) {
+			// User doesn't exist
+			return Result.error(Response.Status.NOT_FOUND, "User " + data.getUsername() + " doens't exist");
+		}
 
-						// Return token
-						LOG.info("User " + data.getUsername() + "logged in successfully");
+		// Create new transation
+		//Transaction tnx = datastore.newTransaction();
 
-						String jws = this.createNewJWS(user_id);
+		try {
+			while (result.hasNext()){
+				hashedPassword =  result.next().getString("usr_password");
 
-						String refresh_token = this.newRefreshToken();
-						//AuthToken at = new AuthToken(user_id);
+				if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))) {
+					// Correct password
 
-						this.userToken.put(refresh_token, jws);
+					// Return token
+					LOG.info("User " + data.getUsername() + "logged in successfully");
 
-						/*Entity token = Entity.newBuilder(usrCurrentToken)
-								//.set("refresh_token", refresh_token)
-								.set("jwt", jws)
-								.build();
+					String jws = this.createNewJWS(user_id);
 
-						tnx.put(token);
-						tnx.commit();*/
-						return Result.ok(jws);
-					}
+					String refresh_token = this.newRefreshToken();
+					//AuthToken at = new AuthToken(user_id);
+
+					return Result.ok(jws);
 				}
+			}
 
-				LOG.warning("Wrong Password");
-				//tnx.rollback();
-				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
-			} finally {
+			LOG.warning("Wrong Password");
+			//tnx.rollback();
+			return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
+		} finally {
 				/*if (tnx.isActive()) {
 					tnx.rollback();
 				}*/
-			}
 		}
-		return Result.error(Status.BAD_REQUEST, "Oops");
 	}
 
 	@Override
@@ -243,38 +217,7 @@ public class UserImplementation implements Users {
 			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
 
-		String user_id = jws.getId();
-
-		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
-
-		// Create new transation
-		Transaction tnx = datastore.newTransaction();
-
-		try {
-
-			Entity token_entity = tnx.get(usrCurrentToken);
-
-			if (token_entity == null) {
-				tnx.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.BAD_REQUEST, "Token Invalid");
-			}
-
-			/*if (!token.tokenID.equals(token_creation.tokenID)) {
-				tnx.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_ACCEPTABLE, "Token Invalid");
-			}*/
-
-			tnx.delete(usrCurrentToken);
-			//userToken.remove(user_id);
-			tnx.commit();
-			return Result.ok();
-		} finally {
-			if (tnx.isActive()) {
-				tnx.rollback();
-			}
-		}
+		return Result.ok();
 	}
 
 	@Override
@@ -818,7 +761,6 @@ public class UserImplementation implements Users {
 
 		//Builds the JWT and serializes it to a compact, URL-safe string
 		//this.verifyToken(builder.compact());
-		System.out.println(builder.compact());
 		return builder.compact();
 	}
 
