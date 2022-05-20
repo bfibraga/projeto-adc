@@ -5,7 +5,7 @@ const HTTP_RESPONSE = {
 	"INTERNAL_SERVER": 500
 }
 
-const base_uri = "http://localhost:8080";
+const base_uri = window.location.origin;
 var xmlhttp = new XMLHttpRequest();
 
 let res = "";
@@ -51,10 +51,7 @@ async function register(){
 				"telephone": u_telephone,
 				"smartphone": u_smartphone
 		});
-		var base_url = window.location.origin;
 
-		var host = window.location.host;
-		console.log(base_url);
 
 		console.log(response);
 
