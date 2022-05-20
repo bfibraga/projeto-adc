@@ -1,29 +1,29 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.DatatypeConverter;
-
-import com.google.appengine.api.users.User;
+import com.google.appengine.api.memcache.stdimpl.GCacheFactory;
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.gson.Gson;
-
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserRole;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
-import pt.unl.fct.di.adc.silvanus.util.*;
+import pt.unl.fct.di.adc.silvanus.util.Users;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
+
+import javax.cache.Cache;
+import javax.cache.CacheException;
+import javax.cache.CacheFactory;
+import javax.cache.CacheManager;
+import javax.crypto.SecretKey;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public class UserImplementation implements Users {
 
@@ -37,9 +37,20 @@ public class UserImplementation implements Users {
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private final KeyFactory userKeyFactory = this.datastore.newKeyFactory().setKind("UserCredentials");
 
+	//Cache
+	private Cache cache;
+
 	public UserImplementation(){
 		this.g = new Gson();
 		this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+		try {
+			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+			Map<Object, Object> properties = new HashMap<>();
+			properties.put(GCacheFactory.EXPIRATION_DELTA, TimeUnit.HOURS.toHours(12));
+			this.cache = cacheFactory.createCache(Collections.emptyMap());
+		} catch (CacheException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 	@Override
 	public Result<String> register(UserData data) {
@@ -100,26 +111,16 @@ public class UserImplementation implements Users {
 			// Verification of this user
 			String verified = "";
 			Entity userPermission;
-			if (role.toString().equals("SU")) {
-				verified = data.getUsername().trim();
-				userPermission = Entity.newBuilder(userPermissionKey)
-						.set("usr_state", "ACTIVE")
-						.set("list_usr_validation", verified)
-						.build();
-			} else {
-				userPermission = Entity.newBuilder(userPermissionKey)
-						.set("usr_state", data.getState())
-						.set("list_usr_validation", verified)
-						.build();
-			}
+			userPermission = Entity.newBuilder(userPermissionKey)
+					.set("usr_state", data.getState())
+					.set("list_usr_validation", verified)
+					.build();
+
+			String value = g.toJson( new LoginData(data.getUsername(), data.getEmail(), DigestUtils.sha512Hex(data.getPassword())));
+			this.cache.put(user_id, value);
 
 			//TODO: First Registration information
 			String jws = this.createNewJWS(user_id);
-
-			Entity token = Entity.newBuilder(usrCurrentToken)
-					//.set("refresh_token", refresh_token)
-					.set("jwt", jws)
-					.build();
 
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
@@ -144,43 +145,58 @@ public class UserImplementation implements Users {
 
 		String user_id = data.getID();
 
+		String available_data_json = (String) this.cache.get(user_id);
+		LoginData available_data = g.fromJson(available_data_json, LoginData.class);
+
 		// Verify if the user is in cache
 		String hashedPassword = "";
-		Query<Entity> query = null;
-		QueryResults<Entity> result;
+		if (available_data != null)	{
+			hashedPassword = available_data.getPassword();
+			if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))){
+				String jws = this.createNewJWS(user_id);
 
-		if (data.getUsername().equals(LoginData.NOT_DEFINED)) {
-			query = Query.newEntityQueryBuilder()
-					.setKind("UserCredentials")
-					.setFilter(PropertyFilter.eq("usr_email", data.getEmail()))
-					.setLimit(5)
-					.build();
-		}
+				String refresh_token = this.newRefreshToken();
 
-		if (data.getEmail().equals(LoginData.NOT_DEFINED)) {
-			query = Query.newEntityQueryBuilder()
-					.setKind("UserCredentials")
-					.setFilter(PropertyFilter.eq("usr_username", data.getUsername()))
-					.setLimit(5)
-					.build();
-		}
+				return Result.ok(jws);
+			} else {
+				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
+			}
+		} else {
+			Query<Entity> query = null;
+			QueryResults<Entity> result;
 
-		if (query == null){
-			return Result.error(Status.BAD_REQUEST, "Something went wrong getting a list of users...");
-		}
+			if (data.getUsername().equals(LoginData.NOT_DEFINED)) {
+				query = Query.newEntityQueryBuilder()
+						.setKind("UserCredentials")
+						.setFilter(PropertyFilter.eq("usr_email", data.getEmail()))
+						.setLimit(5)
+						.build();
+			}
 
-		result = datastore.run(query);
-		if (result == null) {
-			// User doesn't exist
-			return Result.error(Response.Status.NOT_FOUND, "User " + data.getUsername() + " doens't exist");
-		}
+			if (data.getEmail().equals(LoginData.NOT_DEFINED)) {
+				query = Query.newEntityQueryBuilder()
+						.setKind("UserCredentials")
+						.setFilter(PropertyFilter.eq("usr_username", data.getUsername()))
+						.setLimit(5)
+						.build();
+			}
 
-		// Create new transation
-		//Transaction tnx = datastore.newTransaction();
+			if (query == null){
+				return Result.error(Status.BAD_REQUEST, "Something went wrong getting a list of users...");
+			}
 
-		try {
+			result = datastore.run(query);
+			if (result == null) {
+				// User doesn't exist
+				return Result.error(Response.Status.NOT_FOUND, "User " + data.getUsername() + " doens't exist");
+			}
+
+			// Create new transation
+			//Transaction tnx = datastore.newTransaction();
+
 			while (result.hasNext()){
-				hashedPassword =  result.next().getString("usr_password");
+				Entity curr_result = result.next();
+				hashedPassword = curr_result.getString("usr_password");
 
 				if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))) {
 					// Correct password
@@ -193,6 +209,9 @@ public class UserImplementation implements Users {
 					String refresh_token = this.newRefreshToken();
 					//AuthToken at = new AuthToken(user_id);
 
+					String value = g.toJson(data.setPassword(DigestUtils.sha512Hex(data.getPassword())));
+					this.cache.put(curr_result.getKey().getName(), value);
+
 					return Result.ok(jws);
 				}
 			}
@@ -200,10 +219,6 @@ public class UserImplementation implements Users {
 			LOG.warning("Wrong Password");
 			//tnx.rollback();
 			return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
-		} finally {
-				/*if (tnx.isActive()) {
-					tnx.rollback();
-				}*/
 		}
 	}
 
