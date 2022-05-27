@@ -2,7 +2,6 @@ package pt.unl.fct.di.adc.silvanus.implementation;
 
 import java.util.logging.Logger;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.cloud.datastore.Datastore;
@@ -14,7 +13,7 @@ import com.google.gson.Gson;
 
 import pt.unl.fct.di.adc.silvanus.data.parcel.ParcelaData;
 import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
-import pt.unl.fct.di.adc.silvanus.util.Parcel;
+import pt.unl.fct.di.adc.silvanus.api.Parcel;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 public class ParcelImplementation implements Parcel {

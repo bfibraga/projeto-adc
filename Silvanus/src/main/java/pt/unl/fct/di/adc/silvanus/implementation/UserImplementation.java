@@ -1,6 +1,5 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
-import com.google.appengine.api.memcache.stdimpl.GCacheFactory;
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
@@ -11,18 +10,17 @@ import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserRole;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
-import pt.unl.fct.di.adc.silvanus.util.Users;
+import pt.unl.fct.di.adc.silvanus.api.Users;
+import pt.unl.fct.di.adc.silvanus.util.JSON;
+import pt.unl.fct.di.adc.silvanus.util.cache.CacheManager;
+import pt.unl.fct.di.adc.silvanus.util.TOKEN;
+import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
-import javax.cache.Cache;
-import javax.cache.CacheException;
-import javax.cache.CacheFactory;
-import javax.cache.CacheManager;
 import javax.crypto.SecretKey;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class UserImplementation implements Users {
@@ -38,19 +36,12 @@ public class UserImplementation implements Users {
 	private final KeyFactory userKeyFactory = this.datastore.newKeyFactory().setKind("UserCredentials");
 
 	//Cache
-	private Cache cache;
+	private CacheManager<String, String> cache;
 
 	public UserImplementation(){
 		this.g = new Gson();
 		this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-		try {
-			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
-			Map<Object, Object> properties = new HashMap<>();
-			properties.put(GCacheFactory.EXPIRATION_DELTA, TimeUnit.HOURS.toHours(12));
-			this.cache = cacheFactory.createCache(Collections.emptyMap());
-		} catch (CacheException e) {
-			System.out.println(e.getMessage());
-		}
+		this.cache = new UserCacheManager<>();
 	}
 	@Override
 	public Result<String> register(UserData data) {
@@ -116,11 +107,10 @@ public class UserImplementation implements Users {
 					.set("list_usr_validation", verified)
 					.build();
 
-			String value = g.toJson( new LoginData(data.getUsername(), data.getEmail(), DigestUtils.sha512Hex(data.getPassword())));
-			this.cache.put(user_id, value);
+			this.cache.put(user_id, "credentials", JSON.encode(data));
 
 			//TODO: First Registration information
-			String jws = this.createNewJWS(user_id);
+			String jws = TOKEN.createNewJWS(user_id);
 
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
@@ -135,6 +125,7 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Result<String> login(LoginData data) {
 		boolean validation_code = data.validation();
 		if (validation_code) {
@@ -145,17 +136,17 @@ public class UserImplementation implements Users {
 
 		String user_id = data.getID();
 
-		String available_data_json = (String) this.cache.get(user_id);
-		LoginData available_data = g.fromJson(available_data_json, LoginData.class);
+		//TODO refactor this cache part
+		LoginData loginData = this.cache.get(user_id, "credentials", LoginData.class);
 
 		// Verify if the user is in cache
 		String hashedPassword = "";
-		if (available_data != null)	{
-			hashedPassword = available_data.getPassword();
+		if (loginData != null)	{
+			hashedPassword = loginData.getPassword();
 			if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))){
-				String jws = this.createNewJWS(user_id);
+				String jws = TOKEN.createNewJWS(user_id);
 
-				String refresh_token = this.newRefreshToken();
+				String refresh_token = TOKEN.newRefreshToken();
 
 				return Result.ok(jws);
 			} else {
@@ -191,9 +182,6 @@ public class UserImplementation implements Users {
 				return Result.error(Response.Status.NOT_FOUND, "User " + data.getUsername() + " doens't exist");
 			}
 
-			// Create new transation
-			//Transaction tnx = datastore.newTransaction();
-
 			while (result.hasNext()){
 				Entity curr_result = result.next();
 				hashedPassword = curr_result.getString("usr_password");
@@ -204,20 +192,20 @@ public class UserImplementation implements Users {
 					// Return token
 					LOG.info("User " + data.getUsername() + "logged in successfully");
 
-					String jws = this.createNewJWS(user_id);
+					String jws = TOKEN.createNewJWS(user_id);
 
-					String refresh_token = this.newRefreshToken();
-					//AuthToken at = new AuthToken(user_id);
+					String refresh_token = TOKEN.newRefreshToken();
 
-					String value = g.toJson(data.setPassword(DigestUtils.sha512Hex(data.getPassword())));
-					this.cache.put(curr_result.getKey().getName(), value);
+					Map<String,String> user_info = new HashMap<>();
+					String data_json = g.toJson(data);
+					user_info.put(user_id + "." + "credentials".hashCode(), data_json);
+					this.cache.put(user_id, "crendentials", JSON.encode(user_info));
 
 					return Result.ok(jws);
 				}
 			}
 
 			LOG.warning("Wrong Password");
-			//tnx.rollback();
 			return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
 		}
 	}
@@ -226,11 +214,14 @@ public class UserImplementation implements Users {
 	public Result<Void> logout(String token) {
 
 		LOG.fine("Logout attempt");
-		Claims jws = this.verifyToken(token);
+		Claims jws = TOKEN.verifyToken(token);
 
 		if (jws == null){
 			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
+
+		//Valid token to invoke
+
 
 		return Result.ok();
 	}
@@ -381,19 +372,7 @@ public class UserImplementation implements Users {
 	//TODO
 	@Override
 	public Result<String> refresh_token(String old_refresh_token) {
-		return Result.ok(this.newRefreshToken());
-	}
-
-	private String newRefreshToken(){
-		Date creationDate = new Date();
-		Date expirationDate = new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME);
-		String refresh_token = Jwts.builder()
-				.setExpiration(expirationDate) //a java.util.Date
-				.setIssuedAt(creationDate) // for example, now
-				.signWith(key)
-				.setId(UUID.randomUUID().toString())
-				.compact(); //just an example id
-		return refresh_token;
+		return Result.ok(TOKEN.newRefreshToken());
 	}
 
 	@Override
@@ -424,7 +403,7 @@ public class UserImplementation implements Users {
 		LOG.fine("Removing user " + username);
 
 		String jwsString = "";
-		Claims jws = this.verifyToken(token);
+		Claims jws = TOKEN.verifyToken(token);
 
 		if (jws == null){
 			return Result.error(Status.FORBIDDEN, "Invalid Token");
@@ -759,39 +738,5 @@ public class UserImplementation implements Users {
 				tnx.rollback();
 			}
 		}
-	}
-
-	private String createNewJWS(String user_id){
-		long nowMillis = System.currentTimeMillis();
-		Date now = new Date(nowMillis);
-		Date expiration = new Date(nowMillis + AuthToken.EXPIRATION_TIME);
-
-		//Let's set the JWT Claims
-		JwtBuilder builder = Jwts.builder()
-				.setId(String.valueOf(UUID.randomUUID()))
-				.setSubject(user_id)
-				.setIssuedAt(now)
-				.setExpiration(expiration)
-				.signWith(key);
-
-		//Builds the JWT and serializes it to a compact, URL-safe string
-		//this.verifyToken(builder.compact());
-		return builder.compact();
-	}
-
-	private Claims verifyToken(String jwsString){
-		Claims jws = null;
-		try{
-			jws = Jwts.parserBuilder()
-							.setSigningKey(key)
-									.build()
-											.parseClaimsJws(jwsString)
-													.getBody();
-			System.out.println(jws.getSubject());
-		} catch (JwtException e){
-			System.out.println(e.getMessage());
-			return null;
-		}
-		return jws;
 	}
 }

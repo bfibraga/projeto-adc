@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.util;
+package pt.unl.fct.di.adc.silvanus.api;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;

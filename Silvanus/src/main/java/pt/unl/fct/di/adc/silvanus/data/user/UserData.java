@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserData {
 
+	public static final String SEPARATOR = ".";
+
 	private String username;
 	private String email;
 	private String name;
@@ -98,8 +100,8 @@ public class UserData {
 	}
 
 	public String getID(){
-		return this.getUsername().hashCode() + "." +
-				this.getEmail().hashCode() + ".";
+		return this.getUsername().hashCode() + SEPARATOR +
+				this.getEmail().hashCode();
 	}
 
 	private boolean validField(String keyword) {

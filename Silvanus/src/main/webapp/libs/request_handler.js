@@ -63,79 +63,6 @@ async function register(){
 	}
 }
 
-/*function notActive() {
-	logout(time);
-}
-
-function isActive() {
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						//Debug purposes
-
-						let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-
-
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0); 
-						}
-				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-		let query = sessionStorage.getItem("username_token");
-		xmlhttp.open("GET", base_uri + "/api/user/get?user=" + query);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(null);
-	}
-}*/
-
-/*function activate() {
-
-	let u_target_username = new String(document.getElementById("username").value);
-
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						//Debug purposes
-
-						let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-						sessionStorage.setItem("username_token", null);
-						sessionStorage.setItem("token", null);
-
-						let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-
-						break;
-					default:
-						console.log(xmlhttp.responseText);
-				}
-			}
-		}
-
-
-		obj = JSON.stringify(obj);
-		xmlhttp.open("PUT", base_uri + "/api/user/activate/" + u_target_username);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-}*/
-
 async function activate(identifier){
 	try{
 		const response = await axios.post("/api/user/activate/" + identifier);
@@ -148,31 +75,6 @@ async function activate(identifier){
 		//document.getElementById("loader").classList.add("d-none");
 	}
 }
-
-/*function login() {
-	let u_identifier = new String(document.getElementById("usr_identifier").value);
-	let u_password = checkUndefined(new String(document.getElementById("usr_password").value));
-
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						window.location.replace(base_uri.concat("/app"));
-						break;
-					default:
-						document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
-
-				}
-				document.getElementById("loader").classList.add("d-none");
-			}
-		}
-
-		xmlhttp.open("POST", base_uri + "/api/user/login/" + u_identifier + "?password=" + u_password);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(null);
-	}
-}*/
 
 async function login(){
 	try{
@@ -207,56 +109,6 @@ function init() {
 	}
 }
 
-/*function getInfo() {
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						//Debug purposes
-
-						let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-
-						if (response[2] == "INATIVE") {
-							window.location.replace(base_uri.concat("/validation.html"));
-						}
-
-						document.getElementById("usr_username").innerText = new String(response[0]);
-						document.getElementById("usr_mail").innerText = new String(response[1]);
-
-						const name = response[2].split(" ");
-						document.getElementById("usr_firstname").innerText = new String("Primeiro Nome: " + name[0]);
-						document.getElementById("usr_lastname").innerText = new String("Último Nome:" + name[1]);
-						document.getElementById("usr_id").innerText = new String("NIF: " + response[3]);
-						document.getElementById("usr_phone").innerText = new String("Número de telefone: " + response[4]);
-						document.getElementById("usr_address").innerText = new String("Morada: " + response[5]);
-
-						document.getElementById("loader").classList.add("d-none");
-
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-		let query = sessionStorage.getItem("username_token");
-		xmlhttp.open("GET", base_uri + "/api/user/get?username=" + query);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(null);
-	}
-}*/
-
 async function getInfo(){
 	try{
 		const response = await axios.get("/api/user/info");
@@ -269,70 +121,13 @@ async function getInfo(){
 
 async function logout() {
 	try{
-		const response = await axios.get("/api/user/logout");
+		const response = await axios.post("/api/user/logout");
 		console.log(response);
 	} catch (error){
 		console.log(error);
 	} finally {
 	}
-
-	/*if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status){
-					case HTTP_RESPONSE["OK"]:
-						sleep(time);
-						window.location.replace(base_uri.concat("/"));
-						break;
-					default:
-						console.log(xmlhttp.status);
-				}
-
-			}
-		}
-
-		obj = JSON.stringify(obj);
-
-		xmlhttp.open("POST", base_uri + "/api/user/logout/");
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}*/
-
 }
-
-/*function change_password() {
-	let u_new_password = checkUndefined(new String(document.getElementById("new_password").value));
-
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						console.log("Password changed successfully")
-						document.getElementById("info").innerText = "Password changed successfully";
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-
-		xmlhttp.open("PUT", base_uri + "/api/user/change?password=" + u_new_password);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-
-}*/
 
 async function change_password(){
 	try{
@@ -350,52 +145,6 @@ async function change_password(){
 		console.log("Executed successfully");
 	}
 }
-
-/*function changing_att() {
-	let u_target_username = new String(document.getElementById("username").value);
-	let u_name = new String(document.getElementById("name").value);
-	let u_visibility = document.getElementById("visibility").checked ? "PRIVATE" : "PUBLIC";
-	let u_telephone = checkUndefined(new String(document.getElementById("telephone").value));
-	let u_smartphone = checkUndefined(new String(document.getElementById("smartphone").value));
-
-	const query = "[" + "'" + u_visibility + "'" + "," + "'" + u_name + "'" + "," + "'" + u_telephone + "'" + "," + "'" + u_smartphone + "'" + "]";
-
-	//getToken();
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						console.log("Attributes changed successfully")
-						document.getElementById("info").innerText = "Attributes changed successfully";
-						sleep(1000);
-						window.location.replace(base_uri.concat("/app"));
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
-
-
-		}
-		obj = JSON.stringify(obj);
-
-		let final_uri = base_uri + "/api/user/change/" + u_target_username + "?attributes=";
-
-		xmlhttp.open("PUT", final_uri + query);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-
-}*/
 
 async function changing_att(){
 	try{

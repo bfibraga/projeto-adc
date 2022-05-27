@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.util;
+package pt.unl.fct.di.adc.silvanus.api.rest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 
-import static pt.unl.fct.di.adc.silvanus.util.RestUsers.CHARSET;
+import static pt.unl.fct.di.adc.silvanus.api.rest.RestUsers.CHARSET;
 
 //TODO Review all Rest operations 
 @Produces(MediaType.APPLICATION_JSON + CHARSET)
