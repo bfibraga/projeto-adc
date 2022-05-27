@@ -30,8 +30,12 @@ public abstract class CacheManager<K, V> {
         }
     }
 
+    public Map<String, String> get(K key){
+        return this.verifyEntry(key);
+    }
+
     /**
-     * Returns in cache object of given key
+     * Returns in cache object of given key of a property
      * @param key - Given key to get object
      * @param property - Given property to get an object
      * @param class_object - Class of an object to get

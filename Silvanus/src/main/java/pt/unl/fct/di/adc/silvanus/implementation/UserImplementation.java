@@ -249,14 +249,15 @@ public class UserImplementation implements Users {
 			return Result.error(Status.BAD_REQUEST, "Same user");
 		}
 
-
-
 		// Create new transation
 		Transaction tnx = datastore.newTransaction();
 
 		try {
-			Entity user_verify = tnx.get(usrPermissionkey);
-			Entity user_role = tnx.get(usrRoleKey);
+			Entity user_verify = this.cache.get(user_id_promote, "permission", Entity.class);
+			if (user_verify == null) user_verify = tnx.get(usrPermissionkey);
+
+			Entity user_role = this.cache.get(user_id_promote, "role", Entity.class);
+			if (user_role == null) user_role = tnx.get(usrRoleKey);
 
 			if (user_verify == null || user_role == null) {
 				// User doesn't exist
@@ -267,8 +268,11 @@ public class UserImplementation implements Users {
 			this.cache.put(user_id_promote, "permission", JSON.encode(user_verify));
 			this.cache.put(user_id_promote, "role", JSON.encode(user_role));
 
-			Entity high_user_verify = tnx.get(high_usrPermissionkey);
-			Entity high_user_role = tnx.get(high_usrRoleKey);
+			Entity high_user_verify = this.cache.get(high_user_id, "permission", Entity.class);
+			if (high_user_verify == null) high_user_verify = tnx.get(high_usrPermissionkey);
+
+			Entity high_user_role = this.cache.get(high_user_id, "role", Entity.class);
+			if (high_user_role == null) high_user_role = tnx.get(high_usrRoleKey);
 
 			if (high_user_verify == null || high_user_role == null) {
 				// Given higher priority User doesn't exist
@@ -296,8 +300,11 @@ public class UserImplementation implements Users {
 			}
 
 			// Success
-			user_role = Entity.newBuilder(usrRoleKey).set("role_name", role.toString())
-					.set("role_priority", role.getPriority()).build();
+			user_role = Entity.newBuilder(usrRoleKey)
+					.set("role_name", role.toString())
+					.set("role_priority", role.getPriority())
+					.build();
+			this.cache.put(user_id_promote, "role", JSON.encode(user_role));
 
 			tnx.put(user_role);
 			tnx.commit();
@@ -311,43 +318,41 @@ public class UserImplementation implements Users {
 
 	@Override
 	public Result<String[]> getUser(String username) {
+		//TODO Figure it out how to get userID
 		String user_id = username.trim();
+
+		//Get from DB
 		Key userKey = userKeyFactory.newKey(user_id);
 		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
 		Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 
-		Transaction txn = datastore.newTransaction();
+		Entity user = this.cache.get(user_id, "credentials", Entity.class);
+		if (user == null) user = datastore.get(userKey);
 
-		try {
-			Entity user = txn.get(userKey);
-
-			if (user == null) {
-				txn.rollback();
-				return Result.error(Status.BAD_REQUEST, "");
-			}
-
-			Entity userInfo = txn.get(userInfoKey);
-			Entity userRole = txn.get(userRoleKey);
-			//Entity userPermission = txn.get(userPermissionKey);
-
-			String[] response = {
-					username,
-					user.getString("usr_email"),
-					userInfo.getString("usr_name"),
-					userInfo.getString("usr_telephone"),
-					userInfo.getString("usr_smartphone"),
-					userInfo.getString("usr_address"),
-					userInfo.getString("usr_NIF"),
-					userRole.getString("role_name")
-			};
-
-			return Result.ok(response);
-		} finally {
-			if (txn.isActive()) {
-				txn.rollback();
-			}
+		if (user == null) {
+			return Result.error(Status.BAD_REQUEST, "");
 		}
+
+		Entity userInfo = this.cache.get(user_id, "info", Entity.class);
+		if (userInfo == null) userInfo = datastore.get(userInfoKey);
+
+		Entity userRole = this.cache.get(user_id, "role", Entity.class);
+		if (userRole == null) userRole = datastore.get(userRoleKey);
+
+
+		String[] response = {
+				username,
+				user.getString("usr_email"),
+				userInfo.getString("usr_name"),
+				userInfo.getString("usr_telephone"),
+				userInfo.getString("usr_smartphone"),
+				userInfo.getString("usr_address"),
+				userInfo.getString("usr_NIF"),
+				userRole.getString("role_name")
+		};
+
+		return Result.ok(response);
 	}
 
 	//TODO
@@ -360,21 +365,15 @@ public class UserImplementation implements Users {
 	public Result<Void> remove(String token, String username) {
 		LOG.fine("Removing user " + username);
 
-		String jwsString = "";
 		Claims jws = TOKEN.verifyToken(token);
 
 		if (jws == null){
 			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
 
-		long curr_time = System.currentTimeMillis();
-		long expirationData = jws.getExpiration().getTime();
-		if (curr_time > expirationData) {
-			LOG.warning("Token invalid");
-			return Result.error(Status.NOT_FOUND, "Token invalid");
-		}
-
 		String user_id = jws.getId();
+
+		//Query to lookup all users
 		String remove_id = username.trim();
 
 		Key userKey = userKeyFactory.newKey(user_id);
@@ -392,16 +391,11 @@ public class UserImplementation implements Users {
 		Transaction txn = datastore.newTransaction();
 
 		try {
-			// TODO Testing
-			Entity token_entity = txn.get(usrCurrentToken);
-
-			if (token_entity == null) {
-				txn.rollback();
-				LOG.fine("Username not logged in");
-				return Result.error(Status.NOT_ACCEPTABLE,"");
+			Entity userRole = this.cache.get(user_id, "role", Entity.class);
+			if (userRole == null){
+				userRole = txn.get(userRoleKey);
+				this.cache.put(user_id, "role", JSON.encode(userRole));
 			}
-
-			Entity userRole = txn.get(userRoleKey);
 
 			if (user_id.equals(remove_id) && userRole.getLong("role_priority") <= 0) {
 
@@ -456,12 +450,11 @@ public class UserImplementation implements Users {
 	public Result<Void> activate(String token, String username) {
 		LOG.fine("Verification user " + username);
 
-		/*long curr_time = System.currentTimeMillis();
-		long expirationData = jws.getBody().getExpiration().getTime();
-		if (curr_time > expirationData) {
-			LOG.warning("Token invalid");
-			return Result.error(Status.NOT_FOUND, "Token invalid");
-		}*/
+		Claims jws = TOKEN.verifyToken(token);
+
+		if (jws == null){
+			return Result.error(Status.FORBIDDEN, "Invalid token");
+		}
 
 		// Create key outside of this transaction
 		// User to verify

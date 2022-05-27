@@ -19,7 +19,8 @@ import java.util.UUID;
 public class TOKEN {
 
     //TODO To be more secure, get secret key from database
-    private static final String SECRET_KEY = "9aad93edcc3711da9ab40ed51da80bd0\n" +
+    private static final String SECRET_KEY =
+            "9aad93edcc3711da9ab40ed51da80bd0\n" +
             "99e700cc4505a36f48a9170f0d03e903\n" +
             "e8ad3aa8ad3f30470a4ba195a0f3474d\n" +
             "3eabf39a2d4001ee26e5250f279811b5\n" +
