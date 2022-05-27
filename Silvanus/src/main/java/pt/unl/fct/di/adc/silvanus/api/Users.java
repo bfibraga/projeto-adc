@@ -22,9 +22,7 @@ public interface Users {
 	Result<String[]> getUser(String username);
 
 	Result<String> refresh_token(String old_refresh_token);
-	
-	Result<AuthToken> getToken(String username);
-	
+
 	Result<Void> remove(String token, String username);
 	
 	Result<Void> activate(String token, String username);

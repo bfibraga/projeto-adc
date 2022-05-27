@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract Cache manager
+ * @author GreenTeam
  */
 public abstract class CacheManager<K, V> {
 
@@ -39,7 +40,7 @@ public abstract class CacheManager<K, V> {
      */
     public <O> O get(K key, String property, Class<O> class_object) {
         Map<String, String> cache_result = this.verifyEntry(key);
-        String data_json = cache_result.get(String.valueOf(property.hashCode()));
+        String data_json = cache_result.get(this.encodeProperty(property));
 
         if (data_json == null){
             return null;
@@ -48,15 +49,38 @@ public abstract class CacheManager<K, V> {
         return JSON.decode(data_json, class_object);
     }
 
+    /**
+     * Adds a new object to given key and property
+     * @param key - Given key to insert the object
+     * @param property - Property to insert the object
+     * @param value - Object to insert
+     */
     @SuppressWarnings("unchecked")
     public void put(K key, String property, V value){
         //TODO Testing
 
         Map<String, String> cache_result = this.verifyEntry(key);
-        cache_result.put(String.valueOf(property.hashCode()), JSON.encode(value));
+        cache_result.put(this.encodeProperty(property), JSON.encode(value));
         this.cache.put(key.toString(), cache_result);
     }
 
+    /**
+     * Removes an object from given key and property
+     * @param key - Given key to remove a object from a property
+     * @param property - Given property to remove
+     */
+    @SuppressWarnings("unchecked")
+    public void remove(K key, String property){
+        Map<String, String> cache_result = this.verifyEntry(key);
+        cache_result.remove(this.encodeProperty(property));
+        this.cache.put(key.toString(), cache_result);
+    }
+
+    /**
+     * Verify if given key has a Collection
+     * @param key - Given key to check
+     * @return Collection of given key
+     */
     @SuppressWarnings("unchecked")
     private Map<String, String> verifyEntry(K key){
         if (key == null) {
@@ -72,6 +96,15 @@ public abstract class CacheManager<K, V> {
         }
 
         return JSON.decode(available_data_json, Map.class);
+    }
+
+    /**
+     * Encode given property
+     * @param property - Given property in String format
+     * @return Encoded property in String format
+     */
+    private String encodeProperty(String property){
+         return String.valueOf(property.hashCode());
     }
 
 }

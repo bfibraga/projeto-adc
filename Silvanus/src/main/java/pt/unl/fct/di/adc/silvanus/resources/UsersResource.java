@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-@Path("/user")
+@Path(RestUsers.PATH)
 public class UsersResource implements RestUsers {
 
 	private final UserImplementation impl;
@@ -100,19 +100,6 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response getToken(HttpServletRequest request) {
-		String token = this.token(request);
-
-		Result<AuthToken> result = impl.getToken(token);
-
-		if (!result.isOK()) {
-			return Response.status(result.error()).entity(result.statusMessage()).build();
-		}
-
-		return Response.ok().entity(result.statusMessage()).build();
-	}
-
-	@Override
 	public Response remove(HttpServletRequest request, String username) {
 		String token = this.token(request);
 
@@ -161,7 +148,7 @@ public class UsersResource implements RestUsers {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-		return Response.ok().entity("User atttibutes were sucessfully changed").build();
+		return Response.ok().entity(result.statusMessage()).build();
 	}
 
 	private String token(HttpServletRequest request){

@@ -6,7 +6,9 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
+import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
+import javax.ws.rs.core.Response;
 import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
@@ -66,6 +68,12 @@ public class TOKEN {
                     .parseClaimsJws(jwsString)
                     .getBody();
             System.out.println(jws.getSubject());
+
+            long curr_time = System.currentTimeMillis();
+            long expirationData = jws.getExpiration().getTime();
+            if (curr_time > expirationData) {
+                return null;
+            }
         } catch (JwtException e){
             System.out.println(e.getMessage());
             return null;

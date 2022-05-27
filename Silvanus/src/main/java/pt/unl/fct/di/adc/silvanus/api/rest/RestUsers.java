@@ -15,6 +15,7 @@ import static pt.unl.fct.di.adc.silvanus.api.rest.RestUsers.CHARSET;
 @Produces(MediaType.APPLICATION_JSON + CHARSET)
 public interface RestUsers {
 	String CHARSET = ";charset=utf-8";
+	String PATH = "/user";
 
 	@POST
 	@Path("/register")
@@ -50,12 +51,6 @@ public interface RestUsers {
 	@Path("/refresh_token")
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
 	Response refresh_token(@Context HttpServletRequest request);
-	
-	@GET
-	@Path("/token")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response getToken(@Context HttpServletRequest request);
 	
 	@DELETE
 	@Path("/remove/{identifier}")

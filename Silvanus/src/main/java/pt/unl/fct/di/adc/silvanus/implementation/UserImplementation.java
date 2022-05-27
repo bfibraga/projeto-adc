@@ -5,7 +5,6 @@ import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.gson.Gson;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserRole;
@@ -17,10 +16,8 @@ import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
-import javax.crypto.SecretKey;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import java.util.*;
 import java.util.logging.Logger;
 
 public class UserImplementation implements Users {
@@ -28,8 +25,6 @@ public class UserImplementation implements Users {
 	// Util classes
 	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
 	private final Gson g;
-
-	private final SecretKey key;
 
 	// Datastore
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
@@ -40,12 +35,11 @@ public class UserImplementation implements Users {
 
 	public UserImplementation(){
 		this.g = new Gson();
-		this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 		this.cache = new UserCacheManager<>();
 	}
 	@Override
 	public Result<String> register(UserData data) {
-		LOG.fine("Resgiter user " + data.getUsername());
+		LOG.fine("Register user " + data.getUsername());
 
 		boolean validation_code = data.validation();
 		if (validation_code) {
@@ -81,13 +75,14 @@ public class UserImplementation implements Users {
 					.set("usr_password", DigestUtils.sha512Hex(data.getPassword()))
 					// .set("usr_confirmation", DigestUtils.sha512Hex(data.getConfirmation()))
 					.build();
+			this.cache.put(user_id, "credentials", JSON.encode(user));
 
 			// Role attribution
 			UserRole role = UserRole.compareType(data.getRole());
-
 			Entity userRole = Entity.newBuilder(userRoleKey)
 					.set("role_name", role.toString())
 					.set("role_priority", role.getPriority()).build();
+			this.cache.put(user_id, "role", JSON.encode(userRole));
 
 			// Info of the new user
 			Entity userInfo = Entity.newBuilder(userInfoKey)
@@ -98,6 +93,7 @@ public class UserImplementation implements Users {
 					.set("usr_address", data.getAddress())
 					.set("usr_NIF", data.getNif())
 					.build();
+			this.cache.put(user_id, "info", JSON.encode(userInfo));
 
 			// Verification of this user
 			String verified = "";
@@ -106,8 +102,7 @@ public class UserImplementation implements Users {
 					.set("usr_state", data.getState())
 					.set("list_usr_validation", verified)
 					.build();
-
-			this.cache.put(user_id, "credentials", JSON.encode(data));
+			this.cache.put(user_id, "permission", JSON.encode(userPermission));
 
 			//TODO: First Registration information
 			String jws = TOKEN.createNewJWS(user_id);
@@ -125,7 +120,6 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Result<String> login(LoginData data) {
 		boolean validation_code = data.validation();
 		if (validation_code) {
@@ -137,12 +131,12 @@ public class UserImplementation implements Users {
 		String user_id = data.getID();
 
 		//TODO refactor this cache part
-		LoginData loginData = this.cache.get(user_id, "credentials", LoginData.class);
+		Entity loginData = this.cache.get(user_id, "credentials", Entity.class);
 
 		// Verify if the user is in cache
 		String hashedPassword = "";
 		if (loginData != null)	{
-			hashedPassword = loginData.getPassword();
+			hashedPassword = loginData.getString("usr_password");
 			if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))){
 				String jws = TOKEN.createNewJWS(user_id);
 
@@ -196,10 +190,9 @@ public class UserImplementation implements Users {
 
 					String refresh_token = TOKEN.newRefreshToken();
 
-					Map<String,String> user_info = new HashMap<>();
-					String data_json = g.toJson(data);
-					user_info.put(user_id + "." + "credentials".hashCode(), data_json);
-					this.cache.put(user_id, "crendentials", JSON.encode(user_info));
+					//Store in cache
+					this.cache.put(user_id, "credentials", JSON.encode(data));
+					this.cache.put(user_id, "token", jws);
 
 					return Result.ok(jws);
 				}
@@ -220,8 +213,8 @@ public class UserImplementation implements Users {
 			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
 
-		//Valid token to invoke
-
+		//Revoke token
+		this.cache.remove(jws.getSubject(), "token");
 
 		return Result.ok();
 	}
@@ -229,44 +222,34 @@ public class UserImplementation implements Users {
 	@Override
 	public Result<Void> promote(String token, String username, String new_role) {
 
-		Jws<Claims> jws;
-		String jwsString = "";
-		String user_id = username;
-		String high_user_id = "";
+		Claims jws = TOKEN.verifyToken(token);
 
-		try{
-			jws = Jwts.parserBuilder()  // (1)
-					.setSigningKey(key)         // (2)
-					.build()                    // (3)
-					.parseClaimsJws(jwsString); // (4)
-
-			user_id = jws.getBody().getId();
-		} catch (JwtException e){
-			return Result.error(Status.FORBIDDEN, "Invalid token");
+		if (jws == null){
+			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
 
-		long curr_time = System.currentTimeMillis();
-		long expirationData = jws.getBody().getExpiration().getTime();
-		if (curr_time > expirationData) {
-			LOG.warning("Token invalid");
-			return Result.error(Status.NOT_FOUND, "Token invalid");
-		}
+		String high_user_id = jws.getSubject();
+
+		//Query to lookup for given user
+		String user_id_promote = username;
 
 		LOG.fine("Promotion of user " + username);
 
 		// User to verify
-		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
-		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
+		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id_promote);
+		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id_promote);
 		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token);
 
 		// Higher priority user
 		Key high_usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(high_user_id);
 		Key high_usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(high_user_id);
 
-		if (user_id.equals(high_user_id)) {
+		if (user_id_promote.equals(high_user_id)) {
 			LOG.warning("Same user");
 			return Result.error(Status.BAD_REQUEST, "Same user");
 		}
+
+
 
 		// Create new transation
 		Transaction tnx = datastore.newTransaction();
@@ -278,16 +261,11 @@ public class UserImplementation implements Users {
 			if (user_verify == null || user_role == null) {
 				// User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST, "User " + username + "doens't exist");
+				return Result.error(Status.BAD_REQUEST, "User " + username + "doesn't exist");
 			}
 
-			Entity token_entity = tnx.get(usrCurrentToken);
-
-			if (token_entity == null) {
-				tnx.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.BAD_REQUEST, "Token invalid");
-			}
+			this.cache.put(user_id_promote, "permission", JSON.encode(user_verify));
+			this.cache.put(user_id_promote, "role", JSON.encode(user_role));
 
 			Entity high_user_verify = tnx.get(high_usrPermissionkey);
 			Entity high_user_role = tnx.get(high_usrRoleKey);
@@ -297,6 +275,9 @@ public class UserImplementation implements Users {
 				tnx.rollback();
 				return Result.error(Status.BAD_REQUEST, "User doens't exist");
 			}
+
+			this.cache.put(high_user_id, "permission", JSON.encode(high_user_verify));
+			this.cache.put(high_user_id, "role", JSON.encode(high_user_role));
 
 			UserRole role = UserRole.compareType(new_role);
 			long high_role_priority = high_user_role.getLong("role_priority");
@@ -373,29 +354,6 @@ public class UserImplementation implements Users {
 	@Override
 	public Result<String> refresh_token(String old_refresh_token) {
 		return Result.ok(TOKEN.newRefreshToken());
-	}
-
-	@Override
-	public Result<AuthToken> getToken(String username) {
-		String user_id = username.trim();
-		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
-
-		Transaction txn = datastore.newTransaction();
-
-		try {
-			Entity token = txn.get(usrCurrentToken);
-
-			if (token == null) {
-				txn.rollback();
-				return Result.error(Status.BAD_REQUEST,"");
-			}
-
-			return Result.ok();
-		} finally {
-			if (txn.isActive()) {
-				txn.rollback();
-			}
-		}
 	}
 
 	@Override
