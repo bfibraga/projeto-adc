@@ -151,6 +151,12 @@
             <scope>runtime</scope>
         </dependency>
 
+		<!-- Dependedencia das cenas do Polygon-->
+		<dependency>
+			<groupId>org.locationtech.jts</groupId>
+			<artifactId>jts-core</artifactId>
+			<version>1.18.2</version>
+		</dependency>
 
 	</dependencies>
 
