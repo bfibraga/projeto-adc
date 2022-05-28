@@ -33,45 +33,45 @@ public interface RestUsers {
 	@Path("/logout")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response logout(@Context HttpServletRequest request);
+	Response logout(@CookieParam("token") String cookie);
 	
 	@PUT
 	@Path("/promote/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response promote(@Context HttpServletRequest request, @PathParam("identifier") String username, @QueryParam("new_role") String new_role);
+	Response promote(@CookieParam("token") String cookie, @PathParam("identifier") String username, @QueryParam("new_role") String new_role);
 	
 	@GET
 	@Path("/info")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response getUser(@Context HttpServletRequest request);
+	Response getUser(@CookieParam("token") String cookie);
 
 	@GET
 	@Path("/refresh_token")
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response refresh_token(@Context HttpServletRequest request);
+	Response refresh_token(@CookieParam("token") String cookie);
 	
 	@DELETE
 	@Path("/remove/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	Response remove(@Context HttpServletRequest request, @PathParam("identifier") String username);
+	Response remove(@CookieParam("token") String cookie, @PathParam("identifier") String username);
 	
 	@PUT
 	@Path("/activate/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response activate(@Context HttpServletRequest request, @PathParam("identifier") String identifier);
+	Response activate(@CookieParam("token") String cookie, @PathParam("identifier") String identifier);
 	
 	@PUT
 	@Path("/change")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response changePassword(@Context HttpServletRequest request, @QueryParam("password") String new_password);
+	Response changePassword(@CookieParam("token") String cookie, @QueryParam("password") String new_password);
 	
 	@PUT
 	@Path("/change/{identifier}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response changeAttributes(@Context HttpServletRequest request, @PathParam("identifier") String identifier, @QueryParam("attributes") String list_json);
+	Response changeAttributes(@CookieParam("token") String cookie, @PathParam("identifier") String identifier, @QueryParam("attributes") String list_json);
 }

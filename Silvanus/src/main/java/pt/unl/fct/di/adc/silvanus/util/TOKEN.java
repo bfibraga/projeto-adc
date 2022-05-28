@@ -6,9 +6,8 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
-import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.NewCookie;
 import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
@@ -31,17 +30,21 @@ public class TOKEN {
             "235dc36f243397a28d684575780cd6ad\n" +
             "4bae493f7c35f2998476a060187ebedd";
 
+    private static final long DEFAULT_USER_EXPIRATION = 1000*60*60*12; //12h
+
     private static final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
     /**
      * Create a new JSON Web Token from given userID.
+     *
      * @param user_id - Given userID
+     * @param operation_level - Level of the operation that can perform with this token
      * @return JWT for given user
      */
-    public static String createNewJWS(String user_id){
+    public static String createNewJWS(String user_id, int operation_level){
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
-        Date expiration = new Date(nowMillis + AuthToken.EXPIRATION_TIME);
+        Date expiration = new Date(nowMillis + (DEFAULT_USER_EXPIRATION)/operation_level);
 
         //Let's set the JWT Claims
         JwtBuilder builder = Jwts.builder()
@@ -49,6 +52,7 @@ public class TOKEN {
                 .setSubject(user_id)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
+                .claim("op-level", operation_level)
                 .signWith(key);
 
         //Builds the JWT and serializes it to a compact, URL-safe string
@@ -88,13 +92,22 @@ public class TOKEN {
      */
     public static String newRefreshToken(){
         Date creationDate = new Date();
-        Date expirationDate = new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME);
-        String refresh_token = Jwts.builder()
+        Date expirationDate = new Date(System.currentTimeMillis()+DEFAULT_USER_EXPIRATION*2*7);
+        JwtBuilder refresh_token = Jwts.builder()
                 .setExpiration(expirationDate) //a java.util.Date
                 .setIssuedAt(creationDate) // for example, now
                 .signWith(key)
-                .setId(UUID.randomUUID().toString())
-                .compact(); //just an example id
-        return refresh_token;
+                .setId(UUID.randomUUID().toString());
+        return refresh_token.compact();
+    }
+
+    /**
+     * Return User Token as a Cookie
+     * @param value - Value of the token in String format
+     * @return Cookie with value of the token
+     */
+    public static NewCookie cookie(String value){
+        //TODO When this system is running on cloud, set secure parameter to true
+        return new NewCookie("token", value, "/api", null, "Token of the user", 1000*60*60, false, true);
     }
 }

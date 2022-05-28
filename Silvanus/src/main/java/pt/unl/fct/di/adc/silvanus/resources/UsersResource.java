@@ -5,11 +5,13 @@ import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestUsers;
+import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 @Path(RestUsers.PATH)
@@ -43,17 +45,15 @@ public class UsersResource implements RestUsers {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-		System.out.println(result.value());
+		System.out.println("Token\n" + "token" + " -> " + result.value());
 		//token = (AuthToken) result.value();
 		//Add http-only cookie
 		//TODO Change entity
-		return Response.ok().header("Set-Cookie", "tkn=" + result.value() + "; HttpOnly ; Max-Age=1000*60*60").build();
+		return Response.ok().cookie(TOKEN.cookie(result.value())).build();
 	}
 
 	@Override
-	public Response logout(HttpServletRequest request) {
-		String token = this.token(request);
-
+	public Response logout(String token) {
 		System.out.println(token);
 		Result<Void> result = impl.logout(token);
 
@@ -61,14 +61,11 @@ public class UsersResource implements RestUsers {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-
-		return Response.ok().entity(result.statusMessage()).header("Set-Cookie", null).build();
+		return Response.ok().entity(result.statusMessage()).cookie(TOKEN.cookie(null)).build();
 	}
 
 	@Override
-	public Response promote(HttpServletRequest request, String username, String new_role) {
-		String token = this.token(request);
-
+	public Response promote(String token, String username, String new_role) {
 		Result<Void> result = impl.promote(token, username, new_role);
 
 		if (!result.isOK()) {
@@ -79,9 +76,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response getUser(HttpServletRequest request) {
-		String token = this.token(request);
-
+	public Response getUser(String token) {
 		//TODO Alter getUser implementation
 		Result<String[]> result = impl.getUser(token);
 
@@ -93,16 +88,13 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response refresh_token(HttpServletRequest request) {
-		String token = this.token(request);
+	public Response refresh_token(String token) {
 		Result<String> result = impl.refresh_token(token);
 		return Response.ok().entity(result.value()).build();
 	}
 
 	@Override
-	public Response remove(HttpServletRequest request, String username) {
-		String token = this.token(request);
-
+	public Response remove(String token, String username) {
 		Result<Void> result = impl.remove(token, username);
 
 		if (!result.isOK()) {
@@ -113,9 +105,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response activate(HttpServletRequest request, String identifier) {
-		String token = this.token(request);
-
+	public Response activate(String token, String identifier) {
 		Result<Void> result = impl.activate(token, identifier);
 
 		if (!result.isOK()) {
@@ -126,9 +116,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response changePassword(HttpServletRequest request, String new_password) {
-		String token = this.token(request);
-
+	public Response changePassword(String token, String new_password) {
 		Result<Void> result = impl.changePassword(token, new_password);
 
 		if (!result.isOK()) {
@@ -139,9 +127,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response changeAttributes(HttpServletRequest request, String identifier, String list_json) {
-		String token = this.token(request);
-
+	public Response changeAttributes(String token, String identifier, String list_json) {
 		Result<Void> result = impl.changeAttributes(token, identifier, list_json);
 
 		if (!result.isOK()) {
@@ -149,16 +135,5 @@ public class UsersResource implements RestUsers {
 		}
 
 		return Response.ok().entity(result.statusMessage()).build();
-	}
-
-	private String token(HttpServletRequest request){
-		//TODO Debug
-		for (Cookie cookie: request.getCookies()) {
-			System.out.println(cookie.getName() + " -> " + cookie.getValue());
-			if (cookie.getName().equals("tkn")){
-				return cookie.getValue();
-			}
-		}
-		return null;
 	}
 }
