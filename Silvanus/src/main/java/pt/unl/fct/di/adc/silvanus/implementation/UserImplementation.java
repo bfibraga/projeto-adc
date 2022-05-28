@@ -5,11 +5,10 @@ import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.gson.Gson;
 import io.jsonwebtoken.*;
-import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserRole;
+import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 import pt.unl.fct.di.adc.silvanus.api.Users;
+import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.cache.CacheManager;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
@@ -17,24 +16,21 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import java.util.HashSet;
 import java.util.logging.Logger;
 
 public class UserImplementation implements Users {
 
 	// Util classes
 	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
-	private final Gson g;
-
 	// Datastore
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private final KeyFactory userKeyFactory = this.datastore.newKeyFactory().setKind("UserCredentials");
 
 	//Cache
-	private CacheManager<String> cache;
+	private UserCacheManager<String> cache = new UserCacheManager<>();
 
 	public UserImplementation(){
-		this.g = new Gson();
-		this.cache = new UserCacheManager<>();
 	}
 	@Override
 	public Result<String> register(UserData data) {
@@ -57,7 +53,6 @@ public class UserImplementation implements Users {
 		Transaction txn = datastore.newTransaction();
 
 		try {
-
 			// Verify if user exists
 			Entity user = txn.get(userKey);
 
@@ -74,15 +69,15 @@ public class UserImplementation implements Users {
 					.set("usr_password", DigestUtils.sha512Hex(data.getPassword()))
 					// .set("usr_confirmation", DigestUtils.sha512Hex(data.getConfirmation()))
 					.build();
-			this.cache.put(user_id, "credentials", user);
+			LoginData loginData = data.getCredentials();
+			this.cache.put(user_id, loginData);
 
 			// Role attribution
 			UserRole role = UserRole.compareType(data.getRole());
 			Entity userRole = Entity.newBuilder(userRoleKey)
 					.set("role_name", role.toString())
 					.set("role_priority", role.getPriority()).build();
-			this.cache.put(user_id, "role", userRole
-			);
+			this.cache.put(user_id, role);
 
 			// Info of the new user
 			Entity userInfo = Entity.newBuilder(userInfoKey)
@@ -93,16 +88,18 @@ public class UserImplementation implements Users {
 					.set("usr_address", data.getAddress())
 					.set("usr_NIF", data.getNif())
 					.build();
-			this.cache.put(user_id, "info", userInfo);
+			UserInfoData userInfoData = data.getInfo();
+			this.cache.put(user_id, userInfoData);
 
 			// Verification of this user
-			String verified = "";
+			String verified = JSON.encode(new HashSet<>());
 			Entity userPermission;
 			userPermission = Entity.newBuilder(userPermissionKey)
 					.set("usr_state", data.getState())
 					.set("list_usr_validation", verified)
 					.build();
-			this.cache.put(user_id, "permission", userPermission);
+			UserStateData userStateData = data.getStateData();
+			this.cache.put(user_id, userStateData);
 
 			//TODO: First Registration information
 			String jws = TOKEN.createNewJWS(user_id, 1);
@@ -131,7 +128,7 @@ public class UserImplementation implements Users {
 		String user_id = data.getID();
 
 		//TODO refactor this cache part
-		LoginData loginData = this.cache.get(user_id, "credentials", LoginData.class);
+		LoginData loginData = this.cache.getLoginData(user_id);
 
 		// Verify if the user is in cache
 		String hashedPassword = "";
@@ -194,7 +191,7 @@ public class UserImplementation implements Users {
 					LoginData store_data = new LoginData(curr_result.getString("usr_username"),
 							curr_result.getString("usr_email"),
 							curr_result.getString("usr_password"));
-					this.cache.put(user_id, "credentials", store_data);
+					this.cache.put(user_id, store_data);
 					this.cache.put(user_id, "token", jws);
 
 					return Result.ok(jws);
@@ -211,7 +208,7 @@ public class UserImplementation implements Users {
 
 		LOG.fine("Logout attempt");
 
-		if (token == null){
+		if (token == null || token.trim().equals("")){
 			return Result.error(Status.BAD_REQUEST, "Null token");
 		}
 
@@ -222,7 +219,8 @@ public class UserImplementation implements Users {
 		}
 
 		//Revoke token
-		this.cache.remove(jws.getSubject(), "token");
+		String userID = jws.getSubject();
+		this.cache.remove(userID, "token");
 
 		return Result.ok();
 	}
@@ -237,9 +235,13 @@ public class UserImplementation implements Users {
 		}
 
 		String high_user_id = jws.getSubject();
-
 		//Query to lookup for given user
 		String user_id_promote = username;
+
+		if (user_id_promote.equals(high_user_id)) {
+			LOG.warning("Same user");
+			return Result.error(Status.FORBIDDEN, "Same user");
+		}
 
 		LOG.fine("Promotion of user " + username);
 
@@ -250,11 +252,6 @@ public class UserImplementation implements Users {
 		// Higher priority user
 		Key high_usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(high_user_id);
 		Key high_usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(high_user_id);
-
-		if (user_id_promote.equals(high_user_id)) {
-			LOG.warning("Same user");
-			return Result.error(Status.FORBIDDEN, "Same user");
-		}
 
 		// Create new transation
 		Transaction tnx = datastore.newTransaction();
@@ -580,9 +577,6 @@ public class UserImplementation implements Users {
 				return Result.error(Status.BAD_REQUEST, "");
 			}
 
-			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
-			long curr_time = System.currentTimeMillis();
-
 			/*if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				LOG.warning("Token invalid");
 				return Result.error(Status.NOT_FOUND, "");
@@ -642,9 +636,6 @@ public class UserImplementation implements Users {
 				return Result.error(Status.BAD_REQUEST, "");
 			}
 
-			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
-			long curr_time = System.currentTimeMillis();
-
 			/*if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
@@ -678,7 +669,7 @@ public class UserImplementation implements Users {
 			Entity target = tnx.get(target_usrKey_info);
 			final String[] list_att = { "usr_visibility", "usr_name", "usr_telephone", "usr_smartphone", "usr_address",
 					"usr_NIF" };
-			String[] attributes = g.fromJson(list_json, String[].class);
+			/*String[] attributes = g.fromJson(list_json, String[].class);
 			for (int i = 0; i < attributes.length; i++) {
 				attributes[i] = attributes[i].trim().equals("") ? target.getString(list_att[i]) : attributes[i];
 			}
@@ -689,7 +680,7 @@ public class UserImplementation implements Users {
 					.set("usr_NIF", attributes[5]).build();
 
 			tnx.put(target);
-			tnx.commit();
+			tnx.commit();*/
 			return Result.ok();
 		} finally {
 			if (tnx.isActive()) {

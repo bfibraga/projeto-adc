@@ -118,4 +118,17 @@ public class UserData {
 		
 		return valid;
 	}
+
+	public LoginData getCredentials() {
+		return new LoginData(this.getUsername(), this.getEmail(), this.getPassword());
+	}
+
+	public UserInfoData getInfo() {
+		return new UserInfoData(this.getName(), this.getState(), this.getVisibility(), this.getNif(), this.getAddress(), this.getTelephone(), this.getSmartphone());
+	}
+
+	public UserStateData getStateData() {
+		//TODO Improve this later
+		return new UserStateData(this.getState());
+	}
 }
