@@ -16,6 +16,10 @@ public class UserCacheManager<K> extends CacheManager<K> {
         super();
     }
 
+    public UserCacheManager(long expiritation_time){
+        super(expiritation_time);
+    }
+
     /**
      * Insert new LoginData to given key and property
      * @param key - Given key to insert the object

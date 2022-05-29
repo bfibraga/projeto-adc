@@ -4,7 +4,6 @@ import com.google.appengine.api.memcache.stdimpl.GCacheFactory;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 
 import javax.cache.Cache;
-import javax.cache.CacheEntry;
 import javax.cache.CacheException;
 import javax.cache.CacheFactory;
 import java.util.*;
@@ -16,18 +15,30 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class CacheManager<K> {
 
-    private static final int HOURS_DURATION = 12;
+    private static final int MINS_DURATION = 12*60;
     protected Cache cache;
 
-    public CacheManager() {
+    public CacheManager(){
         try {
-            CacheFactory cacheFactory = javax.cache.CacheManager.getInstance().getCacheFactory();
-            Map<Integer, Long> properties = new HashMap<>();
-            properties.put(GCacheFactory.EXPIRATION_DELTA, TimeUnit.HOURS.toHours(HOURS_DURATION));
-            this.cache = cacheFactory.createCache(Collections.emptyMap());
+            this.createCache(MINS_DURATION);
         } catch (CacheException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public CacheManager(long expiration_time) {
+        try {
+            this.createCache(expiration_time);
+        } catch (CacheException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void createCache(long expiration_time) throws CacheException {
+        CacheFactory cacheFactory = javax.cache.CacheManager.getInstance().getCacheFactory();
+        Map<Integer, Long> properties = new HashMap<>();
+        properties.put(GCacheFactory.EXPIRATION_DELTA, TimeUnit.MINUTES.toHours(expiration_time));
+        this.cache = cacheFactory.createCache(Collections.emptyMap());
     }
 
     /**
