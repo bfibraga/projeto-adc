@@ -1,5 +1,12 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+
+import javax.crypto.SecretKey;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
@@ -12,6 +19,7 @@ import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.cache.CacheManager;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
+
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Response;
