@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import java.util.Set;
 
 @Path(RestUsers.PATH)
 public class UsersResource implements RestUsers {
@@ -76,9 +77,9 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response getUser(String token) {
+	public Response getUser(String token, String identifier) {
 		//TODO Alter getUser implementation
-		Result<String[]> result = impl.getUser(token);
+		Result<Set<String[]>> result = impl.getUser(token, identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();

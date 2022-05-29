@@ -17,7 +17,7 @@ function getToken() {
 }
 
 function checkUndefined(keyword) {
-	return keyword.trim() == "" ? "UNDEFINED" : keyword;
+	return keyword.trim() === "" ? "UNDEFINED" : keyword;
 }
 
 async function register(){
@@ -123,6 +123,7 @@ async function logout() {
 	try{
 		const response = await axios.post("/api/user/logout");
 		console.log(response);
+		window.location.replace(base_uri);
 	} catch (error){
 		console.log(error);
 	} finally {

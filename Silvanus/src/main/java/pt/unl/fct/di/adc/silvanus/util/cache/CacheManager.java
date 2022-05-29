@@ -4,11 +4,10 @@ import com.google.appengine.api.memcache.stdimpl.GCacheFactory;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 
 import javax.cache.Cache;
+import javax.cache.CacheEntry;
 import javax.cache.CacheException;
 import javax.cache.CacheFactory;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,6 +46,41 @@ public abstract class CacheManager<K> {
         }
 
         return JSON.decode(data_json, class_object);
+    }
+
+    /**
+     *
+     * @param subKey
+     * @param property
+     * @param class_object
+     * @return
+     * @param <O>
+     */
+    @SuppressWarnings("unchecked")
+    public <O> List<O> getAll(K subKey, String property, Class<O> class_object){
+        if (subKey == null) {
+            return new ArrayList<>();
+        }
+        List<O> result = new ArrayList<>();
+        String regex = "(.*)" + subKey + "(.*)";
+        for (Map.Entry<String, String> stringStringEntry : (Iterable<Map.Entry<String, String>>) this.cache.entrySet()) {
+            String curr_key = stringStringEntry.getKey();
+            if (curr_key.matches(regex)) {
+                Map<String, String> available_data = (Map<String, String>) this.cache.get(curr_key);
+
+                if (available_data == null) {
+                    available_data = new HashMap<>();
+                    this.cache.put(curr_key, available_data);
+                }
+
+                String data_json = available_data.get(hashProperty(property));
+
+                if (data_json != null) {
+                    result.add(JSON.decode(data_json, class_object));
+                }
+            }
+        }
+        return result;
     }
 
     //TODO Alter visibility of this method

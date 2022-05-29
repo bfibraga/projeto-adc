@@ -16,7 +16,9 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class UserImplementation implements Users {
@@ -144,33 +146,10 @@ public class UserImplementation implements Users {
 				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
 			}
 		} else {
-			Query<Entity> query = null;
-			QueryResults<Entity> result;
-
-			if (data.getUsername().equals(LoginData.NOT_DEFINED)) {
-				query = Query.newEntityQueryBuilder()
-						.setKind("UserCredentials")
-						.setFilter(PropertyFilter.eq("usr_email", data.getEmail()))
-						.setLimit(5)
-						.build();
-			}
-
-			if (data.getEmail().equals(LoginData.NOT_DEFINED)) {
-				query = Query.newEntityQueryBuilder()
-						.setKind("UserCredentials")
-						.setFilter(PropertyFilter.eq("usr_username", data.getUsername()))
-						.setLimit(5)
-						.build();
-			}
-
-			if (query == null){
-				return Result.error(Status.BAD_REQUEST, "Something went wrong getting a list of users...");
-			}
-
-			result = datastore.run(query);
-			if (result == null) {
-				// User doesn't exist
-				return Result.error(Response.Status.NOT_FOUND, "User " + data.getUsername() + " doens't exist");
+			//TODO Testing
+			QueryResults<Entity> result = this.find(data.getUsername(), "UserCredentials", "usr_username", 5);
+			if (!result.hasNext()){
+				result = this.find(data.getEmail(), "UserCredentials", "usr_email", 5);
 			}
 
 			while (result.hasNext()){
@@ -203,14 +182,20 @@ public class UserImplementation implements Users {
 		}
 	}
 
+	private QueryResults<Entity> find(String identifier, String kind, String parameter, int limit_query){
+		Query<Entity> query = Query.newEntityQueryBuilder()
+				.setKind(kind)
+				.setFilter(PropertyFilter.eq(parameter, identifier))
+				.setLimit(limit_query)
+				.build();
+
+		return datastore.run(query);
+	}
+
 	@Override
 	public Result<Void> logout(String token) {
 
 		LOG.fine("Logout attempt");
-
-		if (token == null || token.trim().equals("")){
-			return Result.error(Status.BAD_REQUEST, "Null token");
-		}
 
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -321,12 +306,43 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<String[]> getUser(String username) {
-		//TODO Figure it out how to get userID
-		String user_id = username.trim();
+	public Result<Set<String[]>> getUser(String token, String identifier) {
+		//Token verifycation
+		Claims jws = TOKEN.verifyToken(token);
+
+		if (jws == null){
+			return Result.error(Status.FORBIDDEN, "Invalid Token");
+		}
+
+		if (identifier.trim().equals("")){
+			Set<String[]> result = new HashSet<>();
+			result.add(new String[]{jws.getSubject(), jws.getId()});
+			return Result.ok(result);
+		}
+
+		//Query only for user identifiers
+		//TODO Testing
+		QueryResults<Entity> result = this.find(identifier, "UserCredentials", "usr_username", 5);
+		if (!result.hasNext()){
+			result = this.find(identifier, "UserCredentials", "usr_email", 5);
+		}
+
+		//TODO
+		Set<String[]> result_set = new HashSet<>();
+		while(result.hasNext()){
+			Entity curr_result = result.next();
+			String user_id = curr_result.getKey().getName();
+
+			String[] user_info = {
+					user_id, //TODO remove userID
+					curr_result.getString("usr_username"),
+					curr_result.getString("usr_email")
+			};
+			result_set.add(user_info);
+		}
 
 		//Get from DB
-		Key userKey = userKeyFactory.newKey(user_id);
+		/*Key userKey = userKeyFactory.newKey(user_id);
 		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
 		Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
@@ -354,9 +370,9 @@ public class UserImplementation implements Users {
 				userInfo.getString("usr_address"),
 				userInfo.getString("usr_NIF"),
 				userRole.getString("role_name")
-		};
+		};*/
 
-		return Result.ok(response);
+		return Result.ok(result_set);
 	}
 
 	//TODO

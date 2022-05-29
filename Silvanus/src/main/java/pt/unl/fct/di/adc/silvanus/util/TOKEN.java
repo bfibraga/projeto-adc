@@ -6,8 +6,10 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
+import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
@@ -61,16 +63,20 @@ public class TOKEN {
 
     /**
      * Verify the integrity of given JWT
-     * @param jwsString JWT in String format
+     * @param token JWT in String format
      * @return Claims stored in that token
      */
-    public static Claims verifyToken(String jwsString){
-        Claims jws = null;
+    public static Claims verifyToken(String token){
+        if (token == null || token.trim().equals("")){
+            return null;
+        }
+
+        Claims jws;
         try{
             jws = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(jwsString)
+                    .parseClaimsJws(token)
                     .getBody();
             System.out.println(jws.getSubject());
 

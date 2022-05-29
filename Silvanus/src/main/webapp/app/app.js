@@ -1,11 +1,11 @@
-var map;
+var change_attr_type = [];
 
-function initMap() 
-{
-    var map_center = {lat:  38.659784, lng:  -9.202765};
+function convertElement(id, new_type){
+    var originalELement = document.getElementById(id);
+    var newElement = document.createElement(new_type);
 
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: map_center,
-        zoom: 16
-    });
+    for (var i = 0; i < originalELement.attributes.length; i++) {
+        var attr = originalELement.attributes.item(i);
+        newElement.setAttribute(attr.nodeName, attr.nodeValue);
+    }
 }

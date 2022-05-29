@@ -43,9 +43,8 @@ public interface RestUsers {
 	
 	@GET
 	@Path("/info")
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response getUser(@CookieParam("token") String cookie);
+	Response getUser(@CookieParam("token") String cookie, @QueryParam("identifier") @DefaultValue(" ") String identifier);
 
 	@GET
 	@Path("/refresh_token")

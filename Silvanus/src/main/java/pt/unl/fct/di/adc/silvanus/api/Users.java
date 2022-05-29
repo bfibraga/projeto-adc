@@ -8,6 +8,7 @@ import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Context;
+import java.util.Set;
 
 public interface Users {
 
@@ -18,8 +19,8 @@ public interface Users {
 	Result<Void> logout(String token);
 	
 	Result<Void> promote(String token, String username, String new_role);
-	
-	Result<String[]> getUser(String username);
+
+	Result<Set<String[]>> getUser(String token, String identifier);
 
 	Result<String> refresh_token(String old_refresh_token);
 
