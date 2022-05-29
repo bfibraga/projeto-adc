@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.data.user;
 
+import java.io.Serializable;
+
 public class LoginData {
 
 	public final static String NOT_DEFINED = "~~";
@@ -40,7 +42,34 @@ public class LoginData {
 	public String getPassword() {
 		return this.password;
 	}
-	
+
+	/**
+	 *
+	 * @return the user's username
+	 */
+	public LoginData setUsername(String username) {
+		this.username = username;
+		return this;
+	}
+
+	/**
+	 *
+	 * @return the user's username
+	 */
+	public LoginData setEmail(String email) {
+		this.email = email;
+		return this;
+	}
+
+	/**
+	 *
+	 * @return the user's username
+	 */
+	public LoginData setPassword(String password) {
+		this.password = password;
+		return this;
+	}
+
 	/**
 	 * Checks if the given keyword is not equal to an empty string or null
 	 * @param keyword to validate

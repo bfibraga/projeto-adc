@@ -1,11 +1,13 @@
 let map;
+let drawing_control;
+let active_drawing = false;
 let markers = [];
 
 let last_index = 0;
 let other_markers = 0;
 let points = [];
 let lines = [];
-let polygons = [];
+let polygons = new google.maps.Polygon();
 
 let click_listener;
 
@@ -26,7 +28,40 @@ function initMap()
         zoom: 15
     });
 
-    clearListeners(map, "click");
+    drawing_control = new google.maps.drawing.DrawingManager({
+        drawingMode: google.maps.drawing.OverlayType.MARKER,
+        drawingControl: false,
+        drawingControlOptions: {
+          position: google.maps.ControlPosition.TOP_CENTER,
+          drawingModes: [
+            google.maps.drawing.OverlayType.MARKER,
+            google.maps.drawing.OverlayType.POLYGON,
+            google.maps.drawing.OverlayType.POLYLINE,
+            google.maps.drawing.OverlayType.RECTANGLE,
+          ],
+        },
+        polygonOptions:{
+            editable:true,
+            fillColor: "#00dd00",
+            strokeColor: "#00ff00"
+        },
+        markerOptions: {
+            icon: "../media/icons/map-marker.svg",
+          },
+      });
+
+      drawing_control.addListener("polygoncomplete", function(polygon){
+        polygons.setMap(null);  
+        polygons = polygon;
+        console.log(polygons);
+      })
+
+      toggleDrawingControl(active_drawing);
+    
+      drawing_control.setMap(null);
+
+
+    //clearListeners(map, "click");
 }
 
 function point(_lat, _lng){
@@ -96,7 +131,7 @@ function center(given_points){
 }
 
 function createPolygon(color){
-    other_markers = markers.length;
+   /* other_markers = markers.length;
     last_index = lines.length;
     click_listener = map.addListener("click", (mapsMouseEvent) => {
         const latLng = mapsMouseEvent.latLng;
@@ -121,7 +156,22 @@ function createPolygon(color){
                 addLine(new_line, color);
             }
         }
+    });*/
+    active_drawing = !active_drawing;
+    toggleDrawingControl(active_drawing);
+}
+
+function toggleDrawingControl(value){
+    drawing_control.setOptions({
+        drawingControl: value
     });
+    if (value){
+        drawing_control.setMap(map);
+        polygons.setMap(map);
+    } else {
+        drawing_control.setMap(null);
+        polygons.setMao(null);
+    }
 }
 
 function clearTemporaryData(){

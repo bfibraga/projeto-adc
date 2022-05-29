@@ -7,44 +7,44 @@ import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.gson.Gson;
-
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserRole;
+import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
-import pt.unl.fct.di.adc.silvanus.util.interfaces.Users;
+import pt.unl.fct.di.adc.silvanus.api.Users;
+import pt.unl.fct.di.adc.silvanus.util.JSON;
+import pt.unl.fct.di.adc.silvanus.util.cache.CacheManager;
+import pt.unl.fct.di.adc.silvanus.util.TOKEN;
+import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
+
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Logger;
 
 public class UserImplementation implements Users {
 
 	// Util classes
 	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
-	private final Gson g;
-
-	private final SecretKey key;
-
 	// Datastore
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private final KeyFactory userKeyFactory = this.datastore.newKeyFactory().setKind("UserCredentials");
 
-	// User info
-	private ConcurrentHashMap<String, UserData> userInfo = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, String> userToken = new ConcurrentHashMap<>();
+	//Cache
+	private UserCacheManager<String> cache = new UserCacheManager<>();
 
 	public UserImplementation(){
-		this.g = new Gson();
-		this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 	}
 	@Override
 	public Result<String> register(UserData data) {
-		LOG.fine("Resgiter user " + data.getUsername());
+		LOG.fine("Register user " + data.getUsername());
 
 		boolean validation_code = data.validation();
 		if (validation_code) {
@@ -63,7 +63,6 @@ public class UserImplementation implements Users {
 		Transaction txn = datastore.newTransaction();
 
 		try {
-
 			// Verify if user exists
 			Entity user = txn.get(userKey);
 
@@ -80,13 +79,15 @@ public class UserImplementation implements Users {
 					.set("usr_password", DigestUtils.sha512Hex(data.getPassword()))
 					// .set("usr_confirmation", DigestUtils.sha512Hex(data.getConfirmation()))
 					.build();
+			LoginData loginData = data.getCredentials();
+			this.cache.put(user_id, loginData);
 
 			// Role attribution
 			UserRole role = UserRole.compareType(data.getRole());
-
 			Entity userRole = Entity.newBuilder(userRoleKey)
 					.set("role_name", role.toString())
 					.set("role_priority", role.getPriority()).build();
+			this.cache.put(user_id, role);
 
 			// Info of the new user
 			Entity userInfo = Entity.newBuilder(userInfoKey)
@@ -97,37 +98,26 @@ public class UserImplementation implements Users {
 					.set("usr_address", data.getAddress())
 					.set("usr_NIF", data.getNif())
 					.build();
+			UserInfoData userInfoData = data.getInfo();
+			this.cache.put(user_id, userInfoData);
 
 			// Verification of this user
-			String verified = "";
+			String verified = JSON.encode(new HashSet<>());
 			Entity userPermission;
-			if (role.toString().equals("SU")) {
-				verified = data.getUsername().trim();
-				userPermission = Entity.newBuilder(userPermissionKey)
-						.set("usr_state", "ACTIVE")
-						.set("list_usr_validation", verified)
-						.build();
-			} else {
-				userPermission = Entity.newBuilder(userPermissionKey)
-						.set("usr_state", data.getState())
-						.set("list_usr_validation", verified)
-						.build();
-			}
+			userPermission = Entity.newBuilder(userPermissionKey)
+					.set("usr_state", data.getState())
+					.set("list_usr_validation", verified)
+					.build();
+			UserStateData userStateData = data.getStateData();
+			this.cache.put(user_id, userStateData);
 
 			//TODO: First Registration information
-			String jws = this.createNewJWS(user_id);
-
-			Entity token = Entity.newBuilder(usrCurrentToken)
-					//.set("refresh_token", refresh_token)
-					.set("jwt", jws)
-					.build();
+			String jws = TOKEN.createNewJWS(user_id, 1);
 
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
 
-			this.userInfo.putIfAbsent(user_id, data);
-
-			LOG.info("User resgisted " + data.getUsername() + " successfully");
+			LOG.info("User register " + data.getUsername() + " successfully");
 			return Result.ok(jws);
 		} finally {
 			if (txn.isActive()) {
@@ -147,204 +137,148 @@ public class UserImplementation implements Users {
 
 		String user_id = data.getID();
 
-		UserData userData = this.userInfo.get(user_id);
+		//TODO refactor this cache part
+		LoginData loginData = this.cache.getLoginData(user_id);
 
 		// Verify if the user is in cache
 		String hashedPassword = "";
-		if (userData != null) {
-			hashedPassword = userData.getPassword();
-		} else {
-			Query<Entity> query = null;
-			QueryResults<Entity> result;
-			
-			if (data.getUsername().equals(LoginData.NOT_DEFINED)) {
-				query = Query.newEntityQueryBuilder()
-						.setKind("UserCredentials")
-	                    .setFilter(PropertyFilter.eq("usr_email", data.getEmail()))
-	                    .setLimit(5)
-	                    .build();
-			}
-			
-			if (data.getEmail().equals(LoginData.NOT_DEFINED)) {
-				query = Query.newEntityQueryBuilder()
-						.setKind("UserCredentials")
-	                    .setFilter(PropertyFilter.eq("usr_username", data.getUsername()))
-	                    .setLimit(5)
-	                    .build();
-			}
-			
-			if (query == null){
-				return Result.error(Status.BAD_REQUEST, "Something went wrong getting a list of users...");
-			}
-			
-			result = datastore.run(query);
-			if (result == null) {
-				// User doesn't exist
-				return Result.error(Response.Status.NOT_FOUND, "User " + data.getUsername() + " doens't exist");
-			}
+		if (loginData != null)	{
+			hashedPassword = loginData.getPassword();
+			if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))){
+				String jws = TOKEN.createNewJWS(user_id, 1);
 
-			Key usrCurrentToken = datastore.newKeyFactory()
-					.setKind("UserToken")
-					.newKey(user_id);
+				String refresh_token = TOKEN.newRefreshToken();
 
-			// Create new transation
-			//Transaction tnx = datastore.newTransaction();
-
-			try {
-				while (result.hasNext()){
-					hashedPassword =  result.next().getString("usr_password");
-
-					if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))) {
-						// Correct password
-
-						// Return token
-						LOG.info("User " + data.getUsername() + "logged in successfully");
-
-						String jws = this.createNewJWS(user_id);
-
-						String refresh_token = this.newRefreshToken();
-						//AuthToken at = new AuthToken(user_id);
-
-						this.userToken.put(refresh_token, jws);
-
-						/*Entity token = Entity.newBuilder(usrCurrentToken)
-								//.set("refresh_token", refresh_token)
-								.set("jwt", jws)
-								.build();
-
-						tnx.put(token);
-						tnx.commit();*/
-						return Result.ok(jws);
-					}
-				}
-
-				LOG.warning("Wrong Password");
-				//tnx.rollback();
+				return Result.ok(jws);
+			} else {
 				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
-			} finally {
-				/*if (tnx.isActive()) {
-					tnx.rollback();
-				}*/
 			}
+		} else {
+			//TODO Testing
+			QueryResults<Entity> result = this.find(data.getUsername(), "UserCredentials", "usr_username", 5);
+			if (!result.hasNext()){
+				result = this.find(data.getEmail(), "UserCredentials", "usr_email", 5);
+			}
+
+			while (result.hasNext()){
+				Entity curr_result = result.next();
+				hashedPassword = curr_result.getString("usr_password");
+
+				if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))) {
+					// Correct password
+
+					// Return token
+					LOG.info("User " + data.getUsername() + "logged in successfully");
+
+					String jws = TOKEN.createNewJWS(user_id, 1);
+
+					String refresh_token = TOKEN.newRefreshToken();
+
+					//Store in cache
+					LoginData store_data = new LoginData(curr_result.getString("usr_username"),
+							curr_result.getString("usr_email"),
+							curr_result.getString("usr_password"));
+					this.cache.put(user_id, store_data);
+					this.cache.put(user_id, "token", jws);
+
+					return Result.ok(jws);
+				}
+			}
+
+			LOG.warning("Wrong Password");
+			return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
 		}
-		return Result.error(Status.BAD_REQUEST, "Oops");
+	}
+
+	private QueryResults<Entity> find(String identifier, String kind, String parameter, int limit_query){
+		Query<Entity> query = Query.newEntityQueryBuilder()
+				.setKind(kind)
+				.setFilter(PropertyFilter.eq(parameter, identifier))
+				.setLimit(limit_query)
+				.build();
+
+		return datastore.run(query);
 	}
 
 	@Override
 	public Result<Void> logout(String token) {
 
 		LOG.fine("Logout attempt");
-		Claims jws = this.verifyToken(token);
+
+		Claims jws = TOKEN.verifyToken(token);
 
 		if (jws == null){
 			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
 
-		String user_id = jws.getId();
+		//Revoke token
+		String userID = jws.getSubject();
+		this.cache.remove(userID, "token");
 
-		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
-
-		// Create new transation
-		Transaction tnx = datastore.newTransaction();
-
-		try {
-
-			Entity token_entity = tnx.get(usrCurrentToken);
-
-			if (token_entity == null) {
-				tnx.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.BAD_REQUEST, "Token Invalid");
-			}
-
-			/*if (!token.tokenID.equals(token_creation.tokenID)) {
-				tnx.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_ACCEPTABLE, "Token Invalid");
-			}*/
-
-			tnx.delete(usrCurrentToken);
-			//userToken.remove(user_id);
-			tnx.commit();
-			return Result.ok();
-		} finally {
-			if (tnx.isActive()) {
-				tnx.rollback();
-			}
-		}
+		return Result.ok();
 	}
 
 	@Override
 	public Result<Void> promote(String token, String username, String new_role) {
 
-		Jws<Claims> jws;
-		String jwsString = "";
-		String user_id = username;
-		String high_user_id = "";
+		Claims jws = TOKEN.verifyToken(token);
 
-		try{
-			jws = Jwts.parserBuilder()  // (1)
-					.setSigningKey(key)         // (2)
-					.build()                    // (3)
-					.parseClaimsJws(jwsString); // (4)
-
-			user_id = jws.getBody().getId();
-		} catch (JwtException e){
-			return Result.error(Status.FORBIDDEN, "Invalid token");
+		if (jws == null){
+			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
 
-		long curr_time = System.currentTimeMillis();
-		long expirationData = jws.getBody().getExpiration().getTime();
-		if (curr_time > expirationData) {
-			LOG.warning("Token invalid");
-			return Result.error(Status.NOT_FOUND, "Token invalid");
+		String high_user_id = jws.getSubject();
+		//Query to lookup for given user
+		String user_id_promote = username;
+
+		if (user_id_promote.equals(high_user_id)) {
+			LOG.warning("Same user");
+			return Result.error(Status.FORBIDDEN, "Same user");
 		}
 
 		LOG.fine("Promotion of user " + username);
 
 		// User to verify
-		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
-		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
-		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token);
+		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id_promote);
+		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id_promote);
 
 		// Higher priority user
 		Key high_usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(high_user_id);
 		Key high_usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(high_user_id);
 
-		if (user_id.equals(high_user_id)) {
-			LOG.warning("Same user");
-			return Result.error(Status.BAD_REQUEST, "Same user");
-		}
-
 		// Create new transation
 		Transaction tnx = datastore.newTransaction();
 
 		try {
-			Entity user_verify = tnx.get(usrPermissionkey);
-			Entity user_role = tnx.get(usrRoleKey);
+			Entity user_verify = this.cache.get(user_id_promote, "permission", Entity.class);
+			if (user_verify == null) user_verify = tnx.get(usrPermissionkey);
+
+			Entity user_role = this.cache.get(user_id_promote, "role", Entity.class);
+			if (user_role == null) user_role = tnx.get(usrRoleKey);
 
 			if (user_verify == null || user_role == null) {
 				// User doesn't exist
 				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST, "User " + username + "doens't exist");
+				return Result.error(Status.BAD_REQUEST, "User " + username + "doesn't exist");
 			}
 
-			Entity token_entity = tnx.get(usrCurrentToken);
+			this.cache.put(user_id_promote, "permission", user_verify);
+			this.cache.put(user_id_promote, "role", user_role);
 
-			if (token_entity == null) {
-				tnx.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.BAD_REQUEST, "Token invalid");
-			}
+			Entity high_user_verify = this.cache.get(high_user_id, "permission", Entity.class);
+			if (high_user_verify == null) high_user_verify = tnx.get(high_usrPermissionkey);
 
-			Entity high_user_verify = tnx.get(high_usrPermissionkey);
-			Entity high_user_role = tnx.get(high_usrRoleKey);
+			Entity high_user_role = this.cache.get(high_user_id, "role", Entity.class);
+			if (high_user_role == null) high_user_role = tnx.get(high_usrRoleKey);
 
 			if (high_user_verify == null || high_user_role == null) {
 				// Given higher priority User doesn't exist
 				tnx.rollback();
 				return Result.error(Status.BAD_REQUEST, "User doens't exist");
 			}
+
+			this.cache.put(high_user_id, "permission", high_user_verify);
+			this.cache.put(high_user_id, "role", high_user_role);
 
 			UserRole role = UserRole.compareType(new_role);
 			long high_role_priority = high_user_role.getLong("role_priority");
@@ -363,8 +297,11 @@ public class UserImplementation implements Users {
 			}
 
 			// Success
-			user_role = Entity.newBuilder(usrRoleKey).set("role_name", role.toString())
-					.set("role_priority", role.getPriority()).build();
+			user_role = Entity.newBuilder(usrRoleKey)
+					.set("role_name", role.toString())
+					.set("role_priority", role.getPriority())
+					.build();
+			this.cache.put(user_id_promote, "role", user_role);
 
 			tnx.put(user_role);
 			tnx.commit();
@@ -377,106 +314,94 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<String[]> getUser(String username) {
-		String user_id = username.trim();
-		Key userKey = userKeyFactory.newKey(user_id);
+	public Result<Set<String[]>> getUser(String token, String identifier) {
+		//Token verifycation
+		Claims jws = TOKEN.verifyToken(token);
+
+		if (jws == null){
+			return Result.error(Status.FORBIDDEN, "Invalid Token");
+		}
+
+		if (identifier.trim().equals("")){
+			Set<String[]> result = new HashSet<>();
+			result.add(new String[]{jws.getSubject(), jws.getId()});
+			return Result.ok(result);
+		}
+
+		//Query only for user identifiers
+		//TODO Testing
+		QueryResults<Entity> result = this.find(identifier, "UserCredentials", "usr_username", 5);
+		if (!result.hasNext()){
+			result = this.find(identifier, "UserCredentials", "usr_email", 5);
+		}
+
+		//TODO
+		Set<String[]> result_set = new HashSet<>();
+		while(result.hasNext()){
+			Entity curr_result = result.next();
+			String user_id = curr_result.getKey().getName();
+
+			String[] user_info = {
+					user_id, //TODO remove userID
+					curr_result.getString("usr_username"),
+					curr_result.getString("usr_email")
+			};
+			result_set.add(user_info);
+		}
+
+		//Get from DB
+		/*Key userKey = userKeyFactory.newKey(user_id);
 		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
 		Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 
-		Transaction txn = datastore.newTransaction();
+		Entity user = this.cache.get(user_id, "credentials", Entity.class);
+		if (user == null) user = datastore.get(userKey);
 
-		try {
-			Entity user = txn.get(userKey);
-
-			if (user == null) {
-				txn.rollback();
-				return Result.error(Status.BAD_REQUEST, "");
-			}
-
-			Entity userInfo = txn.get(userInfoKey);
-			Entity userRole = txn.get(userRoleKey);
-			//Entity userPermission = txn.get(userPermissionKey);
-
-			String[] response = {
-					username,
-					user.getString("usr_email"),
-					userInfo.getString("usr_name"),
-					userInfo.getString("usr_telephone"),
-					userInfo.getString("usr_smartphone"),
-					userInfo.getString("usr_address"),
-					userInfo.getString("usr_NIF"),
-					userRole.getString("role_name")
-			};
-
-			return Result.ok(response);
-		} finally {
-			if (txn.isActive()) {
-				txn.rollback();
-			}
+		if (user == null) {
+			return Result.error(Status.BAD_REQUEST, "");
 		}
+
+		Entity userInfo = this.cache.get(user_id, "info", Entity.class);
+		if (userInfo == null) userInfo = datastore.get(userInfoKey);
+
+		Entity userRole = this.cache.get(user_id, "role", Entity.class);
+		if (userRole == null) userRole = datastore.get(userRoleKey);
+
+
+		String[] response = {
+				username,
+				user.getString("usr_email"),
+				userInfo.getString("usr_name"),
+				userInfo.getString("usr_telephone"),
+				userInfo.getString("usr_smartphone"),
+				userInfo.getString("usr_address"),
+				userInfo.getString("usr_NIF"),
+				userRole.getString("role_name")
+		};*/
+
+		return Result.ok(result_set);
 	}
 
 	//TODO
 	@Override
 	public Result<String> refresh_token(String old_refresh_token) {
-		return Result.ok(this.newRefreshToken());
-	}
-
-	private String newRefreshToken(){
-		Date creationDate = new Date();
-		Date expirationDate = new Date(System.currentTimeMillis()+AuthToken.EXPIRATION_TIME);
-		String refresh_token = Jwts.builder()
-				.setExpiration(expirationDate) //a java.util.Date
-				.setIssuedAt(creationDate) // for example, now
-				.signWith(key)
-				.setId(UUID.randomUUID().toString())
-				.compact(); //just an example id
-		return refresh_token;
-	}
-
-	@Override
-	public Result<AuthToken> getToken(String username) {
-		String user_id = username.trim();
-		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
-
-		Transaction txn = datastore.newTransaction();
-
-		try {
-			Entity token = txn.get(usrCurrentToken);
-
-			if (token == null) {
-				txn.rollback();
-				return Result.error(Status.BAD_REQUEST,"");
-			}
-
-			return Result.ok();
-		} finally {
-			if (txn.isActive()) {
-				txn.rollback();
-			}
-		}
+		return Result.ok(TOKEN.newRefreshToken());
 	}
 
 	@Override
 	public Result<Void> remove(String token, String username) {
 		LOG.fine("Removing user " + username);
 
-		String jwsString = "";
-		Claims jws = this.verifyToken(token);
+		Claims jws = TOKEN.verifyToken(token);
 
 		if (jws == null){
 			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
 
-		long curr_time = System.currentTimeMillis();
-		long expirationData = jws.getExpiration().getTime();
-		if (curr_time > expirationData) {
-			LOG.warning("Token invalid");
-			return Result.error(Status.NOT_FOUND, "Token invalid");
-		}
-
 		String user_id = jws.getId();
+
+		//Query to lookup all users
 		String remove_id = username.trim();
 
 		Key userKey = userKeyFactory.newKey(user_id);
@@ -494,16 +419,11 @@ public class UserImplementation implements Users {
 		Transaction txn = datastore.newTransaction();
 
 		try {
-			// TODO Testing
-			Entity token_entity = txn.get(usrCurrentToken);
-
-			if (token_entity == null) {
-				txn.rollback();
-				LOG.fine("Username not logged in");
-				return Result.error(Status.NOT_ACCEPTABLE,"");
+			Entity userRole = this.cache.get(user_id, "role", Entity.class);
+			if (userRole == null){
+				userRole = txn.get(userRoleKey);
+				this.cache.put(user_id, "role", userRole);
 			}
-
-			Entity userRole = txn.get(userRoleKey);
 
 			if (user_id.equals(remove_id) && userRole.getLong("role_priority") <= 0) {
 
@@ -558,12 +478,11 @@ public class UserImplementation implements Users {
 	public Result<Void> activate(String token, String username) {
 		LOG.fine("Verification user " + username);
 
-		/*long curr_time = System.currentTimeMillis();
-		long expirationData = jws.getBody().getExpiration().getTime();
-		if (curr_time > expirationData) {
-			LOG.warning("Token invalid");
-			return Result.error(Status.NOT_FOUND, "Token invalid");
-		}*/
+		Claims jws = TOKEN.verifyToken(token);
+
+		if (jws == null){
+			return Result.error(Status.FORBIDDEN, "Invalid token");
+		}
 
 		// Create key outside of this transaction
 		// User to verify
@@ -682,9 +601,6 @@ public class UserImplementation implements Users {
 				return Result.error(Status.BAD_REQUEST, "");
 			}
 
-			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
-			long curr_time = System.currentTimeMillis();
-
 			/*if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				LOG.warning("Token invalid");
 				return Result.error(Status.NOT_FOUND, "");
@@ -744,9 +660,6 @@ public class UserImplementation implements Users {
 				return Result.error(Status.BAD_REQUEST, "");
 			}
 
-			AuthToken token_creation = g.fromJson(userToken.getString("creation_data"), AuthToken.class);
-			long curr_time = System.currentTimeMillis();
-
 			/*if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
 				tnx.rollback();
 				LOG.warning("Token invalid");
@@ -780,7 +693,7 @@ public class UserImplementation implements Users {
 			Entity target = tnx.get(target_usrKey_info);
 			final String[] list_att = { "usr_visibility", "usr_name", "usr_telephone", "usr_smartphone", "usr_address",
 					"usr_NIF" };
-			String[] attributes = g.fromJson(list_json, String[].class);
+			/*String[] attributes = g.fromJson(list_json, String[].class);
 			for (int i = 0; i < attributes.length; i++) {
 				attributes[i] = attributes[i].trim().equals("") ? target.getString(list_att[i]) : attributes[i];
 			}
@@ -791,47 +704,12 @@ public class UserImplementation implements Users {
 					.set("usr_NIF", attributes[5]).build();
 
 			tnx.put(target);
-			tnx.commit();
+			tnx.commit();*/
 			return Result.ok();
 		} finally {
 			if (tnx.isActive()) {
 				tnx.rollback();
 			}
 		}
-	}
-
-	private String createNewJWS(String user_id){
-		long nowMillis = System.currentTimeMillis();
-		Date now = new Date(nowMillis);
-		Date expiration = new Date(nowMillis + AuthToken.EXPIRATION_TIME);
-
-		//Let's set the JWT Claims
-		JwtBuilder builder = Jwts.builder()
-				.setId(String.valueOf(UUID.randomUUID()))
-				.setSubject(user_id)
-				.setIssuedAt(now)
-				.setExpiration(expiration)
-				.signWith(key);
-
-		//Builds the JWT and serializes it to a compact, URL-safe string
-		//this.verifyToken(builder.compact());
-		System.out.println(builder.compact());
-		return builder.compact();
-	}
-
-	private Claims verifyToken(String jwsString){
-		Claims jws = null;
-		try{
-			jws = Jwts.parserBuilder()
-							.setSigningKey(key)
-									.build()
-											.parseClaimsJws(jwsString)
-													.getBody();
-			System.out.println(jws.getSubject());
-		} catch (JwtException e){
-			System.out.println(e.getMessage());
-			return null;
-		}
-		return jws;
 	}
 }

@@ -1,5 +1,4 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +14,7 @@ import org.locationtech.jts.geom.Polygon;
 import pt.unl.fct.di.adc.silvanus.data.parcel.Chunk;
 import pt.unl.fct.di.adc.silvanus.data.parcel.ParcelaData;
 import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
-import pt.unl.fct.di.adc.silvanus.util.interfaces.Parcel;
+import pt.unl.fct.di.adc.silvanus.api.Parcel;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import java.util.ArrayList;
