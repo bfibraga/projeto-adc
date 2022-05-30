@@ -1,25 +1,17 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.json.Json;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
+import pt.unl.fct.di.adc.silvanus.api.impl.Parcel;
 import pt.unl.fct.di.adc.silvanus.data.parcel.Chunk;
 import pt.unl.fct.di.adc.silvanus.data.parcel.ParcelaData;
 import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
-import pt.unl.fct.di.adc.silvanus.api.Parcel;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 

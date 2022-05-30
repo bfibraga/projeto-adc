@@ -14,7 +14,7 @@ import static pt.unl.fct.di.adc.silvanus.api.rest.RestUsers.CHARSET;
 //TODO Review all Rest operations 
 @Produces(MediaType.APPLICATION_JSON + CHARSET)
 public interface RestUsers {
-	String CHARSET = ";charset=utf-8";
+	static String CHARSET = ";charset=utf-8";
 	String PATH = "/user";
 
 	@POST

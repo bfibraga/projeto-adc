@@ -7,8 +7,9 @@ enum UserProperties {
 }
 
 /**
- * User cache manager
- * @param <K> - Type of the key
+ * User Cache manager
+ * @author GreenTeam
+ * @param <K> Type of the key
  */
 public class UserCacheManager<K> extends CacheManager<K> {
 

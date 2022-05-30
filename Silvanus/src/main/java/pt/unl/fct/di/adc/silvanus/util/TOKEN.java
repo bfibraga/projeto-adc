@@ -5,11 +5,8 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
-import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
 import java.security.Key;
 import java.util.Date;
 import java.util.UUID;

@@ -12,18 +12,17 @@ import java.util.concurrent.TimeUnit;
 /**
  * Abstract Cache manager
  * @author GreenTeam
+ * @param <K> Type of the key
  */
 public abstract class CacheManager<K> {
 
     private static final int MINS_DURATION = 12*60;
+
+    //TODO Maybe introduce "importance" levels of cache
     protected Cache cache;
 
     public CacheManager(){
-        try {
-            this.createCache(MINS_DURATION);
-        } catch (CacheException e) {
-            System.out.println(e.getMessage());
-        }
+        this(MINS_DURATION);
     }
 
     public CacheManager(long expiration_time) {
