@@ -7,6 +7,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import pt.unl.fct.di.adc.silvanus.data.parcel.Coordenada;
 import pt.unl.fct.di.adc.silvanus.data.parcel.ParcelaData;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
@@ -33,5 +34,13 @@ public class ParcelaResource {
 		}
 		
 		return Response.ok().build();
+	}
+
+	@POST
+	@Path("/querie")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	public void doQuerie(Coordenada[] parcela) {
+		impl.quuéééééééééééééééééééééériiiiiiiiiisssssssssss(parcela);
 	}
 }

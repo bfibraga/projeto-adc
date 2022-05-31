@@ -63,10 +63,6 @@ public class Chunk {
 		return idChunk;
 	}
 
-	public boolean pontoEstaDentro(float x, float y) {
-		return (x < leftX && x > rightX) && (y < topY && y > bottomY);
-	}
-
 	public String toString() {
 		String result = String.format("%s: { %.2f ; %.2f ; %.2f ; %.2f }", getIdChunk(), getleftX(), getrightX(),
 				gettopY(), getbottomY());

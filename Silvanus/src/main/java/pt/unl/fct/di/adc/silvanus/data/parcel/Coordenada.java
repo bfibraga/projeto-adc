@@ -1,6 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.data.parcel;
 
 public class Coordenada {
+
     private float lat;
     private float lon;
 

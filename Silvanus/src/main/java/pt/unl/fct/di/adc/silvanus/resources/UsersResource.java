@@ -11,7 +11,7 @@ import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
-import pt.unl.fct.di.adc.silvanus.util.RestUsers;
+import pt.unl.fct.di.adc.silvanus.util.interfaces.RestUsers;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import java.util.Date;

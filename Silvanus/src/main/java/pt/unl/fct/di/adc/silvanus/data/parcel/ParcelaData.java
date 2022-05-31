@@ -30,8 +30,8 @@ public class ParcelaData {
     }
 
     public ParcelaData(Coordenada[] parcela, String id_of_owner, String name_of_terrain, String description_of_terrain,
-                       String conselho_of_terrain, String freguesia_of_terrain, String section_of_terrain, String number_article_terrain,
-                       String type_of_soil_coverage, String current_use_of_soil, String previous_use_of_soil) {
+                       String conselho_of_terrain, String freguesia_of_terrain, String section_of_terrain,
+                       String number_article_terrain, String type_of_soil_coverage, String current_use_of_soil, String previous_use_of_soil) {
         this.parcela = parcela;
         this.id_of_owner = id_of_owner;
         this.name_of_terrain = name_of_terrain;
@@ -88,4 +88,5 @@ public class ParcelaData {
     public String getPrevious_use_of_soil() {
         return previous_use_of_soil;
     }
+
 }
