@@ -36,7 +36,6 @@ public class ResultERROR<T> implements Result<T> {
 
 	@Override
 	public String statusMessage() {
-		// TODO Auto-generated method stub
 		return response;
 	}
 }

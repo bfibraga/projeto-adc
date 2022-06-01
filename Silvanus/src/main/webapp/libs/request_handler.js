@@ -36,6 +36,7 @@ async function register(){
 		let u_nif = String(document.getElementById("usr_id").value);
 		let u_address = String(document.getElementById("usr_adress").value);
 
+		//TODO Change this
 		const response = await axios.post("/api/user/register",
 			{
 				"username": u_username,
@@ -52,10 +53,9 @@ async function register(){
 				"smartphone": u_smartphone
 		});
 
-
 		console.log(response);
 
-		//window.location.replace(base_uri + "/login");
+		window.location.replace(base_uri + "/app");
 	} catch (error){
 		console.log(error);
 	} finally {

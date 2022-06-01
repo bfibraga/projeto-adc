@@ -3,6 +3,7 @@ package pt.unl.fct.di.adc.silvanus.resources;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
+import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestUsers;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
@@ -31,7 +32,7 @@ public class UsersResource implements RestUsers {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-		return Response.ok().entity(result.value()).build();
+		return Response.ok().cookie(TOKEN.cookie(result.value())).build();
 	}
 
 	@Override
@@ -43,7 +44,7 @@ public class UsersResource implements RestUsers {
 		Result<String> result = impl.login(data);
 
 		if (!result.isOK()) {
-			return Response.status(result.error()).entity(result.statusMessage()).build();
+			return Response.status(result.error()).entity(result.statusMessage()).cookie(TOKEN.cookie(null)).build();
 		}
 
 		System.out.println("Token\n" + "token" + " -> " + result.value());
@@ -79,7 +80,7 @@ public class UsersResource implements RestUsers {
 	@Override
 	public Response getUser(String token, String identifier) {
 		//TODO Alter getUser implementation
-		Result<Set<String[]>> result = impl.getUser(token, identifier);
+		Result<Set<UserInfoVisible>> result = impl.getUser(token, identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();

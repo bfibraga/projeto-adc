@@ -7,6 +7,7 @@ import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheFactory;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,7 +38,8 @@ public abstract class CacheManager<K> {
         CacheFactory cacheFactory = javax.cache.CacheManager.getInstance().getCacheFactory();
         Map<Integer, Long> properties = new HashMap<>();
         properties.put(GCacheFactory.EXPIRATION_DELTA, TimeUnit.MINUTES.toHours(expiration_time));
-        this.cache = cacheFactory.createCache(Collections.emptyMap());
+        //TODO Test this part
+        this.cache = cacheFactory.createCache(new ConcurrentHashMap<>());
     }
 
     /**
@@ -59,20 +61,19 @@ public abstract class CacheManager<K> {
     }
 
     /**
-     *
-     * @param subKey
+     * @param <O>
+     * @param pattern
      * @param property
      * @param class_object
      * @return
-     * @param <O>
      */
     @SuppressWarnings("unchecked")
-    public <O> List<O> getAll(K subKey, String property, Class<O> class_object){
-        if (subKey == null) {
+    public <O> List<O> getAll(K pattern, String property, Class<O> class_object){
+        if (pattern == null) {
             return new ArrayList<>();
         }
         List<O> result = new ArrayList<>();
-        String regex = "(.*)" + subKey + "(.*)";
+        String regex = "(.*)" + pattern + "(.*)";
         for (Map.Entry<String, String> stringStringEntry : (Iterable<Map.Entry<String, String>>) this.cache.entrySet()) {
             String curr_key = stringStringEntry.getKey();
             if (curr_key.matches(regex)) {
@@ -135,8 +136,8 @@ public abstract class CacheManager<K> {
         Map<String, String> available_data_json = (Map<String, String>) this.cache.get(keyID);
 
         if (available_data_json == null){
-            this.cache.put(keyID, new HashMap<>());
-            return new HashMap<>();
+            this.cache.put(keyID, new ConcurrentHashMap<>());
+            return new ConcurrentHashMap<>();
         }
 
         return available_data_json;
