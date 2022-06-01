@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.util.interfaces;
+package pt.unl.fct.di.adc.silvanus.api.rest;
 
 import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
 
@@ -6,7 +6,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-public interface NotificationsRest {
+public interface RestNotifications {
 
     /**
      * Metodo que e usada para uma notificacao poder ser enviada de um user para outro

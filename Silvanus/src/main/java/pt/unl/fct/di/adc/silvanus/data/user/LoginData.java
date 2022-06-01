@@ -1,6 +1,8 @@
 package pt.unl.fct.di.adc.silvanus.data.user;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import pt.unl.fct.di.adc.silvanus.util.cripto.CRIPTO;
+import pt.unl.fct.di.adc.silvanus.util.cripto.CriptoManager;
 
 public class LoginData {
 
@@ -99,5 +101,10 @@ public class LoginData {
 	public String getID(){
 		return this.getUsername().hashCode() + "." +
 				this.getEmail().hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Username: %s\nEmail: %s\nPassword: %s\n", this.getUsername(), this.getEmail(), this.getPassword());
 	}
 }

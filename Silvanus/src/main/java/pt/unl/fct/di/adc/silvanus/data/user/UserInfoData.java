@@ -3,7 +3,6 @@ package pt.unl.fct.di.adc.silvanus.data.user;
 public class UserInfoData {
 
     private String name;
-    private String state;
     private String visibility;
     private String nif;
     private String address;
@@ -12,10 +11,9 @@ public class UserInfoData {
 
     public UserInfoData(){}
 
-    public UserInfoData(String name, String state, String visibility, String nif, String address, String telephone, String smartphone){
+    public UserInfoData(String name, String visibility, String nif, String address, String telephone, String smartphone){
         this.name = name;
-        this.state = state;
-        this.visibility = visibility;
+        this.visibility = visibility.toUpperCase();
         this.nif = nif;
         this.address = address;
         this.telephone = telephone;
@@ -24,10 +22,6 @@ public class UserInfoData {
 
     public String getName() {
         return this.name;
-    }
-
-    public String getState() {
-        return this.state;
     }
 
     public String getVisibility() {

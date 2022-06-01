@@ -1,10 +1,11 @@
-package pt.unl.fct.di.adc.silvanus.api;
+package pt.unl.fct.di.adc.silvanus.api.impl;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
+import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Context;
@@ -20,7 +21,7 @@ public interface Users {
 	
 	Result<Void> promote(String token, String username, String new_role);
 
-	Result<Set<String[]>> getUser(String token, String identifier);
+	Result<Set<UserInfoVisible>> getUser(String token, String identifier);
 
 	Result<String> refresh_token(String old_refresh_token);
 

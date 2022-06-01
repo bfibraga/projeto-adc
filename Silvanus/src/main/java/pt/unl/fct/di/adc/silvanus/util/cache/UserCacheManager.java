@@ -7,8 +7,9 @@ enum UserProperties {
 }
 
 /**
- * User cache manager
- * @param <K> - Type of the key
+ * User Cache manager
+ * @author GreenTeam
+ * @param <K> Type of the key
  */
 public class UserCacheManager<K> extends CacheManager<K> {
 
@@ -65,6 +66,11 @@ public class UserCacheManager<K> extends CacheManager<K> {
         this.put(key, UserProperties.STATE.name(), data);
     }
 
+    /**
+     * Get a LoginData of given key
+     * @param key - Given key to get the object
+     * @return LoginData of key
+     */
     public LoginData getLoginData(K key){
         return this.get(key, UserProperties.CREDENTIALS.name(), LoginData.class);
     }

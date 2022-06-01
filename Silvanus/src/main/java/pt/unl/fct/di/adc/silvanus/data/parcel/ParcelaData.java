@@ -1,9 +1,11 @@
 package pt.unl.fct.di.adc.silvanus.data.parcel;
 
+import org.locationtech.jts.geom.Coordinate;
+
 public class ParcelaData {
 
     // --- Pontos do mapa, area e o centro da parcela ---
-    private Coordenada[] parcela;
+    private Coordinate[] parcela;
     // --- Pontos do mapa, area e o centro da parcela ---
 
     // --- Informacao do utilizador ou que este insere ---
@@ -29,7 +31,7 @@ public class ParcelaData {
 
     }
 
-    public ParcelaData(Coordenada[] parcela, String id_of_owner, String name_of_terrain, String description_of_terrain,
+    public ParcelaData(Coordinate[] parcela, String id_of_owner, String name_of_terrain, String description_of_terrain,
                        String conselho_of_terrain, String freguesia_of_terrain, String section_of_terrain, String number_article_terrain,
                        String type_of_soil_coverage, String current_use_of_soil, String previous_use_of_soil) {
         this.parcela = parcela;
@@ -45,7 +47,7 @@ public class ParcelaData {
         this.previous_use_of_soil = previous_use_of_soil;
     }
 
-    public Coordenada[] getParcela() {
+    public Coordinate[] getParcela() {
         return parcela;
     }
 

@@ -4,7 +4,7 @@ import com.google.cloud.datastore.*;
 import com.google.gson.Gson;
 import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
 import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
-import pt.unl.fct.di.adc.silvanus.util.interfaces.Notifications;
+import pt.unl.fct.di.adc.silvanus.api.impl.Notifications;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Response;

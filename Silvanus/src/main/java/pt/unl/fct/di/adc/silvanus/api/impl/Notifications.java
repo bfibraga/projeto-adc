@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.util.interfaces;
+package pt.unl.fct.di.adc.silvanus.api.impl;
 
 import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;

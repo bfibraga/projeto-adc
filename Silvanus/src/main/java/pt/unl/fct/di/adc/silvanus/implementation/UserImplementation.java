@@ -1,33 +1,24 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import javax.crypto.SecretKey;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import com.google.gson.Gson;
 import io.jsonwebtoken.*;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
-import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
-import pt.unl.fct.di.adc.silvanus.api.Users;
+import pt.unl.fct.di.adc.silvanus.api.impl.Users;
+import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
-import pt.unl.fct.di.adc.silvanus.util.cache.CacheManager;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
 
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 public class UserImplementation implements Users {
 
@@ -44,12 +35,15 @@ public class UserImplementation implements Users {
 	}
 	@Override
 	public Result<String> register(UserData data) {
-		LOG.fine("Register user " + data.getUsername());
 
 		boolean validation_code = data.validation();
-		if (validation_code) {
-			LOG.warning("User " + data.getUsername() + "tryied to register with some empty important information");
-			return Result.error(Response.Status.BAD_REQUEST, "User " + data.getUsername() + "tryied to register with some empty important information");
+		LoginData loginData = data.getCredentials();
+
+		LOG.fine("Register user " + loginData.getUsername());
+
+		if (!validation_code) {
+			LOG.warning("User " + loginData.getUsername() + " tryied to register with some empty important information");
+			return Result.error(Response.Status.BAD_REQUEST, "User " + loginData.getUsername() + "tryied to register with some empty important information");
 		}
 		String user_id = data.getID();
 
@@ -68,47 +62,45 @@ public class UserImplementation implements Users {
 
 			if (user != null) {
 				txn.rollback();
-				LOG.fine("Username " + data.getUsername() + "already exists\nTry again with another fancy nickname");
-				return Result.error(Response.Status.FORBIDDEN, "Username " + data.getUsername() + "already exists\nTry again with another fancy nickname");
+				LOG.fine("Username " + data.getCredentials().getUsername() + "already exists\nTry again with another fancy nickname");
+				return Result.error(Response.Status.FORBIDDEN, "Username " + data.getCredentials().getUsername() + "already exists\nTry again with another fancy nickname");
 			}
 
 			// Create a new User
 			user = Entity.newBuilder(userKey)
-					.set("usr_username", data.getUsername())
-					.set("usr_email", data.getEmail())
-					.set("usr_password", DigestUtils.sha512Hex(data.getPassword()))
+					.set("usr_username", loginData.getUsername())
+					.set("usr_email", loginData.getEmail())
+					.set("usr_password", DigestUtils.sha512Hex(loginData.getPassword()))
 					// .set("usr_confirmation", DigestUtils.sha512Hex(data.getConfirmation()))
 					.build();
-			LoginData loginData = data.getCredentials();
 			this.cache.put(user_id, loginData);
 
 			// Role attribution
 			UserRole role = UserRole.compareType(data.getRole());
 			Entity userRole = Entity.newBuilder(userRoleKey)
-					.set("role_name", role.toString())
+					.set("role_name", role.getRoleName())
 					.set("role_priority", role.getPriority()).build();
 			this.cache.put(user_id, role);
 
 			// Info of the new user
-			Entity userInfo = Entity.newBuilder(userInfoKey)
-					.set("usr_visibility", data.getVisibility())
-					.set("usr_name", data.getName())
-					.set("usr_telephone", data.getTelephone())
-					.set("usr_smartphone", data.getSmartphone())
-					.set("usr_address", data.getAddress())
-					.set("usr_NIF", data.getNif())
-					.build();
 			UserInfoData userInfoData = data.getInfo();
+			Entity userInfo = Entity.newBuilder(userInfoKey)
+					.set("usr_visibility", userInfoData.getVisibility())
+					.set("usr_name", userInfoData.getName())
+					.set("usr_telephone", userInfoData.getTelephone())
+					.set("usr_smartphone", userInfoData.getSmartphone())
+					.set("usr_address", userInfoData.getAddress())
+					.set("usr_NIF", userInfoData.getNif())
+					.build();
 			this.cache.put(user_id, userInfoData);
 
 			// Verification of this user
 			String verified = JSON.encode(new HashSet<>());
-			Entity userPermission;
-			userPermission = Entity.newBuilder(userPermissionKey)
-					.set("usr_state", data.getState())
+			UserStateData userStateData = data.getUserStateData();
+			Entity userPermission = Entity.newBuilder(userPermissionKey)
+					.set("usr_state", userStateData.getSet())
 					.set("list_usr_validation", verified)
 					.build();
-			UserStateData userStateData = data.getStateData();
 			this.cache.put(user_id, userStateData);
 
 			//TODO: First Registration information
@@ -117,7 +109,7 @@ public class UserImplementation implements Users {
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
 
-			LOG.info("User register " + data.getUsername() + " successfully");
+			LOG.info("User register " + loginData.getUsername() + " successfully");
 			return Result.ok(jws);
 		} finally {
 			if (txn.isActive()) {
@@ -139,11 +131,13 @@ public class UserImplementation implements Users {
 
 		//TODO refactor this cache part
 		LoginData loginData = this.cache.getLoginData(user_id);
+		System.out.println(loginData);
 
 		// Verify if the user is in cache
 		String hashedPassword = "";
-		if (loginData != null)	{
+		if (loginData != null) {
 			hashedPassword = loginData.getPassword();
+			System.out.println(hashedPassword.equals(data.getPassword()));
 			if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))){
 				String jws = TOKEN.createNewJWS(user_id, 1);
 
@@ -151,6 +145,7 @@ public class UserImplementation implements Users {
 
 				return Result.ok(jws);
 			} else {
+				LOG.warning("Wrong Password");
 				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
 			}
 		} else {
@@ -175,10 +170,11 @@ public class UserImplementation implements Users {
 					String refresh_token = TOKEN.newRefreshToken();
 
 					//Store in cache
-					LoginData store_data = new LoginData(curr_result.getString("usr_username"),
+					//TODO Check if this works
+					/*LoginData store_data = new LoginData(curr_result.getString("usr_username"),
 							curr_result.getString("usr_email"),
-							curr_result.getString("usr_password"));
-					this.cache.put(user_id, store_data);
+							curr_result.getString("usr_password"));*/
+					this.cache.put(user_id, data.setPassword(DigestUtils.sha512Hex(data.getPassword())));
 					this.cache.put(user_id, "token", jws);
 
 					return Result.ok(jws);
@@ -314,7 +310,7 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Set<String[]>> getUser(String token, String identifier) {
+	public Result<Set<UserInfoVisible>> getUser(String token, String identifier) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -322,10 +318,15 @@ public class UserImplementation implements Users {
 			return Result.error(Status.FORBIDDEN, "Invalid Token");
 		}
 
-		if (identifier.trim().equals("")){
-			Set<String[]> result = new HashSet<>();
-			result.add(new String[]{jws.getSubject(), jws.getId()});
-			return Result.ok(result);
+		//TODO Change key to remove some values when changing the values in other commands
+		String key = jws.getSubject() + identifier;
+		String property = "getUser:" + jws.getId() + "." + jws.getSubject();
+		//TODO to test this set object
+		@SuppressWarnings("unchecked")
+		Set<UserInfoVisible> stored = this.cache.get(key, property, Set.class);
+
+		if (stored != null){
+			return Result.ok(stored);
 		}
 
 		//Query only for user identifiers
@@ -336,49 +337,38 @@ public class UserImplementation implements Users {
 		}
 
 		//TODO
-		Set<String[]> result_set = new HashSet<>();
+		Set<UserInfoVisible> result_set = new HashSet<>();
 		while(result.hasNext()){
 			Entity curr_result = result.next();
 			String user_id = curr_result.getKey().getName();
 
-			String[] user_info = {
-					user_id, //TODO remove userID
+			System.out.println(user_id);
+			Key infoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
+			Key stateKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
+			Key roleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
+
+			Entity infoEntity = datastore.get(infoKey);
+			Entity stateEntity = datastore.get(stateKey);
+			Entity roleEntiry  = datastore.get(roleKey);
+
+			//TODO Change the way to return result
+			UserInfoVisible user_info = new UserInfoVisible(
 					curr_result.getString("usr_username"),
-					curr_result.getString("usr_email")
-			};
+					curr_result.getString("usr_email"),
+					infoEntity.getString("usr_name"),
+					infoEntity.getString("usr_visibility"),
+					infoEntity.getString("usr_NIF"),
+					infoEntity.getString("usr_address"),
+					infoEntity.getString("usr_telephone"),
+					infoEntity.getString("usr_smartphone"),
+					stateEntity.getString("usr_state"),
+					roleEntiry.getString("role_name")
+			);
+
 			result_set.add(user_info);
 		}
 
-		//Get from DB
-		/*Key userKey = userKeyFactory.newKey(user_id);
-		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
-		Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
-		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
-
-		Entity user = this.cache.get(user_id, "credentials", Entity.class);
-		if (user == null) user = datastore.get(userKey);
-
-		if (user == null) {
-			return Result.error(Status.BAD_REQUEST, "");
-		}
-
-		Entity userInfo = this.cache.get(user_id, "info", Entity.class);
-		if (userInfo == null) userInfo = datastore.get(userInfoKey);
-
-		Entity userRole = this.cache.get(user_id, "role", Entity.class);
-		if (userRole == null) userRole = datastore.get(userRoleKey);
-
-
-		String[] response = {
-				username,
-				user.getString("usr_email"),
-				userInfo.getString("usr_name"),
-				userInfo.getString("usr_telephone"),
-				userInfo.getString("usr_smartphone"),
-				userInfo.getString("usr_address"),
-				userInfo.getString("usr_NIF"),
-				userRole.getString("role_name")
-		};*/
+		this.cache.put(key, property, result_set);
 
 		return Result.ok(result_set);
 	}

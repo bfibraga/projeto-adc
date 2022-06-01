@@ -1,107 +1,71 @@
 package pt.unl.fct.di.adc.silvanus.data.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.cloud.storage.Acl;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserData {
 
 	public static final String SEPARATOR = ".";
 
-	private String username;
-	private String email;
-	private String name;
-	private String password;
-	private String confirm;
+	private LoginData credentials;
+	private String confirm_password;
+	private UserInfoData info;
 	private String role;
-	private String state;
-	private String visibility;
-	private String nif;
-	private String address;
-	private String telephone;
-	private String smartphone;
+	private UserStateData state;
 
-	public UserData() {
+	public UserData() {}
 
+	public UserData(
+			LoginData credentials,
+			String confirm_password,
+			String role,
+			UserInfoData info) {
+		this(credentials, confirm_password, info, UserRole.compareType(role).getRoleName(), new UserStateData());
 	}
 
 	public UserData(
-			String username,
-			String email, 
-			String name, 
-			String password,
-			String confirm,
+			LoginData credentials,
+			String confirm_password,
+			UserInfoData info,
 			String role,
-			String state,
-			String visibility,
-			String nif,
-			String address,
-			String telephone,
-			String smartphone) {
-		this.username = username;
-		this.email = email;
-		this.name = name;
-		this.password = password;
-		this.confirm = confirm;
+			UserStateData state) {
+		this.credentials = credentials;
+		this.confirm_password = confirm_password;
+		this.info = info;
 		this.role = role;
 		this.state = state;
-		this.visibility = visibility;
-		this.nif = nif;
-		this.address = address;
-		this.telephone = telephone;
-		this.smartphone = smartphone;
 	}
-	
-	public String getUsername() {
-		return this.username;
+
+	public LoginData getCredentials() {
+		return this.credentials;
 	}
-	
-	public String getEmail() {
-		return this.email;
+
+	public String getConfirm_password() {
+		return this.confirm_password;
 	}
-	
-	public String getName() {
-		return this.name;
+
+	public UserInfoData getInfo() {
+		return this.info;
 	}
-	
-	public String getPassword() {
-		return this.password;
-	}
-	
-	public String getConfirmation() {
-		return this.confirm;
-	}
-	
+
 	public String getRole() {
+		if (this.role == null){
+			this.role = UserRole.USER.getRoleName();
+		}
 		return this.role;
 	}
-	
-	public String getState() {
+
+	public UserStateData getUserStateData() {
+		if (this.state == null){
+			this.state = new UserStateData();
+		}
 		return this.state;
-	}
-	
-	public String getVisibility() {
-		return this.visibility;
-	}
-	
-	public String getNif() {
-		return this.nif;
-	}
-	
-	public String getAddress() {
-		return this.address;
-	}
-	
-	public String getTelephone() {
-		return this.telephone;
-	}
-	
-	public String getSmartphone() {
-		return this.smartphone;
 	}
 
 	public String getID(){
-		return this.getUsername().hashCode() + SEPARATOR +
-				this.getEmail().hashCode();
+		LoginData data = this.getCredentials();
+		return data.getUsername().hashCode() + SEPARATOR +
+				data.getEmail().hashCode();
 	}
 
 	private boolean validField(String keyword) {
@@ -109,26 +73,13 @@ public class UserData {
 	}
 	
 	public boolean validation() {
+		LoginData data = this.getCredentials();
 		boolean valid = 
-				validField(this.username) 
-				&& validField(this.email)
-				&& validField(this.name)
-				&& validField(this.password)
-				&& this.password.equals(confirm);
+				validField(data.getUsername())
+				&& validField(data.getEmail())
+				&& validField(data.getPassword())
+				&& data.getPassword().equals(confirm_password);
 		
 		return valid;
-	}
-
-	public LoginData getCredentials() {
-		return new LoginData(this.getUsername(), this.getEmail(), this.getPassword());
-	}
-
-	public UserInfoData getInfo() {
-		return new UserInfoData(this.getName(), this.getState(), this.getVisibility(), this.getNif(), this.getAddress(), this.getTelephone(), this.getSmartphone());
-	}
-
-	public UserStateData getStateData() {
-		//TODO Improve this later
-		return new UserStateData(this.getState());
 	}
 }
