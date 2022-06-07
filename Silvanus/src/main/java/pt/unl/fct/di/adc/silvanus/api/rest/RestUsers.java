@@ -1,21 +1,21 @@
 package pt.unl.fct.di.adc.silvanus.api.rest;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 
-import static pt.unl.fct.di.adc.silvanus.api.rest.RestUsers.CHARSET;
+import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.*;
 
-//TODO Review all Rest operations 
+//TODO Review all Rest operations
+@Path(RestUsers.PATH)
 @Produces(MediaType.APPLICATION_JSON + CHARSET)
 public interface RestUsers {
-	static String CHARSET = ";charset=utf-8";
 	String PATH = "/user";
+	String PASSWORD = "password";
+	String ROLE = "role";
+	String ATTRIBUTES = "attributes";
 
 	@POST
 	@Path("/register")
@@ -24,53 +24,53 @@ public interface RestUsers {
 	Response register(UserData data);
 	
 	@POST
-	@Path("/login/{identifier}")
+	@Path("/login/{"+ IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response login(@PathParam("identifier") String identifier, @QueryParam("password") String password);
+	Response login(@PathParam(IDENTIFIER) String identifier, @QueryParam(PASSWORD) String password);
 	
 	@POST
 	@Path("/logout")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response logout(@CookieParam("token") String cookie);
+	Response logout(@CookieParam(TOKEN) String cookie);
 	
 	@PUT
-	@Path("/promote/{identifier}")
+	@Path("/promote/{" + IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response promote(@CookieParam("token") String cookie, @PathParam("identifier") String username, @QueryParam("new_role") String new_role);
+	Response promote(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String username, @QueryParam(ROLE) String new_role);
 	
 	@GET
 	@Path("/info")
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response getUser(@CookieParam("token") String cookie, @QueryParam("identifier") @DefaultValue(" ") String identifier);
+	Response getUser(@CookieParam(TOKEN) String cookie, @QueryParam(IDENTIFIER) @DefaultValue(DEFAULT_VALUE) String identifier);
 
 	@GET
 	@Path("/refresh_token")
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response refresh_token(@CookieParam("token") String cookie);
+	Response refresh_token(@CookieParam(TOKEN) String cookie);
 	
 	@DELETE
-	@Path("/remove/{identifier}")
+	@Path("/remove/{" + IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	Response remove(@CookieParam("token") String cookie, @PathParam("identifier") String username);
+	Response remove(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String username);
 	
 	@PUT
-	@Path("/activate/{identifier}")
+	@Path("/activate/{" + IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response activate(@CookieParam("token") String cookie, @PathParam("identifier") String identifier);
+	Response activate(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier);
 	
 	@PUT
 	@Path("/change")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response changePassword(@CookieParam("token") String cookie, @QueryParam("password") String new_password);
+	Response changePassword(@CookieParam(TOKEN) String cookie, @QueryParam(PASSWORD) String new_password);
 	
 	@PUT
-	@Path("/change/{identifier}")
+	@Path("/change/{" + IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response changeAttributes(@CookieParam("token") String cookie, @PathParam("identifier") String identifier, @QueryParam("attributes") String list_json);
+	Response changeAttributes(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier, @QueryParam(ATTRIBUTES) String list_json);
 }

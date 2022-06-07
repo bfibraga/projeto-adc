@@ -2,16 +2,17 @@ package pt.unl.fct.di.adc.silvanus.util.cripto;
 
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 
-public class SHA512HEX implements CRIPTO{
+import java.util.Arrays;
 
+public class SHA512 implements CRIPTO{
     @Override
     public String execute(String arg) {
-        return DigestUtils.sha512Hex(arg);
+        return Arrays.toString(DigestUtils.sha512(arg));
     }
 
     //TODO Change this
     @Override
     public String name() {
-        return "SHA512HEX";
+        return "SHA512";
     }
 }

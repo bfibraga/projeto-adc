@@ -2,7 +2,6 @@ package pt.unl.fct.di.adc.silvanus.resources;
 
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
-import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestUsers;
@@ -15,8 +14,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.util.Set;
-
-@Path(RestUsers.PATH)
 public class UsersResource implements RestUsers {
 
 	private final UserImplementation impl;

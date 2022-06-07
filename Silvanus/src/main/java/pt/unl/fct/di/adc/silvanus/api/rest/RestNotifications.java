@@ -6,8 +6,14 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.IDENTIFIER;
+import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.TOKEN;
+import static pt.unl.fct.di.adc.silvanus.api.rest.RestNotifications.PATH;
+
+@Path(PATH)
 public interface RestNotifications {
 
+    String PATH = "/notification";
     /**
      * Metodo que e usada para uma notificacao poder ser enviada de um user para outro
      * @param data informacao sobre a notificacao a ser enviada
@@ -16,7 +22,7 @@ public interface RestNotifications {
     @POST
     @Path("/send")
     @Consumes(MediaType.APPLICATION_JSON)
-    Response sendNotification(Notification data);
+    Response send(@CookieParam(TOKEN) String token, Notification data);
 
     /**
      * Metodo que e usado para fazer uma querie a base de dados para saber quais as notificacoes que o user recebeu
@@ -24,17 +30,17 @@ public interface RestNotifications {
      * @return -> a resposta do servidor neste pedido
      */
     @GET
-    @Path("/list/{identifier}")
+    @Path("/list/{" + IDENTIFIER + "}")
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    Response listNotification(@PathParam("identifier") String userID);
+    Response list(@CookieParam(TOKEN) String token, @PathParam(IDENTIFIER) String userID);
 
     /**
      * Metodo que e usada para apagar uma notificacao do user que invoca esta operacao.
      * @param data informacao sobre a notificacao a ser enviada
      * @return -> a resposta do servidor neste pedido
      */
-    @POST
+    @DELETE
     @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
-    Response deleteNotification(Notification data);
+    Response delete(@CookieParam(IDENTIFIER) String token, Notification data);
 }

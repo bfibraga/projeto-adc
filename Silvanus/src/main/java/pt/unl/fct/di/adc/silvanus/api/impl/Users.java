@@ -4,7 +4,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
-import pt.unl.fct.di.adc.silvanus.data.user.auth.AuthToken;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
@@ -19,13 +18,13 @@ public interface Users {
 	
 	Result<Void> logout(String token);
 	
-	Result<Void> promote(String token, String username, String new_role);
+	Result<Void> promote(String token, String identifier, String new_role);
 
 	Result<Set<UserInfoVisible>> getUser(String token, String identifier);
 
 	Result<String> refresh_token(String old_refresh_token);
 
-	Result<Void> remove(String token, String username);
+	Result<Void> remove(String token, String identifier);
 	
 	Result<Void> activate(String token, String username);
 	

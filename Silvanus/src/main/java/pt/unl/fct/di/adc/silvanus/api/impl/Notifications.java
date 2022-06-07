@@ -8,12 +8,13 @@ import javax.ws.rs.core.Response;
 
 public interface Notifications {
 
-    Result<Void> sendNotification(Notification data);
+    Result<Void> send(Notification data);
 
-    Result<String> listNotificationOfUser(String userID);
+    Result<String> list(String userID);
 
-    Result<Void> deleteNotification(Notification data);
+    Result<Void> delete(Notification data);
 
+    //TODO Review all this support functions
     boolean canSendMoreNotifications(String senderID, String receiverID);
 
     boolean userExists(String user_username);

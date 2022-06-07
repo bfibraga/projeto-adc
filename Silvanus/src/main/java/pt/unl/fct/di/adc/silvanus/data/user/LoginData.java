@@ -1,9 +1,5 @@
 package pt.unl.fct.di.adc.silvanus.data.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import pt.unl.fct.di.adc.silvanus.util.cripto.CRIPTO;
-import pt.unl.fct.di.adc.silvanus.util.cripto.CriptoManager;
-
 public class LoginData {
 
 	public final static String NOT_DEFINED = "~~";

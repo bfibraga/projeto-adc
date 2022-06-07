@@ -3,12 +3,12 @@ package pt.unl.fct.di.adc.silvanus.resources;
 import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
 import pt.unl.fct.di.adc.silvanus.implementation.NotificationImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestNotifications;
+import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-@Path("/notification")
 public class NotificationResource implements RestNotifications {
 
     private final NotificationImplementation implementation;
@@ -18,8 +18,8 @@ public class NotificationResource implements RestNotifications {
     }
 
     @Override
-    public Response sendNotification(Notification data) {
-        Result res = implementation.sendNotification(data);
+    public Response send(String token, Notification data) {
+        Result<Void> res = implementation.send(data);
         if (res.isOK())
             return Response.ok().build();
         else
@@ -27,8 +27,8 @@ public class NotificationResource implements RestNotifications {
     }
 
     @Override
-    public Response listNotification(String userID) {
-        Result<String> res = implementation.listNotificationOfUser(userID);
+    public Response list(String token, String userID) {
+        Result<String> res = implementation.list(userID);
         if (res.isOK())
             return Response.ok(res.value()).build();
         else
@@ -36,8 +36,8 @@ public class NotificationResource implements RestNotifications {
     }
 
     @Override
-    public Response deleteNotification(Notification data) {
-        Result res = implementation.deleteNotification(data);
+    public Response delete(String token, Notification data) {
+        Result<Void> res = implementation.delete(data);
         if (res.isOK())
             return Response.ok().build();
         else

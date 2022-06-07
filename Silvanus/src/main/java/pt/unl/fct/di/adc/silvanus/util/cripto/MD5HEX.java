@@ -8,6 +8,7 @@ public class MD5HEX implements CRIPTO{
         return DigestUtils.md5Hex(arg);
     }
 
+    //TODO Change this
     @Override
     public String name() {
         return "MD5HEX";

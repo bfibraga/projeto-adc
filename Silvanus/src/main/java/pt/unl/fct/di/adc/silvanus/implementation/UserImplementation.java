@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response.Status;
 import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.storage.Acl;
 import io.jsonwebtoken.*;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
@@ -15,6 +16,9 @@ import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
 
+import pt.unl.fct.di.adc.silvanus.util.cripto.CRIPTO;
+import pt.unl.fct.di.adc.silvanus.util.cache.CriptoCacheManager;
+import pt.unl.fct.di.adc.silvanus.util.cripto.SHA512HEX;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import java.util.HashSet;
@@ -30,6 +34,7 @@ public class UserImplementation implements Users {
 
 	//Cache
 	private UserCacheManager<String> cache = new UserCacheManager<>();
+	private CriptoCacheManager<String> criptoCacheManager = new CriptoCacheManager();
 
 	public UserImplementation(){
 	}
@@ -67,11 +72,13 @@ public class UserImplementation implements Users {
 			}
 
 			// Create a new User
+			CRIPTO cripto = this.criptoCacheManager.get(user_id);
+			String encriptedPassword = cripto.execute(loginData.getPassword());
 			user = Entity.newBuilder(userKey)
 					.set("usr_username", loginData.getUsername())
 					.set("usr_email", loginData.getEmail())
-					.set("usr_password", DigestUtils.sha512Hex(loginData.getPassword()))
-					// .set("usr_confirmation", DigestUtils.sha512Hex(data.getConfirmation()))
+					.set("usr_password", encriptedPassword)
+					.set("usr_cripto", cripto.name())
 					.build();
 			this.cache.put(user_id, loginData);
 
@@ -104,7 +111,7 @@ public class UserImplementation implements Users {
 			this.cache.put(user_id, userStateData);
 
 			//TODO: First Registration information
-			String jws = TOKEN.createNewJWS(user_id, 1);
+			String jws = TOKEN.createNewJWS(user_id, 1, new String[]{});
 
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
@@ -131,21 +138,28 @@ public class UserImplementation implements Users {
 
 		//TODO refactor this cache part
 		LoginData loginData = this.cache.getLoginData(user_id);
-		System.out.println(loginData);
+		CRIPTO cripto = loginData != null ? this.criptoCacheManager.get(user_id) : null;
+		if (cripto == null){
+			cripto = new SHA512HEX();
+		}
 
 		// Verify if the user is in cache
 		String hashedPassword = "";
 		if (loginData != null) {
 			hashedPassword = loginData.getPassword();
-			System.out.println(hashedPassword.equals(data.getPassword()));
-			if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))){
-				String jws = TOKEN.createNewJWS(user_id, 1);
+
+			System.out.println(hashedPassword);
+			System.out.println(cripto.name());
+			System.out.println(cripto.execute(data.getPassword()));
+			System.out.println(hashedPassword.equals(cripto.execute(data.getPassword())));
+			if (hashedPassword.equals(cripto.execute(data.getPassword()))){
+				String jws = TOKEN.createNewJWS(user_id, 1, new String[]{});
 
 				String refresh_token = TOKEN.newRefreshToken();
 
 				return Result.ok(jws);
 			} else {
-				LOG.warning("Wrong Password");
+				LOG.warning("Wrong Password: Line 153");
 				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
 			}
 		} else {
@@ -155,17 +169,27 @@ public class UserImplementation implements Users {
 				result = this.find(data.getEmail(), "UserCredentials", "usr_email", 5);
 			}
 
-			while (result.hasNext()){
+			while (result.hasNext()) {
 				Entity curr_result = result.next();
+				String cripto_name = "";
+				try {
+					cripto_name = curr_result.getString("usr_cripto");
+					cripto = this.criptoCacheManager.map(cripto_name);
+				} catch (DatastoreException e) {
+					cripto = new SHA512HEX();
+					LOG.info(String.format("Using %s to encript %s's password", cripto.name(), data.getUsername()));
+				}
 				hashedPassword = curr_result.getString("usr_password");
+				String givenPassword = cripto.execute(data.getPassword());
 
-				if (hashedPassword.equals(DigestUtils.sha512Hex(data.getPassword()))) {
+				if (hashedPassword.equals(givenPassword)) {
 					// Correct password
-
 					// Return token
 					LOG.info("User " + data.getUsername() + "logged in successfully");
 
-					String jws = TOKEN.createNewJWS(user_id, 1);
+					int operation_level = 1;
+
+					String jws = TOKEN.createNewJWS(user_id, operation_level, new String[]{});
 
 					String refresh_token = TOKEN.newRefreshToken();
 
@@ -174,8 +198,10 @@ public class UserImplementation implements Users {
 					/*LoginData store_data = new LoginData(curr_result.getString("usr_username"),
 							curr_result.getString("usr_email"),
 							curr_result.getString("usr_password"));*/
-					this.cache.put(user_id, data.setPassword(DigestUtils.sha512Hex(data.getPassword())));
-					this.cache.put(user_id, "token", jws);
+					System.out.println(cripto.name());
+					this.cache.put(user_id, data.setPassword(givenPassword));
+					this.cache.put(user_id, "token:" + operation_level, jws);
+					this.criptoCacheManager.put(user_id, cripto.name());
 
 					return Result.ok(jws);
 				}
@@ -190,6 +216,16 @@ public class UserImplementation implements Users {
 		Query<Entity> query = Query.newEntityQueryBuilder()
 				.setKind(kind)
 				.setFilter(PropertyFilter.eq(parameter, identifier))
+				.setLimit(limit_query)
+				.build();
+
+		return datastore.run(query);
+	}
+
+	private QueryResults<Entity> find(String identifier, String kind, Key parameter, int limit_query){
+		Query<Entity> query = Query.newEntityQueryBuilder()
+				.setKind(kind)
+				.setFilter(PropertyFilter.eq(identifier, parameter))
 				.setLimit(limit_query)
 				.build();
 
@@ -214,8 +250,9 @@ public class UserImplementation implements Users {
 		return Result.ok();
 	}
 
+	//TODO TESTING
 	@Override
-	public Result<Void> promote(String token, String username, String new_role) {
+	public Result<Void> promote(String token, String identifier, String new_role) {
 
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -224,80 +261,112 @@ public class UserImplementation implements Users {
 		}
 
 		String high_user_id = jws.getSubject();
-		//Query to lookup for given user
-		String user_id_promote = username;
+		System.out.println("High user id: " + high_user_id);
+		System.out.println("Promotion on: " + identifier);
+		String user_id_promote;
+		LoginData loginData = this.cache.getLoginData(identifier);
+		UserStateData userStateData = this.cache.getStateData(identifier);
+		UserStateData highuserStateData = this.cache.getStateData(high_user_id);
+		UserRole userRole = this.cache.getRoleData(identifier);
+		UserRole highuserRole = this.cache.getRoleData(high_user_id);
+
+		Key usrCredentialsKey = datastore.newKeyFactory().setKind("UserCredentials").newKey(identifier);
+		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(identifier);
+
+		if (loginData == null || userStateData == null || highuserStateData == null || userRole == null || highuserRole == null){
+
+			Entity curr_result = datastore.get(usrCredentialsKey);
+			if (curr_result == null){
+				LOG.info("User not found");
+				return Result.error(Status.NOT_FOUND, "User not found");
+			}
+			user_id_promote = curr_result.getKey().getName();
+			loginData = new LoginData(curr_result.getString("usr_username"),
+					curr_result.getString("usr_email"),
+					curr_result.getString("usr_password"));
+			this.cache.put(identifier, loginData);
+
+			loginData = new LoginData(curr_result.getString("usr_username"),
+					curr_result.getString("usr_email"),
+					curr_result.getString("usr_password"));
+			this.cache.put(identifier, loginData);
+
+			if (user_id_promote.equals(high_user_id)) {
+				LOG.warning("Same user");
+				return Result.error(Status.FORBIDDEN, "Same user");
+			}
+
+			LOG.fine("Promotion of user " + identifier);
+
+			// User to verify
+			Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id_promote);
+
+			// Higher priority user
+			Key high_usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(high_user_id);
+			Key high_usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(high_user_id);
+
+			Entity user_verify = datastore.get(usrPermissionkey);
+			Entity user_role = datastore.get(usrRoleKey);
+
+			if (user_verify == null || user_role == null) {
+				// User doesn't exist
+				return Result.error(Status.BAD_REQUEST, "User " + identifier + "doesn't exist");
+			}
+
+			userStateData = new UserStateData(user_verify.getString("usr_state"),
+					JSON.decode(user_verify.getString("list_usr_validation"), String[].class));
+			userRole = UserRole.compareType(user_role.getString("role_name"));
+
+			this.cache.put(user_id_promote, userRole);
+			this.cache.put(user_id_promote, userStateData);
+
+			Entity high_user_verify = datastore.get(high_usrPermissionkey);
+			Entity high_user_role = datastore.get(high_usrRoleKey);
+
+			if (high_user_verify == null || high_user_role == null) {
+				// Given higher priority User doesn't exist
+				return Result.error(Status.BAD_REQUEST, "User doens't exist");
+			}
+
+			highuserStateData = new UserStateData(high_user_verify.getString("usr_state"),
+					JSON.decode(high_user_verify.getString("list_usr_validation"), String[].class));
+			highuserRole = UserRole.compareType(high_user_role.getString("role_name"));
+
+			this.cache.put(high_user_id, highuserStateData);
+			this.cache.put(high_user_id, highuserRole);
+		}
+
+		user_id_promote = loginData.getID();
 
 		if (user_id_promote.equals(high_user_id)) {
 			LOG.warning("Same user");
 			return Result.error(Status.FORBIDDEN, "Same user");
 		}
 
-		LOG.fine("Promotion of user " + username);
+		UserRole role = UserRole.compareType(new_role);
+		long high_role_priority = highuserRole.getPriority();
 
-		// User to verify
-		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id_promote);
-		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id_promote);
+		if (high_role_priority <= userRole.getPriority() || role.getPriority() > high_role_priority) {
+			LOG.warning("");
+			return Result.error(Status.NOT_ACCEPTABLE, "");
+		}
 
-		// Higher priority user
-		Key high_usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(high_user_id);
-		Key high_usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(high_user_id);
+		// Super user not active
+		if (!highuserStateData.getSet().equals("ACTIVE")) {
+			LOG.warning("User not active");
+			return Result.error(Status.BAD_REQUEST, "User not active");
+		}
 
 		// Create new transation
 		Transaction tnx = datastore.newTransaction();
 
 		try {
-			Entity user_verify = this.cache.get(user_id_promote, "permission", Entity.class);
-			if (user_verify == null) user_verify = tnx.get(usrPermissionkey);
-
-			Entity user_role = this.cache.get(user_id_promote, "role", Entity.class);
-			if (user_role == null) user_role = tnx.get(usrRoleKey);
-
-			if (user_verify == null || user_role == null) {
-				// User doesn't exist
-				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST, "User " + username + "doesn't exist");
-			}
-
-			this.cache.put(user_id_promote, "permission", user_verify);
-			this.cache.put(user_id_promote, "role", user_role);
-
-			Entity high_user_verify = this.cache.get(high_user_id, "permission", Entity.class);
-			if (high_user_verify == null) high_user_verify = tnx.get(high_usrPermissionkey);
-
-			Entity high_user_role = this.cache.get(high_user_id, "role", Entity.class);
-			if (high_user_role == null) high_user_role = tnx.get(high_usrRoleKey);
-
-			if (high_user_verify == null || high_user_role == null) {
-				// Given higher priority User doesn't exist
-				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST, "User doens't exist");
-			}
-
-			this.cache.put(high_user_id, "permission", high_user_verify);
-			this.cache.put(high_user_id, "role", high_user_role);
-
-			UserRole role = UserRole.compareType(new_role);
-			long high_role_priority = high_user_role.getLong("role_priority");
-
-			if (high_role_priority <= user_role.getLong("role_priority") || role.getPriority() > high_role_priority) {
-				tnx.rollback();
-				LOG.warning("");
-				return Result.error(Status.NOT_ACCEPTABLE, "");
-			}
-
-			// Super user not active
-			if (!high_user_verify.getString("usr_state").equals("ACTIVE")) {
-				tnx.rollback();
-				LOG.warning("User not active");
-				return Result.error(Status.BAD_REQUEST, "User not active");
-			}
-
 			// Success
-			user_role = Entity.newBuilder(usrRoleKey)
+			Entity user_role = Entity.newBuilder(usrRoleKey)
 					.set("role_name", role.toString())
 					.set("role_priority", role.getPriority())
 					.build();
-			this.cache.put(user_id_promote, "role", user_role);
+			this.cache.put(user_id_promote, role);
 
 			tnx.put(user_role);
 			tnx.commit();
@@ -307,6 +376,7 @@ public class UserImplementation implements Users {
 				tnx.rollback();
 			}
 		}
+
 	}
 
 	@Override

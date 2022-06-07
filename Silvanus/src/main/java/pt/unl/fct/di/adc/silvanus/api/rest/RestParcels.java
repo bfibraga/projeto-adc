@@ -6,16 +6,13 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static pt.unl.fct.di.adc.silvanus.api.rest.RestParcels.CHARSET;
-
-@Produces(MediaType.APPLICATION_JSON + CHARSET)
+@Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
 public interface RestParcels {
-    String CHARSET = ";charset=utf-8";
     String PATH = "/parcel";
 
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON + CHARSET)
+    @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
     Response doRegister(@CookieParam("token") String token, ParcelaData dataParcela);
 }
