@@ -1,15 +1,15 @@
 package pt.unl.fct.di.adc.silvanus.data.parcel;
 
-public class Coordenada {
+public class Coordinate {
 
     private float lat;
     private float lon;
 
-    public Coordenada() {
+    public Coordinate() {
 
     }
 
-    public Coordenada(float lat, float lon) {
+    public Coordinate(float lat, float lon) {
         this.lat = lat;
         this.lon = lon;
     }

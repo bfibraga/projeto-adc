@@ -1,46 +1,60 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import pt.unl.fct.di.adc.silvanus.data.parcel.Coordenada;
-import pt.unl.fct.di.adc.silvanus.data.parcel.ParcelaData;
+import pt.unl.fct.di.adc.silvanus.data.parcel.Coordinate;
+import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
+import pt.unl.fct.di.adc.silvanus.util.Pair;
+import pt.unl.fct.di.adc.silvanus.util.interfaces.RestParcel;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+
 @Path("/parcela")
-@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-public class ParcelaResource {
-	
-	private ParcelImplementation impl = new ParcelImplementation();
+public class ParcelaResource implements RestParcel {
 
-	public ParcelaResource() {
+    private ParcelImplementation impl = new ParcelImplementation();
 
-	}
+    public ParcelaResource() {
+    }
 
-	@POST
-	@Path("/create")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	public Response doRegister(ParcelaData dataParcela) {
-		Result<Void> result = impl.createParcel(dataParcela);
-		
-		if (!result.isOK()) {
-			return Response.status(result.error()).build();
-		}
-		
-		return Response.ok().build();
-	}
+    @Override
+    public Response doRegister(TerrainData terrainData) {
+        Result<Void> result = impl.createParcel(terrainData);
 
-	@POST
-	@Path("/querie")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	public void doQuerie(Coordenada[] parcela) {
-		impl.quuéééééééééééééééééééééériiiiiiiiiisssssssssss(parcela);
-	}
+        if (!result.isOK()) {
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+        }
+
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response checkIfTerrainHasIntersections(Coordinate[] terrain) {
+        Result<String> result = impl.checkIfParcelHasIntersections(terrain);
+        if (result == null)
+            return Response.ok("Nao ha intersecoes.").build();
+        else
+            return Response.ok("Foram detetadas intersecoes com a parcela:" + result.statusMessage()).build();
+    }
+
+    @Override
+    public Response approveTerrain(Pair<String> pair) {
+        String idOwner = pair.getValue1();
+        String idParcel = pair.getValue2();
+        Result<Void> result = impl.approveTerrain(idOwner, idParcel);
+        if (!result.isOK())
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response denyTerrain(Pair<String> pair) {
+        String idOwner = pair.getValue1();
+        String idParcel = pair.getValue2();
+        Result<Void> result = impl.denyTerrain(idOwner, idParcel);
+        if (!result.isOK())
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+        return Response.ok().build();
+    }
 }
