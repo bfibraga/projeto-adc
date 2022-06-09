@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 
 :root{
-    --primary-bg: white;
-    --secundary-bg: rgb(240,240,240);
+  --bg-primary: rgb(245, 245, 245);
+  --secundary-bg: rgb(240,240,240);
 
 
     --primary-btn-color: rgb(100, 200, 100);
@@ -269,6 +269,7 @@ h1,p,label,a{
 
 .avatar-wrapper{
   display: block;
+  transform-origin: center center;
 }
 
 .avatar-wrapper img{
@@ -277,35 +278,30 @@ h1,p,label,a{
   object-fit: cover;
 }
 
-.grow { 
-  transition: all .2s ease-in-out;
+#edit-profile-btn{
+  display: none;
 }
 
-.grow:hover {
-  transform: scale(1.1);
+#usr_username:hover #edit-profile-btn{
+  display: contents;
 }
 
-ul.nav li a, ul.nav li a:visited {
-    color: var(--primary-btn-color) !important;
+.toast{
+  transition: 200ms ease;
 }
 
-ul.nav li a:hover, ul.nav li a:active {
-    color: var(--primary-btn-color-hover) !important;
+.dropdown{
+  transition: 200ms ease;
 }
 
-ul.nav li.active a {
-    color: var(--primary-btn-color) !important;
+.offcanvas-body{
+  transition: 200ms ease;
 }
 
-.btn-primary {
-    background-color: var(--primary-btn-color) !important;
-    border-color: var(--primary-btn-color) !important;
+.offcanvas-body[data-app-menu-active="false"]{
+  display: none;
 }
 
-.nav-link{
-    color: var(--primary-btn-color) !important;
-}
-
-.nav-link:hover{
-    color: var(--primary-btn-color-hover) !important;
+div[data-app-pending="false"]{
+  display: none;
 }

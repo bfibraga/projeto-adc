@@ -11,156 +11,265 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Google Maps -->
-    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/pure/0.6.2/pure-min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.2/pure-min.css">
 
     <!-- Axios API -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+    <!-- ChartJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
     <!--Aplication-->
     <script type="text/javascript" src="../libs/request_handler.js"></script>
+    <script type="text/javascript" src="app.js"></script>
     <link href="../styles/main.css" rel="stylesheet">
     <link href="../styles/map.css" rel="stylesheet">
+    <link href="../styles/navbar.css" rel="stylesheet">
 
 </head>
-<body id="main" class="" onload="time()">
-  <div id="loader" class="overlay d-none" style="z-index: 100;">
+<!--TODO Put getInfo() function-->
+<body id="main" class="" onload="getInfo(true)">
+  <div id="loader" class="overlay d-none" style="z-index: 100000;">
     <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
   </div>
 
-  <!-- <Terrain> Properties Sidebar -->
-    <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10; left: 4rem; width: calc(100% - 4rem);" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
+  <div class="overlay d-none" style="z-index: 100000;">
+    <div class="position-absolute translate-middle top-50 start-50">
+      <div class="light rounded-3 p-3 mt-3 shadow-sm">
+        Text
+      </div>
+    </div>
+  </div>
+  
+
+  <nav class="app-navbar">
+    <ul class="app-navbar-nav">
+
+      <li class="app-nav-item">
+        <a class="app-nav-link grow"  data-bs-toggle="offcanvas" data-bs-target="#list-properties" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-pin-map" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8l3-4z"/>
+            <path fill-rule="evenodd" d="M8 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"/>
+          </svg>
+          <span class="app-link-text">
+            Terrenos
+          </span>
+        </a>
+      </li>
+
+      <li class="app-nav-item">
+        <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-placement="right" data-tooltip="Mostrar o mapa">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+          </svg>
+          <span class="app-link-text">
+            Mapa
+          </span>
+        </a>
+      </li>
+
+      <li class="app-nav-item">
+        <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#user-properties">
+          <div class="avatar-wrapper d-flex" style="width: 2rem; height: 2rem;">
+            <img id="usr_avatar_navbar" src="../media/imgs/user.png" class="rounded-circle shadow-sm">
+          </div>
+          <span class="app-link-text">
+            Perfil
+          </span>
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+
+  <main>
+        <!-- Maps -->
+        <div id="map" class=""></div>
+        <script src="../libs/maps.js"></script>
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFF-sduDxFSBjCD_C-leaSI-sTkoCNO6Y&callback=initMap&libraries=drawing"></script>
+
+    <!-- Terrain Properties Sidebar -->
+    <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
       <div class="offcanvas-header">
         <h4>Property Name</h4>
         <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
-        
         <p>Description:</p>
         <p>Conselho:</p>
         <p>Freguesia:</p>
         <p>Section:</p>
         <p>Number Article:</p>
         <p>Verification:</p>
-
-        <p>Other info of this terrain: Risco Incendio, Humidade, etc</p>
   
+        <p>Other info of this terrain: Risco Incendio, Humidade, etc</p>
+    
         <!-- Toast Handler-->
-        
+          
       </div>
     </div>
-
-  <!-- Sidebar -->
-  <div class="d-flex flex-column flex-shrink-0 bg-light rounded-3 position-absolute" style="width: 4rem; height: 100vh; z-index: 10; transition: opacity 100ms linear;">
-    <!-- Avatar Image -->
-    <a href="#" style="z-index: -10;" title="Perfil" class="nav-link d-flex align-items-center justify-content-center p-3 text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#user-properties">
-      <div class="avatar-wrapper" style="width: 2rem; height: 2rem;">
-        <img id="usr_avatar" src="../media/imgs/user.png" class="rounded-circle shadow-sm grow" style="">
+    
+    <!-- Alerts -->
+    <div id="request-property-alert" class="position-absolute bottom-0 start-50 translate-middle-x alert alert-primary d-none" role="alert">
+      Crie novos pontos no mapa para delimitar a região que pretende delimitar.
+    </div>
+  </main>
+  <!-- User Properties Offcanvas -->
+  <div class="offcanvas offcanvas-start bg-light rounded-3 border-0 shadow-sm" style="" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-5" id="user-properties" aria-labelledby="offcanvasScrollingLabel">
+    <div class="offcanvas-header position-relative rounded-3">
+      <div class="dropdown">
+        <a class="dropdown-toggle btn light shadow-sm" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Ir para...</a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#usr_credentials_scrollspy">Credenciais</a></li>
+          <li><a class="dropdown-item" href="#usr_notifications_scrollspy">Notificações</a></li>
+          <li><a class="dropdown-item" href="#usr_perfil_scrollspy">Perfil</a></li>
+          <li><a class="dropdown-item" href="#usr_definitions_scrollspy">Definições</a></li>
+          <li><a class="dropdown-item" href="#usr_about_scrollspy">Sobre</a></li>
+        </ul>
       </div>
-    </a>
-    <ul style="z-index: -10;" class="nav nav-pills nav-flush flex-column mb-auto text-center border-top top-50">
-      <li class="nav-item">
-
-        <!-- Map Button -->
-        <a class="nav-link py-3 position-relative navbar-tooltip" aria-current="page" data-bs-toggle="offcanvas" data-bs-placement="right" data-tooltip="Mostrar o mapa">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-geo-alt-fill grow" viewBox="0 0 16 16">
-            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-          </svg>
-        </a>
-
-      </li>
-      <li>
-
-        <!-- Properties Button -->
-        <a href="properties" class="nav-link py-3 position-relative navbar-tooltip" data-bs-toggle="offcanvas" data-bs-target="#list-properties" aria-controls="offcanvasScrolling" data-bs-placement="right" data-tooltip="Listar Propriedades">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-journal-album grow" viewBox="0 0 16 16">
-            <path d="M5.5 4a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5h-5zm1 7a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3z"/>
-            <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
-            <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
-          </svg> 
-        </a>
-
-      </li>
-      <li>
-
-        <!-- Add Property Button -->
-        <a href="#" id="request-property" class="nav-link py-3 position-relative navbar-tooltip" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-send grow" viewBox="0 0 16 16">
-            <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/>
-          </svg>
-        </a>
-
-      </li>
-
-      <li>
-
-        <!-- Verification Property Button -->
-        <a href="#" id="verification-property" class="nav-link py-3 position-relative navbar-tooltip" data-bs-toggle="offcanvas" data-bs-target="#verification-terrain-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right" data-tooltip="Verificar algum Pedido">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-envelope-paper grow" viewBox="0 0 16 16">
-            <path d="M4 0a2 2 0 0 0-2 2v1.133l-.941.502A2 2 0 0 0 0 5.4V14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5.4a2 2 0 0 0-1.059-1.765L14 3.133V2a2 2 0 0 0-2-2H4Zm10 4.267.47.25A1 1 0 0 1 15 5.4v.817l-1 .6v-2.55Zm-1 3.15-3.75 2.25L8 8.917l-1.25.75L3 7.417V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v5.417Zm-11-.6-1-.6V5.4a1 1 0 0 1 .53-.882L2 4.267v2.55Zm13 .566v5.734l-4.778-2.867L15 7.383Zm-.035 6.88A1 1 0 0 1 14 15H2a1 1 0 0 1-.965-.738L8 10.083l6.965 4.18ZM1 13.116V7.383l4.778 2.867L1 13.117Z"/>
-          </svg>
-        </a>
-
-      </li>
-    </ul>
-
-    <!-- Notifications Button -->
-    <a href="#" style="z-index: -10;"  class="nav-link py-3 text-center position-relative border-top navbar-tooltip" data-bs-toggle="offcanvas" data-bs-target="#list-notifications" aria-controls="offcanvasScrolling" data-bs-placement="right" data-tooltip="Notificações">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell-fill grow" viewBox="0 0 16 16">
-        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
-      </svg>
-      <span class="position-absolute translate-middle p-1 bg-danger border border-light rounded-circle">
-        <span class="visually-hidden"></span>
-      </span>
-    </a>
-
-    <!-- Notification Offcanvas-->
-    <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="list-notifications" aria-labelledby="offcanvasScrollingLabel">
-      <div class="offcanvas-header">
-        <h4>Notificações</h4>
-        <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      <a type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></a>
+    </div>
+    <div id="usr_menu" class="offcanvas-body" data-app-menu-active="true">
+      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
+        <div class="d-flex flex-row justify-content-center mb-3">
+          <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
+            <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+          </div>
+        </div>
+        <h3 id="usr_username">Username
+          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
+            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
+          </a>
+        </h3>
+        <h5 id="usr_email" class="">Email</h5>
+        <div id="usr_roles">
+          <span class="badge rounded-pill bg-primary">User</span>
+          <span class="badge rounded-pill bg-danger">Alpha Tester</span>
+          <span class="badge rounded-pill bg-warning">Beta Tester</span>
+        </div>
       </div>
-      <div class="offcanvas-body">
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Special title treatment 1</h5>
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere
-                </a>
+      <div id="usr_notifications_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
+        <h5 class="mb-3">Notificações</h5>
+        <div id="notification-list" class="d-flex flex-column toast-container">
+          <!-- Available Notifications -->
+          
+          <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+
+              <div class="avatar-wrapper m-2" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
+                <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
               </div>
+              <strong class="me-auto">Bootstrap</strong>
+              <small class="text-muted">just now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+              See? Just like this.
             </div>
           </div>
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-              </div>
-            </div>
+
+        
+        </div>
+
+
+      </div>
+      <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
+        <h5 class="mb-3">Perfil</h5>
+        <h6>Primeiro Nome</h6>
+        <p id="usr_firstname" class="border-bottom">-</p>
+        <h6>Último Nome</h6>
+        <p id="usr_lastname" class="border-bottom">-</p>
+        <h6>NIF</h6>
+        <p id="usr_id" class="border-bottom">-</p>
+        <h6>Número de telefone</h6>
+        <p id="usr_phone" class="border-bottom">-</p>
+        <h6>Morada</h6>
+        <p id="usr_address" class="border-bottom">-</p>
+
+      </div>
+      <div id="usr_definitions_scrollspy" class="d-flex flex-column light rounded-3 p-3 mt-3 shadow-sm">
+        <h5>Definições</h5>
+        <a id="btn_change_password" href="#" onclick="toggleChangeProfileMenu('usr_menu', 'usr_change_password')" class="pb-1">Alterar palavra passe</a>
+        <a id="btn_change_usr_profile" href="#" onclick="toggleChangeProfileMenu('usr_menu', 'usr_change_profile_menu')" class="btn-change-usr-profile">Alterar Perfil</a>
+      </div>
+      <div id="usr_about_scrollspy" class="d-flex flex-column light rounded-3 p-3 mt-3 shadow-sm">
+        <h5>Sobre</h5>
+        <a href="">Perguntas frequentes</a>
+        <a href="" data-bs-toggle="offcanvas" data-bs-target="#help-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Ajuda</a>
+        <a href="" data-bs-toggle="offcanvas" data-bs-target="#about-us-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Sobre nós</a>
+      </div>
+      <a href="#" class="btn btn-primary mt-3" onclick="logout()">Logout</a>
+
+      <!-- Toast Handler-->
+    </div>
+    <div id="usr_change_profile_menu" class="offcanvas-body" data-app-menu-active="false">
+      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
+        <div class="d-flex flex-row justify-content-center mb-3">
+          <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
+            <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+          </div>
+        </div>
+        <h3 id="usr_username">Username
+          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
+            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
+          </a>
+        </h3>
+        <h5 id="usr_email" class="">Email</h5>
+        <div id="usr_roles">
+          <span class="badge rounded-pill bg-primary">User</span>
+          <span class="badge rounded-pill bg-danger">Alpha Tester</span>
+          <span class="badge rounded-pill bg-warning">Beta Tester</span>
+        </div>
+      </div>
+      <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
+        <h5 class="mb-3">Perfil</h5>
+        <h6>Primeiro Nome</h6>
+        <input id="usr_firstname_input" class="form-control rounded-pill mb-3"></input>
+        <h6>Último Nome</h6>
+        <input id="usr_lastname_input" class="form-control rounded-pill mb-3"></input>
+        <h6>NIF</h6>
+        <input id="usr_id_input" class="form-control rounded-pill mb-3"></input>
+        <h6>Número de telefone</h6>
+        <input id="usr_phone_input" class="form-control rounded-pill mb-3"></input>
+        <h6>Morada</h6>
+        <input id="usr_address_input" class="form-control rounded-pill"></input>
+        <br>
+        <div class="d-flex flex-column justify-content-center">
+          <div class="d-flex flex-row justify-content-center">
+            <a id="btn_callback_change_usr_profile" onclick="toggleChangeProfileMenu('usr_change_profile_menu', 'usr_menu')" href="#" class="btn btn-danger m-3 btn-change-usr-profile" onclick="">Cancelar</a>
+            <a href="#" class="btn btn-primary m-3" onclick="changing_att()">Alterar</a>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Settings Button -->
-    <div class="dropend" style="z-index: -10;">
-      <a id="settings-btn" href="#"  class="nav-link p-3 text-center dropdown-toggle position-relative navbar-tooltip" data-bs-toggle="dropdown" data-bs-placement="right" data-tooltip="Definições">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-gear-fill grow" viewBox="0 0 16 16">
-          <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
-        </svg>
-      </a>
-      <ul class="dropdown-menu" aria-labelledby="settings-btn">
-        <li><a class="dropdown-item disabled" href="#">Tema</a></li>
-        <li><a class="dropdown-item" href="#" data-bs-toggle="offcanvas" data-bs-target="#help-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Ajuda</a></li>
-        <li><a class="dropdown-item" href="#" data-bs-toggle="offcanvas" data-bs-target="#about-us-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Sobre nós</a></li>
-        <li><a class="dropdown-item" href="#" onclick="logout(2000)">Logout</a></li>
-      </ul>
+    <div id="usr_change_password" class="offcanvas-body" data-app-menu-active="false">
+      <div class="light rounded-3 p-3 shadow-sm">
+        <div class="d-flex flex-row justify-content-center mb-3">
+          <div class="avatar-wrapper mb-3" style="width: 8rem; height: 8rem;">
+            <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+          </div>
+        </div>
+        <h6>Username ou Email</h6>
+        <input id="usr_identifier_change_password" class="form-control rounded-pill mb-3"></input>
+        <h6>Palavra-passe antiga</h6>
+        <input id="usr_old_password_change_password" class="form-control rounded-pill mb-3"></input>
+        <h6>Palavra-passe nova</h6>
+        <input id="usr_new_password_change_password" class="form-control rounded-pill"></input>
+        <br>
+        <div class="d-flex flex-column justify-content-center">
+          <div class="d-flex flex-row justify-content-center">
+            <a id="btn_callback_change_usr_profile" onclick="toggleChangeProfileMenu('usr_change_password', 'usr_menu')" href="#" class="btn btn-danger m-3 btn-change-usr-profile" onclick="">Cancelar</a>
+            <a href="#" class="btn btn-primary m-3" onclick="changing_att()">Alterar</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Toast Handler-->
     </div>
+  </div>
 
-    <!-- Help Offcanvas -->
-    <div class="offcanvas offcanvas-bottom rounded-3" style="z-index: 10; left: 4rem; height: 100vh;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="help-offcanvas" aria-labelledby="offcanvasScrollingLabel">
+      <!-- Help Offcanvas -->
+    <div class="offcanvas offcanvas-bottom rounded-3 bg-light" style="z-index: 10; height: 100vh;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="help-offcanvas" aria-labelledby="offcanvasScrollingLabel">
       <div class="offcanvas-header">
         <h4>Ajuda</h4>
         <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -168,85 +277,57 @@
       <div class="offcanvas-body">
         
         <p> Tutorial of this application </p>
+        
+      </div>
+    </div>
 
-        
-        
-      </div>
-    </div>
-    
-    <!-- About us Offcanvas -->
-    <div class="offcanvas offcanvas-bottom rounded-3" style="z-index: 10; left: 4rem; height: 100vh;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="about-us-offcanvas" aria-labelledby="offcanvasScrollingLabel">
+        <!-- About us Offcanvas -->
+        <div class="offcanvas offcanvas-bottom rounded-3 bg-light" style="z-index: 10; height: 100vh;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="about-us-offcanvas" aria-labelledby="offcanvasScrollingLabel">
+          <div class="offcanvas-header">
+            <h4>Sobre nós</h4>
+            <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <p> Toda informação sobre nos </p>
+          </div>
+        </div>
+      
+
+        <!-- List Properties Sidebar -->
+    <div class="offcanvas offcanvas-start bg-light rounded-3 border-0 shadow-sm" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="list-properties" aria-labelledby="offcanvasScrollingLabel">
       <div class="offcanvas-header">
-        <h4>Sobre nós</h4>
-        <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <p> Toda informação sobre nos </p>
-      </div>
-    </div>
-    
-    <!-- User Properties Sidebar -->
-    <div class="offcanvas offcanvas-start rounded-3" style="z-index: -10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-5" id="user-properties" aria-labelledby="offcanvasScrollingLabel">
-      <div class="offcanvas-header justify-content-center position-relative">
-        <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
-          <img id="usr_avatar" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+        <div class="dropdown">
+          <a class="dropdown-toggle btn light shadow-sm" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Ir para...</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#usr_list_terrain_scrollpsy">Lista de Terrenos</a></li>
+            <li><a class="dropdown-item" href="#usr_pending_terrain_scrollpsy">Pedidos Pendentes</a></li>
+          </ul>
         </div>
         <a type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></a>
       </div>
-      <div class="offcanvas-body">
-        <div class="pb-3 ps-1 border-bottom">
-          <h3 id="usr_username">Username
-            <a type="button" class="btn text-reset position-absolute end-0" onclick="alert('Editar perfil')">
-              <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
-            </a>
-          </h3>
-          <h5 id="usr_mail" class="">Email</h5>
-          <div id="usr_roles">
-            <span class="badge rounded-pill bg-primary">User</span>
-            <span class="badge rounded-pill bg-danger">Alpha Tester</span>
-            <span class="badge rounded-pill bg-warning">Beta Tester</span>
-          </div>      
-        </div>
-        <p id="usr_firstname" class="mt-3">Primeiro Nome:</p>
-        <p id="usr_lastname">Último Nome:</p>
-        <p id="usr_id">NIF:</p>
-        <p id="usr_phone">Número de telefone:</p>
-        <p id="usr_address">Morada:</p>
-        <!-- Toast Handler-->
-        
-      </div>
-    </div>
-    
-    <!-- List Properties Sidebar -->
-    <div class="offcanvas offcanvas-start rounded-3" style="z-index: -10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="list-properties" aria-labelledby="offcanvasScrollingLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Lista de Terrenos</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <div class="card pb-3 mb-3" style="width: 20rem;">
-          <img src="../media/imgs/dark-blurry-gradient-haikei.png" class="card-img-top rounded-3" alt=".">
-          <div class="card-body">
-            <h5 class="card-title">Propriedade 1</h5> 
-            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p> 
-            <a href="#" class="btn btn-primary">Ver no mapa</a> 
-            <a href="#" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#terrain-properties" aria-controls="offcanvasStart">Detalhes</a> 
+      <div class="offcanvas-body ">
+        <div class="row">
+          <div class="col-md-12 col-sm-6">
+            <div id="usr_list_terrain_scollspy" class="row light rounded-3 m-1 p-3 shadow-sm">
+              <h5 class="mb-3">Lista de Terrenos</h5>
+              
+            </div>
           </div>
-        </div>
-        <div class="card pb-3" style="width: 20rem;">
-          <img src="../media/imgs/register-wallpaper.jpg" class="card-img-top" alt=".">
-          <div class="card-body">
-            <h5 class="card-title">Terreno 2</h5> 
-            <p class="card-text">Aliquam tincidunt metus ante, et euismod dui ultricies nec. Integer id pellentesque odio.</p> 
-            <a href="#" class="btn btn-primary">Ver no mapa</a> 
-            <a href="#" class="btn btn-primary">Detalhes</a> 
+          <div class="col ">
+            <div id="usr_pending_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm">
+              <h5 class="mb-3">Pedidos Pendentes</h5>
+              <!-- Add New Property Button --> 
+              <div class="d-flex flex-row justify-content-center">
+                <input type="button" style="" class="btn btn-primary rounded-pill" value="Registar novo terreno"> 
+              </div>
+              
+            </div>
           </div>
         </div>
         
-         <!-- Add New Property Button --> 
-        <div class="input-group center-x" style="width: 17rem; margin-top: 1.5rem; margin-bottom: 1rem;" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling"> 
-          <input type="button" style="width: 20rem;" class="btn btn-primary center-x rounded-pill" value="Registar novo terreno"> 
-        </div>
+        
+        
+        
       </div>
     </div>
 
@@ -324,21 +405,9 @@
         </div>
       </div>
     </div>
-  </div>
-
-
-  <!-- Maps -->
-  <div id="map" class="position-absolute"></div>
-  <script src="../libs/maps.js"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFF-sduDxFSBjCD_C-leaSI-sTkoCNO6Y&callback=initMap&libraries=drawing"></script>
-  
-  <!-- Alerts -->
-  <div id="request-property-alert" class="position-absolute bottom-0 start-50 translate-middle-x alert alert-primary d-none" role="alert">
-    Crie novos pontos no mapa para delimitar a região que pretende delimitar.
-  </div>
 
   <script type="text/javascript">
-    
+
     let isRequest = false;
 
     function closeRequest(){
@@ -392,6 +461,8 @@
         closeRequest();
       }
     });
+
+    
   </script>
   
 </body>

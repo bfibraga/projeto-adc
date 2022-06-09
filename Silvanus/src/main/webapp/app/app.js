@@ -1,11 +1,16 @@
-var change_attr_type = [];
+function toggleChangeProfileMenu(id1, id2){
+    let elem1 = document.getElementById(id1);
+    let elem2 = document.getElementById(id2);
+    toggleMenu(elem1);
+    toggleMenu(elem2);
+}
 
-function convertElement(id, new_type){
-    var originalELement = document.getElementById(id);
-    var newElement = document.createElement(new_type);
-
-    for (var i = 0; i < originalELement.attributes.length; i++) {
-        var attr = originalELement.attributes.item(i);
-        newElement.setAttribute(attr.nodeName, attr.nodeValue);
+function toggleMenu(elem){
+    let value = elem.getAttribute("data-app-menu-active");
+    if (value === "true"){
+      value = "false";
+    } else {
+      value = "true";
     }
+    elem.setAttribute("data-app-menu-active", value);
 }

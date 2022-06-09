@@ -1,20 +1,4 @@
-const HTTP_RESPONSE = {
-	"OK": 200,
-	"BAD_REQUEST": 400,
-	"FORBIDDEN": 403,
-	"INTERNAL_SERVER": 500
-}
-
 const base_uri = window.location.origin;
-var xmlhttp = new XMLHttpRequest();
-
-let res = "";
-
-function getToken() {
-	let res = sessionStorage.getItem("token");
-	res = JSON.parse(res)
-	document.getElementById("token_area").innerText = JSON.stringify(res);
-}
 
 function checkUndefined(keyword) {
 	return keyword.trim() === "" ? "UNDEFINED" : keyword;
@@ -28,8 +12,8 @@ async function register(){
 		let u_password = String(document.getElementById("usr_password").value);
 		let u_confirm = String(document.getElementById("usr_confirm").value);
 
-		let u_role = "USER";
-		let u_state = "ACTIVE";
+		//let u_role = "USER";
+		//let u_state = "ACTIVE";
 		let u_visibility = "PUBLIC";
 		let u_telephone = checkUndefined(String(document.getElementById("usr_telephone").value));
 		let u_smartphone = "911";
@@ -39,40 +23,25 @@ async function register(){
 		//TODO Change this
 		const response = await axios.post("/api/user/register",
 			{
-				"username": u_username,
-				"email": u_email,
-				"name": u_name,
-				"password": u_password,
-				"confirm": u_confirm,
-				"role": u_role,
-				"state": u_state,
-				"visibility": u_visibility,
-				"nif": u_nif,
-				"address": u_address,
-				"telephone": u_telephone,
-				"smartphone": u_smartphone
-		});
-
-		console.log(response);
-
+				"credentials": {
+					"username": u_username,
+					"email": u_email,
+					"password": u_password
+				},
+				"confirm_password": u_confirm,
+				"info": {
+					"name": u_name,
+					"visibility": u_visibility,
+					"nif": u_nif,
+					"address": u_address,
+					"telephone": u_telephone,
+					"smartphone": u_smartphone
+				}
+			});
 		window.location.replace(base_uri + "/app");
 	} catch (error){
 		console.log(error);
 	} finally {
-
-	}
-}
-
-async function activate(identifier){
-	try{
-		const response = await axios.post("/api/user/activate/" + identifier);
-		console.log(response);
-		window.location.replace(base_uri.concat("/app"));
-	} catch (error){
-		console.log(error);
-		//document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
-	} finally {
-		//document.getElementById("loader").classList.add("d-none");
 	}
 }
 
@@ -92,33 +61,6 @@ async function login(){
 	}
 }
 
-function init() {
-	getTime();
-
-	let curr_time = sessionStorage.getItem("time");
-	let token = JSON.parse(sessionStorage.getItem("token"));
-
-	console.log(curr_time);
-	console.log(token.expirationDate);
-
-	if (token.expirationDate < curr_time) {
-		alert("Session Expired! Try login again");
-		window.location.replace(base_uri.concat("/app"));
-	} else {
-		getInfo();
-	}
-}
-
-async function getInfo(){
-	try{
-		const response = await axios.get("/api/user/info");
-		console.log(response);
-	} catch (error){
-		console.log(error);
-	} finally {
-	}
-}
-
 async function logout() {
 	try{
 		const response = await axios.post("/api/user/logout");
@@ -127,6 +69,54 @@ async function logout() {
 	} catch (error){
 		console.log(error);
 	} finally {
+	}
+}
+
+async function getInfo(debug){
+	try{
+		const response = await axios.get("/api/user/info/");
+		const response_data = response.data[0];
+		console.log(response_data);
+
+		//Avatar
+		//TODO Alter this avatar url
+		let avatar_url = "https://storage.googleapis.com/projeto-adc.appspot.com/92b2843145c13d62106f68d0b11153.jpg";
+		document.querySelectorAll('.avatar-wrapper')
+			.forEach(function(image) {
+				// Now do something with my button
+				image.src = avatar_url;
+			});
+
+		//User Visible Data
+		document.getElementById("usr_username").innerHTML = String(response_data.username);
+		document.getElementById("usr_email").innerHTML = String(response_data.email);
+
+		let name_parts = response_data.name.split(" ");
+		document.getElementById("usr_firstname").innerHTML = String(name_parts[0]);
+		document.getElementById("usr_lastname").innerHTML = String(name_parts[name_parts.length-1]);
+
+		document.getElementById("usr_id").innerHTML = String(response_data.nif);
+		document.getElementById("usr_phone").innerHTML = String(response_data.telephone);
+		document.getElementById("usr_address").innerHTML = String(response_data.address);
+
+	} catch (error){
+		console.log(error);
+		if (!debug){
+			window.location.replace(base_uri);
+		}
+	}
+}
+
+async function activate(identifier){
+	try{
+		const response = await axios.post("/api/user/activate/" + identifier);
+		console.log(response);
+		window.location.replace(base_uri.concat("/app"));
+	} catch (error){
+		console.log(error);
+		//document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
+	} finally {
+		//document.getElementById("loader").classList.add("d-none");
 	}
 }
 
@@ -148,6 +138,8 @@ async function change_password(){
 }
 
 async function changing_att(){
+
+	//TODO Remake this
 	try{
 		let query = [];
 		query.push(String(document.getElementById("username").value));
@@ -183,6 +175,8 @@ async function time(){
 
 async function submitTerrain(points_data) {
 	
+	//TODO Remake this function
+
 	let _id_of_owner = String(document.getElementById("usr_username").value);
 	let _name_of_terrain = String(document.getElementById("name-terrain").value);
 	let _description_of_terrain = String(document.getElementById("description-terrain").value);

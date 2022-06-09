@@ -170,7 +170,7 @@ function toggleDrawingControl(value){
         polygons.setMap(map);
     } else {
         drawing_control.setMap(null);
-        polygons.setMao(null);
+        polygons.setMap(null);
     }
 }
 
