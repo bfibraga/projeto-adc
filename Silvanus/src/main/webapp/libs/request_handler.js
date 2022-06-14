@@ -69,6 +69,7 @@ async function logout() {
 	} catch (error){
 		console.log(error);
 	} finally {
+
 	}
 }
 
@@ -83,21 +84,13 @@ async function getInfo(debug){
 		let avatar_url = "https://storage.googleapis.com/projeto-adc.appspot.com/92b2843145c13d62106f68d0b11153.jpg";
 		document.querySelectorAll('.avatar-wrapper')
 			.forEach(function(image) {
-				// Now do something with my button
 				image.src = avatar_url;
 			});
 
-		//User Visible Data
+		//Update User Profile
 		document.getElementById("usr_username").innerHTML = String(response_data.username);
 		document.getElementById("usr_email").innerHTML = String(response_data.email);
-
-		let name_parts = response_data.name.split(" ");
-		document.getElementById("usr_firstname").innerHTML = String(name_parts[0]);
-		document.getElementById("usr_lastname").innerHTML = String(name_parts[name_parts.length-1]);
-
-		document.getElementById("usr_id").innerHTML = String(response_data.nif);
-		document.getElementById("usr_phone").innerHTML = String(response_data.telephone);
-		document.getElementById("usr_address").innerHTML = String(response_data.address);
+		updatePerfil(response_data);
 
 	} catch (error){
 		console.log(error);
@@ -105,6 +98,17 @@ async function getInfo(debug){
 			window.location.replace(base_uri);
 		}
 	}
+}
+
+function updatePerfil(data){
+	//User Visible Data
+	let name_parts = data.name.split(" ");
+	document.getElementById("usr_firstname").innerHTML = String(name_parts[0]);
+	document.getElementById("usr_lastname").innerHTML = String(name_parts[name_parts.length-1]);
+
+	document.getElementById("usr_id").innerHTML = String(data.nif);
+	document.getElementById("usr_phone").innerHTML = String(data.telephone);
+	document.getElementById("usr_address").innerHTML = String(data.address);
 }
 
 async function activate(identifier){
@@ -122,13 +126,9 @@ async function activate(identifier){
 
 async function change_password(){
 	try{
-		let u_new_password = checkUndefined(String(document.getElementById("new_password").value));
+		let u_new_password = String(document.getElementById("usr_new_password_change_password").value);
 
-		const response = await axios.put("/api/user/change", {
-			params: {
-				password: u_new_password
-			}
-		});
+		const response = await axios.put("/api/user/change/password?password=" + u_new_password);
 		console.log(response);
 	} catch (error){
 		console.log(error);
@@ -138,21 +138,31 @@ async function change_password(){
 }
 
 async function changing_att(){
-
-	//TODO Remake this
 	try{
-		let query = [];
-		query.push(String(document.getElementById("username").value));
-		query.push(String(document.getElementById("name").value));
-		//query.push(document.getElementById("visibility").checked ? "PRIVATE" : "PUBLIC");
-		query.push(checkUndefined(String(document.getElementById("telephone").value)));
-		query.push(checkUndefined(String(document.getElementById("smartphone").value)));
-		const response = await axios.put("/api/user/change", {
-			params: {
-				attributes: query
-			}
-		});
+		let u_firstname = String(document.getElementById("usr_firstname_input").value);
+		let u_lastname = String(document.getElementById("usr_lastname_input").value);
+		let u_nif = String(document.getElementById("usr_id_input").value);
+		let u_telephone = String(document.getElementById("usr_phone_input").value);
+		let u_address = String(document.getElementById("usr_address_input").value);
+
+		let obj = {
+			"name": u_firstname + " " + u_lastname,
+			"visibility": "",
+			"nif": u_nif,
+			"address": u_address,
+			"telephone": u_telephone,
+			"smartphone": ""
+		}
+
+		console.log(obj);
+
+		//TODO Add more attributes to change
+		const response = await axios.put("/api/user/change/attributes", obj);
 		console.log(response);
+
+		const response_data = response.data;
+		updatePerfil(response_data);
+
 	} catch (error){
 		console.log(error);
 	} finally {

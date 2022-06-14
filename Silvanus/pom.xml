@@ -112,7 +112,11 @@
 			<version>1.9.78</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.google.cloud</groupId>
@@ -164,7 +168,15 @@
 			<version>1.18.2</version>
 		</dependency>
 
-    </dependencies>
+		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-gmail -->
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-gmail</artifactId>
+			<version>v1-rev110-1.25.0</version>
+		</dependency>
+
+
+	</dependencies>
 
 	<build>
 		<!-- for hot reload of the web application-->

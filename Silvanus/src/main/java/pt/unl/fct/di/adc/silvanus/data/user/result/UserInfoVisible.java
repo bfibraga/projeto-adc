@@ -2,6 +2,7 @@ package pt.unl.fct.di.adc.silvanus.data.user.result;
 
 import org.checkerframework.checker.units.qual.N;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
+import pt.unl.fct.di.adc.silvanus.data.user.UserRole;
 
 public class UserInfoVisible {
 
@@ -15,7 +16,7 @@ public class UserInfoVisible {
     private String telephone;
     private String smartphone;
     private String state;
-    private String role;
+    private UserRole role;
 
     public UserInfoVisible(
             String username,
@@ -27,7 +28,7 @@ public class UserInfoVisible {
             String telephone,
             String smartphone,
             String state,
-            String role
+            UserRole role
     ){
         this.username = username;
         this.email = email;
@@ -42,7 +43,7 @@ public class UserInfoVisible {
     }
 
     public UserInfoVisible(){
-        this(NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED);
+        this(NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, UserRole.USER);
     }
 
     public String getUsername() {
@@ -81,7 +82,7 @@ public class UserInfoVisible {
         return state;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 }

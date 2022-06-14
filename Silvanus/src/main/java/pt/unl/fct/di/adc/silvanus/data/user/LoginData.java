@@ -83,7 +83,7 @@ public class LoginData {
 	 * @return
 	 */
 	private boolean validPassword(String password) {
-		return password.length() > 5 && password.matches("/^[0-9A-Za-z]+$/");
+		return validField(password) && password.length() > 5 && password.matches("/^[0-9A-Za-z]+$/");
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class LoginData {
 	 * @return if they are or not
 	 */
 	public boolean validation() {
-		return validField(username) && validField(email) && validField(password) && validPassword(password);
+		return validField(this.getUsername()) && validField(this.getEmail()) && validPassword(this.getPassword());
 	}
 
 	public String getID(){
@@ -101,6 +101,6 @@ public class LoginData {
 
 	@Override
 	public String toString() {
-		return String.format("Username: %s\nEmail: %s\nPassword: %s\n", this.getUsername(), this.getEmail(), this.getPassword());
+		return String.format("LoginData:\n\tUsername: %s\n\tEmail: %s\n\tPassword: %s", this.getUsername(), this.getEmail(), this.getPassword());
 	}
 }

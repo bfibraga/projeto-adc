@@ -69,17 +69,22 @@ public class UserData {
 	}
 
 	private boolean validField(String keyword) {
-		return !keyword.trim().equals("");
+		return keyword !=null && !keyword.trim().equals("");
 	}
-	
+
 	public boolean validation() {
 		LoginData data = this.getCredentials();
-		boolean valid = 
+		boolean valid =
 				validField(data.getUsername())
-				&& validField(data.getEmail())
-				&& validField(data.getPassword())
-				&& data.getPassword().equals(confirm_password);
-		
+						&& validField(data.getEmail())
+						&& validField(data.getPassword())
+						&& data.getPassword().equals(confirm_password);
+
 		return valid;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s\nConfirm: %s\n%s\nRole: %s\n%s", this.getCredentials(), this.getConfirm_password(), this.getInfo(), this.getRole(), this.getUserStateData());
 	}
 }

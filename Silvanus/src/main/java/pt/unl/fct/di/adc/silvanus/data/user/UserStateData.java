@@ -25,4 +25,25 @@ public class UserStateData {
     public Set<String> getConfirmed_user(){
         return this.confirmed;
     }
+
+    private boolean validField(String keyword) {
+        return keyword !=null && !keyword.trim().equals("");
+    }
+
+    private boolean validSet(String set) {
+        return validField(set) && (set.trim().equalsIgnoreCase("ACTIVE") || set.trim().equalsIgnoreCase("INACTIVE"));
+    }
+
+    public boolean validation() {
+        return validSet(this.getSet());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder(String.format("UserStateData:\n\tSet:%s\n\tConfirmed:[\n", this.getSet()));
+        for (String user:confirmed) {
+            result.append("-").append(user).append("\n");
+        }
+        return result.append("\n]").toString();
+    }
 }

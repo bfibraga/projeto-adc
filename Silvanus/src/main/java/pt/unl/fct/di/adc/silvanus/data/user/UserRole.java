@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.data.user;
 
+import pt.unl.fct.di.adc.silvanus.util.JSON;
+
 public enum UserRole {
 	USER("User", "#6aa84f"),
 	FUNC_CONS("Funcionario Conselho", "#6fa8dc"),
@@ -25,7 +27,7 @@ public enum UserRole {
 	}
 	
 	public String toString() {
-		return this.role_name;
+		return JSON.encode(this);
 	}
 
 	public String getRoleName(){

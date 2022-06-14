@@ -13,9 +13,9 @@ public class Notification {
         this(sender, receiver, "");
     }
 
-    public Notification(String senderOfNotification, String receiverOfNotification, String description) {
-        this.sender = senderOfNotification;
-        this.receiver = receiverOfNotification;
+    public Notification(String sender, String receiver, String description) {
+        this.sender = sender;
+        this.receiver = receiver;
         this.description = description;
     }
 

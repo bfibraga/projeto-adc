@@ -118,7 +118,11 @@ public abstract class CacheManager<K> {
     public void remove(K key, String property){
         Map<String, String> cache_result = this.verifyEntry(key);
         cache_result.remove(hashProperty(property));
-        this.cache.put(key.toString(), cache_result);
+        this.cache.remove(key.toString());
+    }
+
+    public void remove(K key){
+        this.cache.remove(key.toString());
     }
 
     /**

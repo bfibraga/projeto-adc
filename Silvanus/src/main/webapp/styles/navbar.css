@@ -86,9 +86,14 @@ main{
     transition: display 100ms ease;
 }
 
+.active {
+    background-color: #666;
+    color: white;
+}
+
 /*---Small Screens---*/
 
-@media only screen and (max-width: 720px) {
+@media only screen and (max-width: 768px) {
 
     main{
         margin-bottom: var(--nav-bar-len);
@@ -100,17 +105,21 @@ main{
     }
 
     .offcanvas{
+        width: 100vw;
         height: calc(100vh - var(--nav-bar-len));
     }
 
     .app-navbar{
         bottom: 0;
-        width: 100vh;
+        width: 100%;
         height: var(--nav-bar-len);
+        
     }
 
     .app-navbar-nav{
         flex-direction: row;
+        justify-content: center;
+
     }
 
     .app-nav-item{
@@ -139,14 +148,16 @@ main{
         text-align: end;
     }
 
-    .offcanvas{
-        width: 100vw;
+    #request-terrain-offcanvas{
+        --size : 45vh;
+        height: var(--size) !important;
+        top: calc(100vh - var(--size) - var(--nav-bar-len));
     }
 }
 
 /*---Large Screens---*/
 
-@media only screen and (min-width: 720px) {
+@media only screen and (min-width: 768px) {
 
     main{
         margin-left: var(--nav-bar-len);
@@ -159,6 +170,8 @@ main{
 
     .offcanvas{
         margin-left: var(--nav-bar-len);
+        height: 100vh;
+        width: calc(100vw - var(--nav-bar-len));   
     }
 
     .app-navbar{
@@ -197,6 +210,11 @@ main{
 
     .app-link-text{
         display: none;
+    }
+
+    #request-terrain-offcanvas{
+        --size : 50vh;
+        width: var(--size) !important;
     }
 
 }

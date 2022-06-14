@@ -25,6 +25,7 @@
     <link href="../styles/main.css" rel="stylesheet">
     <link href="../styles/map.css" rel="stylesheet">
     <link href="../styles/navbar.css" rel="stylesheet">
+    <link href="../styles/card.css" rel="stylesheet">
 
 </head>
 <!--TODO Put getInfo() function-->
@@ -46,13 +47,12 @@
     <ul class="app-navbar-nav">
 
       <li class="app-nav-item">
-        <a class="app-nav-link grow"  data-bs-toggle="offcanvas" data-bs-target="#list-properties" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-pin-map" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8l3-4z"/>
-            <path fill-rule="evenodd" d="M8 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"/>
-          </svg>
+        <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#user-properties">
+          <div class="avatar-wrapper d-flex" style="width: 2rem; height: 2rem;">
+            <img id="usr_avatar_navbar" src="../media/imgs/user.png" class="rounded-circle shadow-sm">
+          </div>
           <span class="app-link-text">
-            Terrenos
+            Perfil
           </span>
         </a>
       </li>
@@ -69,12 +69,13 @@
       </li>
 
       <li class="app-nav-item">
-        <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#user-properties">
-          <div class="avatar-wrapper d-flex" style="width: 2rem; height: 2rem;">
-            <img id="usr_avatar_navbar" src="../media/imgs/user.png" class="rounded-circle shadow-sm">
-          </div>
+        <a class="app-nav-link grow"  data-bs-toggle="offcanvas" data-bs-target="#list-properties" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-pin-map" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8l3-4z"/>
+            <path fill-rule="evenodd" d="M8 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"/>
+          </svg>
           <span class="app-link-text">
-            Perfil
+            Terrenos
           </span>
         </a>
       </li>
@@ -130,75 +131,117 @@
       <a type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></a>
     </div>
     <div id="usr_menu" class="offcanvas-body" data-app-menu-active="true">
-      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
-        <div class="d-flex flex-row justify-content-center mb-3">
-          <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
-            <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-          </div>
-        </div>
-        <h3 id="usr_username">Username
-          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
-            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
-          </a>
-        </h3>
-        <h5 id="usr_email" class="">Email</h5>
-        <div id="usr_roles">
-          <span class="badge rounded-pill bg-primary">User</span>
-          <span class="badge rounded-pill bg-danger">Alpha Tester</span>
-          <span class="badge rounded-pill bg-warning">Beta Tester</span>
-        </div>
-      </div>
-      <div id="usr_notifications_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
-        <h5 class="mb-3">Notificações</h5>
-        <div id="notification-list" class="d-flex flex-column toast-container">
-          <!-- Available Notifications -->
-          
-          <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-
-              <div class="avatar-wrapper m-2" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
+      
+      <div class="row">
+        <div class="col">
+          <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
+            <div class="d-flex flex-row justify-content-center mb-3">
+              <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
                 <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
               </div>
-              <strong class="me-auto">Bootstrap</strong>
-              <small class="text-muted">just now</small>
-              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="toast-body">
-              See? Just like this.
+            <h3 id="usr_username">Username
+              <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
+                <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
+              </a>
+            </h3>
+            <h5 id="usr_email" class="">Email</h5>
+            <div id="usr_roles">
+              <span class="badge rounded-pill bg-primary">User</span>
+              <span class="badge rounded-pill bg-danger">Alpha Tester</span>
+              <span class="badge rounded-pill bg-warning">Beta Tester</span>
             </div>
           </div>
-
-        
         </div>
+        <div class="col">
+          <div id="usr_notifications_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
+            <h5 class="mb-3">Notificações</h5>
+            <div id="notification-list" class="container d-flex flex-column toast-container">
+              <!-- Available Notifications -->
+              
+              <div class="row flex-column align-items-center">
+                <div class="col mb-3">
+                  <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+        
+                      <div class="avatar-wrapper m-2" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
+                        <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+                      </div>
+                      <strong class="me-auto">Bootstrap</strong>
+                      <small class="text-muted">just now</small>
+                      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                      See? Just like this.
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+        
+                      <div class="avatar-wrapper m-2" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
+                        <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+                      </div>
+                      <strong class="me-auto">Bootstrap</strong>
+                      <small class="text-muted">just now</small>
+                      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                      See? Just like this.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              
+
+              
 
 
-      </div>
-      <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
-        <h5 class="mb-3">Perfil</h5>
-        <h6>Primeiro Nome</h6>
-        <p id="usr_firstname" class="border-bottom">-</p>
-        <h6>Último Nome</h6>
-        <p id="usr_lastname" class="border-bottom">-</p>
-        <h6>NIF</h6>
-        <p id="usr_id" class="border-bottom">-</p>
-        <h6>Número de telefone</h6>
-        <p id="usr_phone" class="border-bottom">-</p>
-        <h6>Morada</h6>
-        <p id="usr_address" class="border-bottom">-</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-12 col-md-12">
+          <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
+            <div class="position-relative perfil-header mb-3">
+              <h5 class="">Perfil</h5>
+              <div class="position-absolute end-0 top-50 translate-middle-y">
+                <a id="btn_change_password"  href="#" onclick="toggleChangeProfileMenu('usr_menu', 'usr_change_password')" class="btn btn-primary pb-1">Alterar palavra passe</a>
+                <a id="btn_change_usr_profile" href="#" onclick="toggleChangeProfileMenu('usr_menu', 'usr_change_profile_menu')" class="btn btn-primary btn-change-usr-profile">Alterar Perfil</a>
+              </div>
+            </div>
+            <h6>Primeiro Nome</h6>
+            <p id="usr_firstname" class="border-bottom">-</p>
+            <h6>Último Nome</h6>
+            <p id="usr_lastname" class="border-bottom">-</p>
+            <h6>NIF</h6>
+            <p id="usr_id" class="border-bottom">-</p>
+            <h6>Número de telefone</h6>
+            <p id="usr_phone" class="border-bottom">-</p>
+            <h6>Morada</h6>
+            <p id="usr_address" class="border-bottom">-</p>
+    
+          </div>
+        </div>
+        <div class="col">
+          <div id="usr_definitions_scrollspy" class="d-flex flex-column light rounded-3 p-3 m-1 shadow-sm">
+            <h5>Definições</h5>
 
+            <div class="d-flex flex-row justify-content-center">
+              <a href="#" class="btn btn-primary mt-3" onclick="logout()">Logout</a>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div id="usr_about_scrollspy" class="d-flex flex-column light rounded-3 p-3 m-1 shadow-sm">
+            <h5>Sobre</h5>
+            <a href="">Perguntas frequentes</a>
+            <a href="" data-bs-toggle="offcanvas" data-bs-target="#help-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Ajuda</a>
+            <a href="" data-bs-toggle="offcanvas" data-bs-target="#about-us-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Sobre nós</a>
+          </div>
+        </div>
       </div>
-      <div id="usr_definitions_scrollspy" class="d-flex flex-column light rounded-3 p-3 mt-3 shadow-sm">
-        <h5>Definições</h5>
-        <a id="btn_change_password" href="#" onclick="toggleChangeProfileMenu('usr_menu', 'usr_change_password')" class="pb-1">Alterar palavra passe</a>
-        <a id="btn_change_usr_profile" href="#" onclick="toggleChangeProfileMenu('usr_menu', 'usr_change_profile_menu')" class="btn-change-usr-profile">Alterar Perfil</a>
-      </div>
-      <div id="usr_about_scrollspy" class="d-flex flex-column light rounded-3 p-3 mt-3 shadow-sm">
-        <h5>Sobre</h5>
-        <a href="">Perguntas frequentes</a>
-        <a href="" data-bs-toggle="offcanvas" data-bs-target="#help-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Ajuda</a>
-        <a href="" data-bs-toggle="offcanvas" data-bs-target="#about-us-offcanvas" aria-controls="offcanvasScrolling" data-bs-placement="right">Sobre nós</a>
-      </div>
-      <a href="#" class="btn btn-primary mt-3" onclick="logout()">Logout</a>
 
       <!-- Toast Handler-->
     </div>
@@ -243,23 +286,32 @@
       </div>
     </div>
     <div id="usr_change_password" class="offcanvas-body" data-app-menu-active="false">
-      <div class="light rounded-3 p-3 shadow-sm">
+      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
         <div class="d-flex flex-row justify-content-center mb-3">
-          <div class="avatar-wrapper mb-3" style="width: 8rem; height: 8rem;">
+          <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
             <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
           </div>
         </div>
-        <h6>Username ou Email</h6>
-        <input id="usr_identifier_change_password" class="form-control rounded-pill mb-3"></input>
-        <h6>Palavra-passe antiga</h6>
-        <input id="usr_old_password_change_password" class="form-control rounded-pill mb-3"></input>
+        <h3 id="usr_username">Username
+          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
+            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
+          </a>
+        </h3>
+        <h5 id="usr_email" class="">Email</h5>
+        <div id="usr_roles">
+          <span class="badge rounded-pill bg-primary">User</span>
+          <span class="badge rounded-pill bg-danger">Alpha Tester</span>
+          <span class="badge rounded-pill bg-warning">Beta Tester</span>
+        </div>
+      </div>
+      <div class="light rounded-3 p-3 shadow-sm">
         <h6>Palavra-passe nova</h6>
         <input id="usr_new_password_change_password" class="form-control rounded-pill"></input>
         <br>
         <div class="d-flex flex-column justify-content-center">
           <div class="d-flex flex-row justify-content-center">
             <a id="btn_callback_change_usr_profile" onclick="toggleChangeProfileMenu('usr_change_password', 'usr_menu')" href="#" class="btn btn-danger m-3 btn-change-usr-profile" onclick="">Cancelar</a>
-            <a href="#" class="btn btn-primary m-3" onclick="changing_att()">Alterar</a>
+            <a href="#" class="btn btn-primary m-3" onclick="change_password()">Alterar</a>
           </div>
         </div>
       </div>
@@ -299,7 +351,9 @@
         <div class="dropdown">
           <a class="dropdown-toggle btn light shadow-sm" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Ir para...</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#usr_list_terrain_scrollpsy">Lista de Terrenos</a></li>
+            <li >
+              <a class="dropdown-item" href="#usr_list_terrain_scrollpsy">Lista de Terrenos</a>
+            </li>
             <li><a class="dropdown-item" href="#usr_pending_terrain_scrollpsy">Pedidos Pendentes</a></li>
           </ul>
         </div>
@@ -307,10 +361,43 @@
       </div>
       <div class="offcanvas-body ">
         <div class="row">
-          <div class="col-md-12 col-sm-6">
+          <div class="col-md-12 col-sm-12">
             <div id="usr_list_terrain_scollspy" class="row light rounded-3 m-1 p-3 shadow-sm">
               <h5 class="mb-3">Lista de Terrenos</h5>
+              <div class="d-flex flex-row justify-content-center align-items-center">
+                <div class="row">
+                  <div class="col m-3">
+                    <a href="" class="card shadow-sm" style="width: 16rem;">
+                      <img src="../media/imgs/register-wallpaper.jpg" class="card__image" alt="" />
+                      <div class="card__overlay">
+                        <div class="card__header">
+                          <div class="card__header-text">
+                            <h3 class="card__title">Terreno 1</h3>            
+                            <span class="card__status">Setubal / Sesimbra</span>
+                          </div>
+                        </div>
+                        <p class="card__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, blanditiis?</p>
+                      </div>
+                    </a> 
+                  </div>
+                  <div class="col m-3" >
+                    <a href="" class="card shadow-sm" style="width: 16rem;">
+                      <img src="../media/imgs/register-wallpaper.jpg" class="card__image" alt="" />
+                      <div class="card__overlay">
+                        <div class="card__header">
+                          <div class="card__header-text">
+                            <h3 class="card__title">Terreno 1</h3>            
+                            <span class="card__status">Setubal / Sesimbra</span>
+                          </div>
+                        </div>
+                        <p class="card__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, blanditiis?</p>
+                      </div>
+                    </a> 
+                  </div>
+                </div>
+              </div>
               
+
             </div>
           </div>
           <div class="col ">
@@ -318,7 +405,7 @@
               <h5 class="mb-3">Pedidos Pendentes</h5>
               <!-- Add New Property Button --> 
               <div class="d-flex flex-row justify-content-center">
-                <input type="button" style="" class="btn btn-primary rounded-pill" value="Registar novo terreno"> 
+                <input type="button" style="" class="btn btn-primary rounded-pill" value="Registar novo terreno" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade"> 
               </div>
               
             </div>
@@ -332,45 +419,45 @@
     </div>
 
     <!-- Request Terrain Sidebar -->
-    <div class="offcanvas offcanvas-end rounded-3" style="z-index: -10; width: 20rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="request-terrain-offcanvas" aria-labelledby="offcanvasScrollingLabel">
+    <div class="offcanvas offcanvas-end rounded-3 bg-light border-0 shadow-sm" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="request-terrain-offcanvas" aria-labelledby="offcanvasScrollingLabel">
       <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Novo Terreno</h5> 
         <button id="request-terrain-btn-close" type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
-        <div class="mb-3">
-          <label for="name-terrain" class="form-label">Nome do Terreno</label>
-          <input type="text" class="form-control rounded-pill" id="name-terrain">
-        </div>
-        <div class="mb-3">
-          <label for="description-terrain" class="form-label">Descrição</label>
-          <textarea class="form-control" id="description-terrain" rows="3"></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="conselho-terrain" class="form-label">Conselho</label>
-          <input type="text" class="form-control rounded-pill" id="conselho-terrain">
-        </div>
-        <div class="mb-3">
-          <label for="freguesia-terrain" class="form-label">Freguesia</label>
-          <input type="text" class="form-control rounded-pill" id="freguesia-terrain">
-        </div>
-        <div class="mb-3">
-          <label for="section-terrain" class="form-label">Secção</label>
-          <input type="text" class="form-control rounded-pill" id="section-terrain">
-        </div>
-        <div class="mb-3">
-          <label for="number-article-terrain" class="form-label">Numero de Artigo</label>
-          <input type="text" class="form-control rounded-pill" id="number-article-terrain">
-        </div>
-        <div class="mb-3">
-          <label for="documentation-validation-terrain" class="form-label">Documentos de Validação do Terreno</label>
-          <input type="file" class="form-control rounded-pill" id="documentation-validation-terrain">
+        <div class="light p-3 mb-3 rounded-3 shadow-sm">
+          <div class="mb-3">
+            <label for="name-terrain" class="form-label">Nome do Terreno</label>
+            <input type="text" class="form-control rounded-pill" id="name-terrain">
+          </div>
+          <div class="mb-3">
+            <label for="description-terrain" class="form-label">Descrição</label>
+            <textarea class="form-control" id="description-terrain" rows="3"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="conselho-terrain" class="form-label">Conselho</label>
+            <input type="text" class="form-control rounded-pill" id="conselho-terrain">
+          </div>
+          <div class="mb-3">
+            <label for="freguesia-terrain" class="form-label">Freguesia</label>
+            <input type="text" class="form-control rounded-pill" id="freguesia-terrain">
+          </div>
+          <div class="mb-3">
+            <label for="number-article-terrain" class="form-label">Numero de Artigo</label>
+            <input type="text" class="form-control rounded-pill" id="number-article-terrain">
+          </div>
+          <div class="mb-3">
+            <label for="documentation-validation-terrain" class="form-label">Documentos de Validação do Terreno</label>
+            <input type="file" class="form-control rounded-pill" id="documentation-validation-terrain">
+          </div>
+
+          <!-- Register Property Button --> 
+          <div class="input-group center-x" style="width: 17rem; margin-top: 1.5rem; margin-bottom: 1rem;"> 
+            <input id="redirect-request-property" type="button" style="width: 20rem;" class="btn btn-primary center-x rounded-pill" value="Registar" onclick="submitPolygon()"> 
+          </div> 
         </div>
         
-        <!-- Register Property Button --> 
-        <div class="input-group center-x" style="width: 17rem; margin-top: 1.5rem; margin-bottom: 1rem;"> 
-          <input id="redirect-request-property" type="button" style="width: 20rem;" class="btn btn-primary center-x rounded-pill" value="Registar" onclick="submitPolygon()"> 
-       	</div> 
+        
       </div>
     </div>
 

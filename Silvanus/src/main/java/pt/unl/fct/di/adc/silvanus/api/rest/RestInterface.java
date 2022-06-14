@@ -1,9 +1,11 @@
 package pt.unl.fct.di.adc.silvanus.api.rest;
 
 public interface RestInterface {
-    public static String CHARSET = ";charset=utf-8";
-    public static String DEFAULT_VALUE = " ";
-    public static String IDENTIFIER = "identifier";
-    public static String TOKEN = "token";
+    String PATH = "/api";
+    String UTF8 = "utf-8";
+    String CHARSET = ";charset=" + UTF8;
+    String DEFAULT_VALUE = " ";
+    String IDENTIFIER = "identifier";
+    String TOKEN = "token";
 
 }

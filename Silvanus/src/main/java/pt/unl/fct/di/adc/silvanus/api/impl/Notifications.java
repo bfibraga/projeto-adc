@@ -5,12 +5,13 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import java.util.Set;
 
 public interface Notifications {
 
     Result<Void> send(Notification data);
 
-    Result<String> list(String userID);
+    Result<Set<Notification>> list(String userID);
 
     Result<Void> delete(Notification data);
 

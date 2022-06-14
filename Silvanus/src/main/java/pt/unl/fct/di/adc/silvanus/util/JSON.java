@@ -1,6 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.util;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Helper class to implement JSON operations
@@ -28,5 +29,9 @@ public class JSON {
      */
     public static <T> T decode(String json, Class<T> given_class) {
         return gson.fromJson(json, given_class);
+    }
+
+    public static <T> T decode(String json){
+        return gson.fromJson(json,  new TypeToken<T>(){}.getType());
     }
 }

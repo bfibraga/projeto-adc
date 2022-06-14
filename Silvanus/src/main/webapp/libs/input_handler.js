@@ -18,6 +18,16 @@ document.getElementById("button-submit").addEventListener("click", function(){
   document.getElementById("loader").classList.add("block");
 });
 
+document.getElementById("button-submit").onkeydown = function(event){
+  switch(event.key){
+    case 'Enter':
+      document.getElementById("loader").classList.remove("none");
+      document.getElementById("loader").classList.add("block");
+      login();
+      break;
+  }
+}
+
 //TODO Remove this
 /*document.getElementById("theme-switch").addEventListener("change", function(){
   if(this.checked){

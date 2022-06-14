@@ -1,19 +1,21 @@
 package pt.unl.fct.di.adc.silvanus.api.rest;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
+import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 
 import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.*;
 
 //TODO Review all Rest operations
-@Path(RestUsers.PATH)
-@Produces(MediaType.APPLICATION_JSON + CHARSET)
 public interface RestUsers {
 	String PATH = "/user";
 	String PASSWORD = "password";
+	String NEW_PASSWORD = "new_" + PASSWORD;
+	String OLD_PASSWORD = "old_" + PASSWORD;
 	String ROLE = "role";
 	String ATTRIBUTES = "attributes";
 
@@ -22,6 +24,11 @@ public interface RestUsers {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
 	Response register(UserData data);
+
+	@POST
+	@Path("/build")
+	@Consumes(MediaType.APPLICATION_JSON)
+	Response build(@HeaderParam("secret") String secret, UserData userData);
 	
 	@POST
 	@Path("/login/{"+ IDENTIFIER + "}")
@@ -63,14 +70,14 @@ public interface RestUsers {
 	Response activate(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier);
 	
 	@PUT
-	@Path("/change")
+	@Path("/change/password")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response changePassword(@CookieParam(TOKEN) String cookie, @QueryParam(PASSWORD) String new_password);
+	Response changePassword(@CookieParam(TOKEN) String cookie, @QueryParam(PASSWORD) @DefaultValue(DEFAULT_VALUE) String new_password);
 	
 	@PUT
-	@Path("/change/{" + IDENTIFIER + "}")
+	@Path("/change/attributes")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response changeAttributes(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier, @QueryParam(ATTRIBUTES) String list_json);
+	Response changeAttributes(@CookieParam(TOKEN) String cookie, @QueryParam(IDENTIFIER) @DefaultValue(DEFAULT_VALUE) String identifier, UserInfoData infoData);
 }

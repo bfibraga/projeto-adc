@@ -76,7 +76,6 @@ public class TOKEN {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            System.out.println(jws.getSubject());
 
             long curr_time = System.currentTimeMillis();
             long expirationData = jws.getExpiration().getTime();

@@ -10,7 +10,6 @@ import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.IDENTIFIER;
 import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.TOKEN;
 import static pt.unl.fct.di.adc.silvanus.api.rest.RestNotifications.PATH;
 
-@Path(PATH)
 public interface RestNotifications {
 
     String PATH = "/notification";

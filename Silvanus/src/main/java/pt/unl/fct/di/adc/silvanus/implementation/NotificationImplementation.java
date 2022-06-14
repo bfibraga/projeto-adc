@@ -8,6 +8,8 @@ import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
 import pt.unl.fct.di.adc.silvanus.api.impl.Notifications;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.ws.rs.core.Response;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,15 +24,11 @@ public class NotificationImplementation implements Notifications {
     private static final String PROPERTY_TEXT_OF_NOTIFICATION = "text_of_notification";
     public static final int MAXIMUM_NUMBER_OF_MESSAGES = 5;
 
-    private final Gson g = new Gson();
-
     private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
     private final KeyFactory notificationKeyFactory = datastore.newKeyFactory().setKind(NOTIFICATION_TABLE_NAME);
 
-    public NotificationImplementation() {
-
-    }
+    public NotificationImplementation() {}
 
     @Override
     public Result<Void> send(Notification data) {
@@ -43,17 +41,21 @@ public class NotificationImplementation implements Notifications {
 
         try {
 
-            if (!userExists(data.getReceiver())) {
+            /*if (!userExists(data.getReceiver())) {
                 LOG.severe("O usuario que era suposto receber a notificacao nao foi encontrado.");
                 return Result.error(Response.Status.NOT_FOUND, "Destinatario invalido.");
-            }
+            }*/
             if (!canSendMoreNotifications(data.getSender(), data.getReceiver())) {
                 LOG.warning("O remetente ja nao pode enviar mais mensagens ao destinatario. O destinatario tem de apagar mensagens do remetente "
                         + "para que a operacao corra com sucesso.");
                 return Result.error(Response.Status.FORBIDDEN, "Não e possivel enviar mais mensagens neste sentido.");
             }
 
-            Entity transaction = Entity.newBuilder(notificationKey).set(PROPERTY_ID_OF_SENDER, data.getSender()).set(PROPERTY_ID_OF_RECEIVER, data.getReceiver()).set(PROPERTY_TEXT_OF_NOTIFICATION, data.getDescription()).build();
+            Entity transaction = Entity.newBuilder(notificationKey)
+                    .set(PROPERTY_ID_OF_SENDER, data.getSender())
+                    .set(PROPERTY_ID_OF_RECEIVER, data.getReceiver())
+                    .set(PROPERTY_TEXT_OF_NOTIFICATION, data.getDescription())
+                    .build();
             txn.put(transaction);
             txn.commit();
             LOG.fine("Foi enviada a notificacao.");
@@ -66,7 +68,7 @@ public class NotificationImplementation implements Notifications {
     }
 
     @Override
-    public Result<String> list(String userID) {
+    public Result<Set<Notification>> list(String userID) {
         LOG.fine("Query was started.");
         Query<Entity> query;
         QueryResults<Entity> results;
@@ -74,12 +76,17 @@ public class NotificationImplementation implements Notifications {
         query = Query.newEntityQueryBuilder().setKind(NOTIFICATION_TABLE_NAME).setFilter(
                 StructuredQuery.CompositeFilter.and(StructuredQuery.PropertyFilter.eq(PROPERTY_ID_OF_RECEIVER, userID))).build();
         results = datastore.run(query);
-        List<Entity> entityList = new LinkedList<>();
+        Set<Notification> result = new HashSet<>();
         while (results.hasNext()) {
             Entity tmp = results.next();
-            entityList.add(tmp);
+
+            Notification notification = new Notification(tmp.getString(PROPERTY_ID_OF_RECEIVER),
+                    tmp.getString(PROPERTY_ID_OF_SENDER),
+                    tmp.getString(PROPERTY_TEXT_OF_NOTIFICATION));
+
+            result.add(notification);
         }
-        return Result.ok(g.toJson(entityList));
+        return Result.ok(result);
     }
 
     @Override
