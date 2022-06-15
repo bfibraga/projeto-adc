@@ -1,598 +1,225 @@
-const HTTP_RESPONSE = {
-	"OK": 200,
-	"BAD_REQUEST": 400,
-	"FORBIDDEN": 403,
-	"INTERNAL_SERVER": 500
-}
-
-const MESSAGE_TYPE = {
-	"USERNAME_INVALID": "Please enter your username",
-	"EMAIL_INVALID": "Please enter a valid email",
-	"NAME_INVALID": "Please enter your name",
-	"PASSWORD_INVALID": "Please enter your password",
-	"PASSWORD_MISMATCH": "Please enter your password again",
-	"WRONG_PARAMETERS": "Wrong username or password"
-}
-
-const ROLE_COLOR = {
-	USER: "rgb(200,200,200)",
-	GBO: "rgb(250, 200, 200)",
-	GS: "rgb(200, 250, 200)",
-	SU: "rgb(200,200,250)"
-}
-
-const base_uri = "http://localhost:8080";
-var xmlhttp = new XMLHttpRequest();
-
-let res = "";
-
-function getToken() {
-	let res = sessionStorage.getItem("token");
-	res = JSON.parse(res)
-	document.getElementById("token_area").innerText = JSON.stringify(res);
-}
-
-function sleep(milliseconds) {
-	const date = Date.now();
-	let currentDate = null;
-	do {
-		currentDate = Date.now();
-	} while (currentDate - date < milliseconds);
-}
+const base_uri = window.location.origin;
 
 function checkUndefined(keyword) {
-	return keyword.trim() == "" ? "UNDEFINED" : keyword;
+	return keyword.trim() === "" ? "UNDEFINED" : keyword;
 }
 
-function register() {
-	let u_username = new String(document.getElementById("usr_identifier").value);
-	let u_email = new String(document.getElementById("usr_email").value);
-	let u_name = new String(document.getElementById("usr_firstname").value + " " + document.getElementById("usr_lastname").value);
-	let u_password = new String(document.getElementById("usr_password").value);
-	let u_confirm = new String(document.getElementById("usr_confirm").value);
+async function register(){
+	try{
+		let u_username = String(document.getElementById("usr_identifier").value);
+		let u_email = String(document.getElementById("usr_email").value);
+		let u_name = String(document.getElementById("usr_firstname").value + " " + document.getElementById("usr_lastname").value);
+		let u_password = String(document.getElementById("usr_password").value);
+		let u_confirm = String(document.getElementById("usr_confirm").value);
 
-	let u_role = "USER";
-	let u_state = "ACTIVE";
-	let u_visibility = "PUBLIC";
-	let u_telephone = checkUndefined(new String(document.getElementById("usr_telephone").value));
-	let u_smartphone = "911";
-	let u_nif = new String(document.getElementById("usr_id").value);
-	let u_address = new String(document.getElementById("usr_adress").value);
+		//let u_role = "USER";
+		//let u_state = "ACTIVE";
+		let u_visibility = "PUBLIC";
+		let u_telephone = checkUndefined(String(document.getElementById("usr_telephone").value));
+		let u_smartphone = "911";
+		let u_nif = String(document.getElementById("usr_id").value);
+		let u_address = String(document.getElementById("usr_adress").value);
 
-	let obj = {
-		"username": u_username,
-		"email": u_email,
-		"name": u_name,
-		"password": u_password,
-		"confirm": u_confirm,
-		"role": u_role,
-		"state": u_state,
-		"visibility": u_visibility,
-		"nif": u_nif,
-		"address": u_address,
-		"telephone": u_telephone,
-		"smartphone": u_smartphone,
-	}
-
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						window.location.replace(base_uri + "/login");
-						break;
-					default:
-						console.log(xmlhttp.statusText);
+		//TODO Change this
+		const response = await axios.post("/api/user/register",
+			{
+				"credentials": {
+					"username": u_username,
+					"email": u_email,
+					"password": u_password
+				},
+				"confirm_password": u_confirm,
+				"info": {
+					"name": u_name,
+					"visibility": u_visibility,
+					"nif": u_nif,
+					"address": u_address,
+					"telephone": u_telephone,
+					"smartphone": u_smartphone
 				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-
-		xmlhttp.open("POST", base_uri + "/api/user/register");
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
+			});
+		window.location.replace(base_uri + "/app");
+	} catch (error){
+		console.log(error);
+	} finally {
 	}
 }
 
-/*function notActive() {
-	logout(time);
-}
+async function login(){
+	try{
+		let u_identifier = String(document.getElementById("usr_identifier").value);
+		let u_password = checkUndefined(String(document.getElementById("usr_password").value));
 
-function isActive() {
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						//Debug purposes
-
-						let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-
-
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0); 
-						}
-				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-		let query = sessionStorage.getItem("username_token");
-		xmlhttp.open("GET", base_uri + "/api/user/get?user=" + query);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(null);
-	}
-}*/
-
-function activate() {
-
-	let u_target_username = new String(document.getElementById("username").value);
-
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						//Debug purposes
-
-						/*let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-						sessionStorage.setItem("username_token", null);
-						sessionStorage.setItem("token", null);*/
-
-						let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-
-						break;
-					default:
-						console.log(xmlhttp.responseText)
-				}
-			}
-		}
-
-
-		obj = JSON.stringify(obj);
-		xmlhttp.open("PUT", base_uri + "/api/user/activate/" + u_target_username);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-}
-
-function login() {
-	let u_identifier = new String(document.getElementById("usr_identifier").value);
-	let u_password = checkUndefined(new String(document.getElementById("usr_password").value));
-
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						//Debug purposes
-
-						/*let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-						sessionStorage.setItem("username_token", response.username);
-						sessionStorage.setItem("token", xmlhttp.responseText);*/
-
-						window.location.replace(base_uri.concat("/app"));
-
-						break;
-					default:
-						document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
-
-				}
-				document.getElementById("loader").classList.add("d-none");
-			}
-		}
-
-		xmlhttp.open("POST", base_uri + "/api/user/login/" + u_identifier + "?password=" + u_password);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(null);
-	}
-}
-
-function init() {
-	getTime();
-
-	let curr_time = sessionStorage.getItem("time");
-	let token = JSON.parse(sessionStorage.getItem("token"));
-
-	console.log(curr_time);
-	console.log(token.expirationDate);
-
-	if (token.expirationDate < curr_time) {
-		alert("Session Expired! Try login again");
+		const response = await axios.post("/api/user/login/" + u_identifier + "?password=" + u_password);
+		console.log(response);
 		window.location.replace(base_uri.concat("/app"));
-	} else {
-		getInfo();
+	} catch (error){
+		console.log(error);
+		document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
+	} finally {
+		document.getElementById("loader").classList.add("d-none");
 	}
 }
 
-function toTimestamp(strDate) {
-	var datum = Date.parse(strDate);
-	return datum / 1000;
+async function logout() {
+	try{
+		const response = await axios.post("/api/user/logout");
+		console.log(response);
+		window.location.replace(base_uri);
+	} catch (error){
+		console.log(error);
+	} finally {
+
+	}
 }
 
-function getTime() {
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						//Debug purposes
+async function getInfo(debug){
+	try{
+		const response = await axios.get("/api/user/info/");
+		const response_data = response.data[0];
+		console.log(response_data);
 
-						/*let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-						sessionStorage.setItem("username_token", null);
-						sessionStorage.setItem("token", null);*/
+		//Avatar
+		//TODO Alter this avatar url
+		let avatar_url = "https://storage.googleapis.com/projeto-adc.appspot.com/92b2843145c13d62106f68d0b11153.jpg";
+		document.querySelectorAll('.avatar-wrapper')
+			.forEach(function(image) {
+				image.src = avatar_url;
+			});
 
-						let response = JSON.parse(xmlhttp.responseText);
-						console.log(toTimestamp(response));
+		//Update User Profile
+		document.getElementById("usr_username").innerHTML = String(response_data.username);
+		document.getElementById("usr_email").innerHTML = String(response_data.email);
+		updatePerfil(response_data);
 
-						sessionStorage.setItem("time", toTimestamp(response));
+	} catch (error){
+		console.log(error);
+		if (!debug){
+			window.location.replace(base_uri);
+		}
+	}
+}
 
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
+function updatePerfil(data){
+	//User Visible Data
+	let name_parts = data.name.split(" ");
+	document.getElementById("usr_firstname").innerHTML = String(name_parts[0]);
+	document.getElementById("usr_lastname").innerHTML = String(name_parts[name_parts.length-1]);
+
+	document.getElementById("usr_id").innerHTML = String(data.nif);
+	document.getElementById("usr_phone").innerHTML = String(data.telephone);
+	document.getElementById("usr_address").innerHTML = String(data.address);
+}
+
+async function activate(identifier){
+	try{
+		const response = await axios.post("/api/user/activate/" + identifier);
+		console.log(response);
+		window.location.replace(base_uri.concat("/app"));
+	} catch (error){
+		console.log(error);
+		//document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
+	} finally {
+		//document.getElementById("loader").classList.add("d-none");
+	}
+}
+
+async function change_password(){
+	try{
+		let u_new_password = String(document.getElementById("usr_new_password_change_password").value);
+
+		const response = await axios.put("/api/user/change/password?password=" + u_new_password);
+		console.log(response);
+	} catch (error){
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
+}
+
+async function changing_att(){
+	try{
+		let u_firstname = String(document.getElementById("usr_firstname_input").value);
+		let u_lastname = String(document.getElementById("usr_lastname_input").value);
+		let u_nif = String(document.getElementById("usr_id_input").value);
+		let u_telephone = String(document.getElementById("usr_phone_input").value);
+		let u_address = String(document.getElementById("usr_address_input").value);
+
+		let obj = {
+			"name": u_firstname + " " + u_lastname,
+			"visibility": "",
+			"nif": u_nif,
+			"address": u_address,
+			"telephone": u_telephone,
+			"smartphone": ""
 		}
 
-		xmlhttp.open("GET", base_uri + "/api/utils/time");
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(null);
+		console.log(obj);
+
+		//TODO Add more attributes to change
+		const response = await axios.put("/api/user/change/attributes", obj);
+		console.log(response);
+
+		const response_data = response.data;
+		updatePerfil(response_data);
+
+	} catch (error){
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
 	}
 }
 
-function getInfo() {
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						//Debug purposes
-
-						let response = JSON.parse(xmlhttp.responseText);
-						console.log(response);
-
-						if (response[2] == "INATIVE") {
-							window.location.replace(base_uri.concat("/validation.html"));
-						}
-
-						document.getElementById("usr_username").innerText = new String(response[0]);
-						document.getElementById("usr_mail").innerText = new String(response[1]);
-
-						const name = response[2].split(" ");
-						document.getElementById("usr_firstname").innerText = new String("Primeiro Nome: " + name[0]);
-						document.getElementById("usr_lastname").innerText = new String("Último Nome:" + name[1]);
-						document.getElementById("usr_id").innerText = new String("NIF: " + response[3]);
-						document.getElementById("usr_phone").innerText = new String("Número de telefone: " + response[4]);
-						document.getElementById("usr_address").innerText = new String("Morada: " + response[5]);
-
-						document.getElementById("loader").classList.add("d-none");
-
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-		let query = sessionStorage.getItem("username_token");
-		xmlhttp.open("GET", base_uri + "/api/user/get?username=" + query);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(null);
+async function time(){
+	try{
+		const response = await axios.get("/api/utils/time");
+		console.log(response);
+	} catch (error){
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
 	}
 }
-
-function logout(time) {
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status){
-					case HTTP_RESPONSE["OK"]:
-						sleep(time);
-						window.location.replace(base_uri.concat("/"));
-						break;
-					default:
-						console.log(xmlhttp.status);
-				}
-
-			}
-		}
-
-		obj = JSON.stringify(obj);
-
-		xmlhttp.open("POST", base_uri + "/api/user/logout/");
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-
-}
-
-function change_password() {
-	let u_new_password = checkUndefined(new String(document.getElementById("new_password").value));
-
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						console.log("Password changed successfully")
-						document.getElementById("info").innerText = "Password changed successfully";
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-
-		xmlhttp.open("PUT", base_uri + "/api/user/change?password=" + u_new_password);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-
-}
-
-function changing_att() {
-	let u_target_username = new String(document.getElementById("username").value);
-	let u_name = new String(document.getElementById("name").value);
-	let u_visibility = document.getElementById("visibility").checked ? "PRIVATE" : "PUBLIC";
-	let u_telephone = checkUndefined(new String(document.getElementById("telephone").value));
-	let u_smartphone = checkUndefined(new String(document.getElementById("smartphone").value));
-
-	const query = "[" + "'" + u_visibility + "'" + "," + "'" + u_name + "'" + "," + "'" + u_telephone + "'" + "," + "'" + u_smartphone + "'" + "]";
-
-	//getToken();
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						console.log("Attributes changed successfully")
-						document.getElementById("info").innerText = "Attributes changed successfully";
-						sleep(1000);
-						window.location.replace(base_uri.concat("/app"));
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
-
-
-		}
-		obj = JSON.stringify(obj);
-
-		let final_uri = base_uri + "/api/user/change/" + u_target_username + "?attributes=";
-
-		xmlhttp.open("PUT", final_uri + query);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-
-}
-
-function listUsers() {
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						/*let response = JSON.parse(xmlhttp.responseText);
-						let result = "";
-						for (let i = 0 ; i < response.length ; i++){
-							result += response[i];
-						}
-						*/
-						console.log(xmlhttp.responseText);
-						document.getElementById("list_users").value = xmlhttp.response != null ? JSON.stringify(xmlhttp.response) : "";
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-
-		xmlhttp.open("GET", base_uri + "/api/user/list/");
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-}
-
-function remove() {
-	let u_target_username = new String(document.getElementById("username").value);
-
-
-	//getToken();
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						console.log("Attributes changed successfully")
-						document.getElementById("info").innerText = "Attributes changed successfully";
-						sleep(1000);
-						window.location.replace(base_uri.concat("/app"));
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-						if (u_target_username == sessionStorage.getItem("username")) {
-							logout(0);
-						}
-				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-
-		let final_uri = base_uri + "/api/user/remove/" + u_target_username;
-
-		xmlhttp.open("DELETE", final_uri);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-}
-
-
-function promote() {
-	let u_target_username = new String(document.getElementById("target_username").value);
-	let u_role = new String(document.getElementById("roles").value);
-
-	//getToken();
-	let res = sessionStorage.getItem("token");
-	console.log(res);
-	let obj = JSON.parse(res);
-	console.log(obj);
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						console.log("Attributes changed successfully")
-						document.getElementById("info").innerText = "Attributes changed successfully";
-						sleep(1000);
-						window.location.replace(base_uri.concat("/app"));
-						break;
-					default:
-						document.getElementById("info").innerHTML = new String(xmlhttp.response);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
-		}
-
-		obj = JSON.stringify(obj);
-
-		let final_uri = base_uri + "/api/user/promote/" + u_target_username;
-
-		xmlhttp.open("PUT", final_uri + "?role=" + u_role);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
-	}
-}
-
 
 //--- Terrain ----
 
-function submitTerrain(points_data) {
+async function submitTerrain(points_data) {
 	
-	let _id_of_owner = new String(document.getElementById("usr_username").value);
-	let _name_of_terrain = new String(document.getElementById("name-terrain").value);
-	let _description_of_terrain = new String(document.getElementById("description-terrain").value);
-	let _conselho_of_terrain = new String(document.getElementById("conselho-terrain").value);
-	let _freguesia_of_terrain = new String(document.getElementById("freguesia-terrain").value);
-	let _section_of_terrain = new String(document.getElementById("section-terrain").value);
-	let _number_article_terrain = new String(document.getElementById("number-article-terrain").value);
-	let _verification_document_of_terrain = new String(document.getElementById("documentation-validation-terrain").value);
+	//TODO Remake this function
+
+	let _id_of_owner = String(document.getElementById("usr_username").value);
+	let _name_of_terrain = String(document.getElementById("name-terrain").value);
+	let _description_of_terrain = String(document.getElementById("description-terrain").value);
+	let _conselho_of_terrain = String(document.getElementById("conselho-terrain").value);
+	let _freguesia_of_terrain = String(document.getElementById("freguesia-terrain").value);
+	let _section_of_terrain = String(document.getElementById("section-terrain").value);
+	let _number_article_terrain = String(document.getElementById("number-article-terrain").value);
+	let _verification_document_of_terrain = String(document.getElementById("documentation-validation-terrain").value);
 	let _type_of_soil_coverage = "";
 	let _current_use_of_soil = "";
 	let _previous_use_of_soil = "";
 
-	let obj = {
-		"parcela": points_data,
-		"id_of_owner": _id_of_owner,
-		"name_of_terrain": _name_of_terrain,
-		"description_of_terrain": _description_of_terrain,
-		"conselho_of_terrain": _conselho_of_terrain,
-		"freguesia_of_terrain": _freguesia_of_terrain,
-		"section_of_terrain": _section_of_terrain,
-		"number_article_terrain": _number_article_terrain,
-		"verification_document_of_terrain": _verification_document_of_terrain,
-		"type_of_soil_coverage": _type_of_soil_coverage,
-		"current_use_of_soil": _current_use_of_soil,
-		"previous_use_of_soil": _previous_use_of_soil
-	}
-
-	if (xmlhttp) {
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === 4) {
-				switch (xmlhttp.status) {
-					case HTTP_RESPONSE["OK"]:
-						console.log("Parcela Criada com Sucesso");
-						break;
-					default:
-						console.log(xmlhttp.statusText);
-						if (xmlhttp.response == "Token invalid") {
-							alert("Token invalid");
-							logout(0);
-						}
-				}
-			}
-		}
-
-		console.log(obj);
-		obj = JSON.stringify(obj);
-
-		let final_uri = base_uri + "/api/parcela/create/";
-
-		xmlhttp.open("POST", final_uri);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(obj);
+	try{
+		const response = await axios.post("/api/parcela/create",
+			{
+				"parcela": points_data,
+				"id_of_owner": _id_of_owner,
+				"name_of_terrain": _name_of_terrain,
+				"description_of_terrain": _description_of_terrain,
+				"conselho_of_terrain": _conselho_of_terrain,
+				"freguesia_of_terrain": _freguesia_of_terrain,
+				"section_of_terrain": _section_of_terrain,
+				"number_article_terrain": _number_article_terrain,
+				"verification_document_of_terrain": _verification_document_of_terrain,
+				"type_of_soil_coverage": _type_of_soil_coverage,
+				"current_use_of_soil": _current_use_of_soil,
+				"previous_use_of_soil": _previous_use_of_soil
+			});
+		console.log(response);
+	} catch (error){
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
 	}
 }
 

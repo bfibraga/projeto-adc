@@ -36,7 +36,7 @@ public interface Result<T> {
 	 * @param Class of value of the result
 	 * @return the value of the result
 	 */
-	static <T> Result<T> ok(T result) {
+	static <T> ResultOK<T> ok(T result) {
 		return new ResultOK<>(result);
 	}
 
