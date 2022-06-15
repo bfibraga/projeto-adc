@@ -1,15 +1,18 @@
 let map;
 let drawing_control;
-let active_drawing = false;
 let markers = [];
 
 let last_index = 0;
 let other_markers = 0;
 let points = [];
 let lines = [];
-let polygons = new google.maps.Polygon();
+let polygons;
 
 let click_listener;
+
+let MAP_MODE = {
+    "LIGHT": 'c5f91d16484f03de'
+};
 
 //TODO Change map bounds
 const PORTUGAL_BOUND = {
@@ -17,7 +20,7 @@ const PORTUGAL_BOUND = {
     south: -47.35,
     west: 166.28,
     east: -175.81,
-  };
+};
 
 function initMap() 
 {
@@ -25,19 +28,23 @@ function initMap()
 
     map = new google.maps.Map(document.getElementById('map'), {
         center: map_center,
-        zoom: 15
+        zoom: 15,
+        mapId: 'c5f91d16484f03de',
     });
 
+    map.addListener("bounds_changed", function(){
+        //Bounds of the map
+        let bounds = map.getBounds();
+        console.log(bounds);
+    }); 
+
     drawing_control = new google.maps.drawing.DrawingManager({
-        drawingMode: google.maps.drawing.OverlayType.MARKER,
+        drawingMode: google.maps.drawing.OverlayType.POLYGON,
         drawingControl: false,
         drawingControlOptions: {
           position: google.maps.ControlPosition.TOP_CENTER,
           drawingModes: [
-            google.maps.drawing.OverlayType.MARKER,
             google.maps.drawing.OverlayType.POLYGON,
-            google.maps.drawing.OverlayType.POLYLINE,
-            google.maps.drawing.OverlayType.RECTANGLE,
           ],
         },
         polygonOptions:{
@@ -45,18 +52,30 @@ function initMap()
             fillColor: "#00dd00",
             strokeColor: "#00ff00"
         },
-        markerOptions: {
-            icon: "../media/icons/map-marker.svg",
-          },
       });
 
       drawing_control.addListener("polygoncomplete", function(polygon){
-        polygons.setMap(null);  
-        polygons = polygon;
-        console.log(polygons);
+        /*if (polygons !== null){
+            polygons.setMap(null);  
+        }
+        polygons = polygon;*/
+        
+        console.log("polygon complete");
+        const result = polygon.getPath().Qd;
+        console.log(result);
+
+        for(let i = 0 ; i < result.length ; i++){
+
+            const obj = {
+                "lat": result[i].lat(),
+                "lon": result[i].lng()
+            }
+
+            console.log(obj);
+        }
       })
 
-      toggleDrawingControl(active_drawing);
+      toggleDrawingControl(false);
     
       drawing_control.setMap(null);
 
@@ -157,8 +176,7 @@ function createPolygon(color){
             }
         }
     });*/
-    active_drawing = !active_drawing;
-    toggleDrawingControl(active_drawing);
+    toggleDrawingControl(false);
 }
 
 function toggleDrawingControl(value){
@@ -167,10 +185,10 @@ function toggleDrawingControl(value){
     });
     if (value){
         drawing_control.setMap(map);
-        polygons.setMap(map);
+        //polygons.setMap(map);
     } else {
         drawing_control.setMap(null);
-        polygons.setMap(null);
+        //polygons.setMap(null);
     }
 }
 

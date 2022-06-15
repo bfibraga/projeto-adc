@@ -22,10 +22,10 @@ public class CriptoCacheManager<K> extends CacheManager<K> {
     }
 
     private static final CRIPTO[] available_cripto = {
+            new SHA256(),
             new SHA256HEX(),
             new SHA512(),
             new SHA512HEX(),
-            new MD5HEX()
     };
 
     public void put(K key, String cripto_name) {

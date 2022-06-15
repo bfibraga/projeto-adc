@@ -293,15 +293,3 @@ h1,p,label,a{
 .dropdown{
   transition: 200ms ease;
 }
-
-.offcanvas-body{
-  transition: 200ms ease;
-}
-
-.offcanvas-body[data-app-menu-active="false"]{
-  display: none;
-}
-
-div[data-app-pending="false"]{
-  display: none;
-}

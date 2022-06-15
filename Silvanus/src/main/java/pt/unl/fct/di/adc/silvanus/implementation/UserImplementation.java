@@ -218,6 +218,8 @@ public class UserImplementation implements Users {
 
 				String refresh_token = TOKEN.newRefreshToken();
 
+				System.out.println(jws);
+
 				return Result.ok(jws);
 			} else {
 				LOG.warning("Wrong Password: Line 153");
@@ -301,6 +303,11 @@ public class UserImplementation implements Users {
 	public Result<Void> logout(String userID) {
 
 		LOG.fine("Logout attempt");
+
+		//Create new Logout timestamp
+		Key logoutKey = datastore.newKeyFactory().setKind("UserLastLogout").newKey(userID);
+		Entity logoutEntity = Entity.newBuilder(logoutKey)
+				.build();
 
 		//Revoke token
 		this.cache.remove(userID, "token");

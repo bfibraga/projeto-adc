@@ -8,6 +8,8 @@
     --bg-secundary: rgb(210,210,210);
     --item-primary: rgb(91, 159, 91);
     --item-secundary: #c29661;
+
+    --header-offcanvas-height: 4rem;
 }
 
 body{
@@ -91,6 +93,22 @@ main{
     color: white;
 }
 
+.offcanvas-header{
+    height: var(--header-offcanvas-height);
+  }
+  
+  .offcanvas-body{
+    transition: 200ms ease;
+  }
+  
+  .offcanvas-body[data-app-menu-active="false"]{
+    display: none;
+  }
+  
+  div[data-app-pending="false"]{
+    display: none;
+  }
+
 /*---Small Screens---*/
 
 @media only screen and (max-width: 768px) {
@@ -153,6 +171,15 @@ main{
         height: var(--size) !important;
         top: calc(100vh - var(--size) - var(--nav-bar-len));
     }
+
+    .offcanvas[data-expand="false"]{
+        top: calc(100% - var(--nav-bar-len) - var(--header-offcanvas-height)) !important;
+    }
+
+    .offcanvas[data-expand="false"] #request-terrain-btn-expand svg{
+        transform: rotate(180deg);
+    }
+
 }
 
 /*---Large Screens---*/
@@ -215,6 +242,10 @@ main{
     #request-terrain-offcanvas{
         --size : 50vh;
         width: var(--size) !important;
+    }
+
+    #request-terrain-btn-expand{
+        display: none;
     }
 
 }
