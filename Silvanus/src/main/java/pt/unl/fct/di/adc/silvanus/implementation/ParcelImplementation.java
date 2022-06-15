@@ -517,7 +517,7 @@ public class ParcelImplementation implements Parcel {
         QueryResults<Entity> results;
 
         query = Query.newEntityQueryBuilder().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
-                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_ID_OWNER, nameOfCounty))
+                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN, nameOfCounty))
                 .build();
 
         results = datastore.run(query);
@@ -538,7 +538,7 @@ public class ParcelImplementation implements Parcel {
         QueryResults<Entity> results;
 
         query = Query.newEntityQueryBuilder().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
-                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_ID_OWNER, nameOfDistrict))
+                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_DISTRITO_OF_CONCELHO, nameOfDistrict))
                 .build();
 
         results = datastore.run(query);
