@@ -89,9 +89,10 @@ public class ParcelImplementation implements Parcel {
 
         String terrainID = terrainData.getId_of_owner() + "/" + terrainData.getName_of_terrain();
         Key terrainKey = datastore.newKeyFactory().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME).newKey(terrainID);
+        Key approvedTerrainKey = datastore.newKeyFactory().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME).newKey(terrainID);
 
         Entity terrainEntity = datastore.get(terrainKey);
-        if (terrainEntity != null) {
+        if (terrainEntity != null || datastore.get(approvedTerrainKey) != null) {
             LOG.severe("Terrain already exists.");
             return Result.error(Response.Status.FORBIDDEN, "Terrain already exists.");
         }
@@ -126,7 +127,7 @@ public class ParcelImplementation implements Parcel {
     /**
      * This is the method that encapsulates all the necessary verifications to validate a terrain
      *
-     * @param terrain the terrain that is being evaluates
+     * @param terrain             the terrain that is being evaluates
      * @param portugalContinental the Bounding Box that contains Portugal Continental
      * @param bibBB               the Bounding Box that contains all the other bounding boxes
      * @return a list that contains all the chunks where the terrain lies, null otherwise
@@ -261,7 +262,7 @@ public class ParcelImplementation implements Parcel {
      * The identifiers of the chunks are limited, the line € [1 , 26] and the collumn € [1 , 38]. The line and collumn are both integers. If the inputs given
      * would result in the number of the line and/or collumn going outside their bounds, the value used is the closest bound.
      *
-     * @param numberLine  number of the line of the central chunk
+     * @param numberLine    number of the line of the central chunk
      * @param numberCollumn number of the collumn of the central chunk
      * @return a list of the indexes of the surrounding chunks (central not included)
      */
@@ -284,7 +285,7 @@ public class ParcelImplementation implements Parcel {
     /**
      * Given a pair(numberLine , numberCollumn) generates the chunk as a Polygon object
      *
-     * @param numberLine  number of the line of the chunk
+     * @param numberLine    number of the line of the chunk
      * @param numberCollumn number of the collumn of the chunk
      * @return the chunk as a Polygon object
      */
@@ -301,9 +302,7 @@ public class ParcelImplementation implements Parcel {
     }
 
     /**
-     *
      * This method is used to fill the map with the chunks of each of the islands.
-     *
      */
     private void fillMapOfIlands() {
         chunksIslands.clear();
@@ -354,8 +353,9 @@ public class ParcelImplementation implements Parcel {
 
     /**
      * Given a the name of a table (that is in the datstore) and a Polygon checks if any of the terrains in that table intersect the one in argument.
+     *
      * @param polygonTerrain the terrain as a Polygon object
-     * @param nameOfTable the name of the table in the datastore in which to query
+     * @param nameOfTable    the name of the table in the datastore in which to query
      * @return an error if it does, null if it doesn't
      */
     private Result<String> querieTableThatContainsParcels(Polygon polygonTerrain, String nameOfTable) {
@@ -385,7 +385,7 @@ public class ParcelImplementation implements Parcel {
     public Result<Void> approveTerrain(String ownerTerrain, String nameTerrain) {
         Entity terrainToBeApproved = checkIfTerrainIsInWaitList(ownerTerrain, nameTerrain);
         if (terrainToBeApproved == null)
-            return null;
+            return Result.error(Response.Status.NOT_FOUND, "Terrain was not found.");
         Result<Void> result = denyTerrain(ownerTerrain, nameTerrain);
         if (!result.isOK())
             return result;
@@ -407,8 +407,9 @@ public class ParcelImplementation implements Parcel {
 
     /**
      * Checks if a terrain (identified by the string "ownerTerrain/nameTerrain") is in the waitlist
+     *
      * @param ownerTerrain owner of the terrain
-     * @param nameTerrain name of the terrain
+     * @param nameTerrain  name of the terrain
      * @return the terrain as an Entity object if it exists, null otherwise
      */
     private Entity checkIfTerrainIsInWaitList(String ownerTerrain, String nameTerrain) {
@@ -421,11 +422,11 @@ public class ParcelImplementation implements Parcel {
                         StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_NAME_OF_TERRAIN, nameTerrain)
                 )).build();
         results = datastore.run(query);
-        Entity terrainToBeApproved = results.next(); // Since there can only be one, .next() will return the entity
-        if (terrainToBeApproved == null) {
+        if (!results.hasNext()) {
             LOG.severe("A parcela não foi encontrada.");
             return null;
         }
+        Entity terrainToBeApproved = results.next(); // Since there can only be one, .next() will return the entity
         return terrainToBeApproved;
     }
 
@@ -450,4 +451,106 @@ public class ParcelImplementation implements Parcel {
     }
 
     // ---------- METHODS USED TO AID IN THE PROCESS OF APPROVING A TERRAIN ---------- \\
+
+    // ---------- METHODS USED TO AID IN THE PROCESS OF DELETING A TERRAIN ---------- \\
+
+    @Override
+    public Result<Void> deleteTerrain(String ownerTerrain, String nameTerrain) {
+        Entity tmp = getTerrainAsEntity(ownerTerrain, nameTerrain, PARCELAS_THAT_ARE_APPROVED_TABLE_NAME);
+        if (tmp == null)
+            return Result.error(Response.Status.NOT_FOUND, "The Terrain was not found.");
+        Transaction txn = datastore.newTransaction();
+        Key keyOfTerrain = tmp.getKey();
+        try {
+            txn.delete(keyOfTerrain);
+            txn.commit();
+            LOG.info("Terrain was deleted.");
+        } finally {
+            if (txn.isActive()) txn.rollback();
+        }
+        return Result.ok();
+    }
+
+    // ---------- METHODS USED TO AID IN THE PROCESS OF DELETING A TERRAIN ---------- \\
+
+    /**
+     * This method is used to get a terrain from one of the tables it can be in
+     *
+     * @param ownerTerrain the id of the owner of the terrain
+     * @param nameTerrain  the name of the terrain
+     * @param nameOfTable  the name of the table in which to query
+     * @return the entity (it can be null)
+     */
+    private Entity getTerrainAsEntity(String ownerTerrain, String nameTerrain, String nameOfTable) {
+        String terrainID = ownerTerrain + "/" + nameTerrain;
+        Key terrainKey = datastore.newKeyFactory().setKind(nameOfTable).newKey(terrainID);
+
+        Entity terrainEntity = datastore.get(terrainKey);
+        return terrainEntity;
+    }
+
+    @Override
+    public Result<List<String>> getAllTerrainsOfUser(String ownerTerrain) {
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        query = Query.newEntityQueryBuilder().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
+                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_ID_OWNER, ownerTerrain))
+                .build();
+
+        results = datastore.run(query);
+
+        if (!results.hasNext())
+            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
+        List<String> list = new ArrayList<>();
+        while (results.hasNext()) {
+            Entity tmp = results.next();
+            tmp.getList("");
+            list.add(g.toJson(tmp.getProperties()));
+        }
+        return Result.ok(list);
+    }
+
+    @Override
+    public Result<List<Entity>> getAllTerrainsInCounty(String nameOfCounty) {
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        query = Query.newEntityQueryBuilder().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
+                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_ID_OWNER, nameOfCounty))
+                .build();
+
+        results = datastore.run(query);
+
+        if (!results.hasNext())
+            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
+        List<Entity> list = new ArrayList<>();
+        while (results.hasNext()) {
+            Entity tmp = results.next();
+            list.add(tmp);
+        }
+        return Result.ok(list);
+    }
+
+    @Override
+    public Result<List<Entity>> getAllTerrainsInDistrict(String nameOfDistrict) {
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        query = Query.newEntityQueryBuilder().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
+                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_ID_OWNER, nameOfDistrict))
+                .build();
+
+        results = datastore.run(query);
+
+        if (!results.hasNext())
+            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
+        List<Entity> list = new ArrayList<>();
+        while (results.hasNext()) {
+            Entity tmp = results.next();
+            tmp.getList("");
+            list.add(tmp);
+        }
+        return Result.ok(list);
+    }
 }
