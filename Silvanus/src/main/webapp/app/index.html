@@ -22,6 +22,7 @@
     <!--Aplication-->
     <script type="text/javascript" src="../libs/request_handler.js"></script>
     <script type="text/javascript" src="app.js"></script>
+    <script type="text/javascript" src="../libs/dom_deliver.js"></script>
     <link href="../styles/main.css" rel="stylesheet">
     <link href="../styles/map.css" rel="stylesheet">
     <link href="../styles/navbar.css" rel="stylesheet">
@@ -141,7 +142,7 @@
               </div>
             </div>
             <h3 id="usr_username">Username
-              <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
+              <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="loadTerrain('usr_menu')">
                 <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
               </a>
             </h3>
@@ -462,34 +463,75 @@
           Crie novos pontos no mapa para delimitar a região que pretende registar.
         </div>
         <div class="light p-3 mb-3 rounded-3 shadow-sm">
-          <div class="mb-3">
-            <label for="name-terrain" class="form-label">Nome do Terreno</label>
-            <input type="text" class="form-control rounded-pill" id="name-terrain">
+          <div class="light p-3 mb-3 rounded-3 shadow-sm">
+            <h5 class="mb-3">Sobre o terreno</h5>
+            <div class="mb-3">
+              <label for="name-terrain" class="form-label">Nome do Terreno</label>
+              <input type="text" class="form-control rounded-pill" id="name-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="description-terrain" class="form-label">Descrição</label>
+              <textarea class="form-control" id="description-terrain" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="conselho-terrain" class="form-label">Conselho</label>
+              <input type="text" class="form-control rounded-pill" id="conselho-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="freguesia-terrain" class="form-label">Freguesia</label>
+              <input type="text" class="form-control rounded-pill" id="freguesia-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="number-article-terrain" class="form-label">Número de Artigo</label>
+              <input type="text" class="form-control rounded-pill" id="number-article-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="documentation-validation-terrain" class="form-label">Documentos de Validação do Terreno</label>
+              <input type="file" class="form-control rounded-pill" id="documentation-validation-terrain">
+            </div>
           </div>
-          <div class="mb-3">
-            <label for="description-terrain" class="form-label">Descrição</label>
-            <textarea class="form-control" id="description-terrain" rows="3"></textarea>
-          </div>
-          <div class="mb-3">
-            <label for="conselho-terrain" class="form-label">Conselho</label>
-            <input type="text" class="form-control rounded-pill" id="conselho-terrain">
-          </div>
-          <div class="mb-3">
-            <label for="freguesia-terrain" class="form-label">Freguesia</label>
-            <input type="text" class="form-control rounded-pill" id="freguesia-terrain">
-          </div>
-          <div class="mb-3">
-            <label for="number-article-terrain" class="form-label">Numero de Artigo</label>
-            <input type="text" class="form-control rounded-pill" id="number-article-terrain">
-          </div>
-          <div class="mb-3">
-            <label for="documentation-validation-terrain" class="form-label">Documentos de Validação do Terreno</label>
-            <input type="file" class="form-control rounded-pill" id="documentation-validation-terrain">
+          
+          <div class="light p-3 mb-3 rounded-3 shadow-sm">
+            <h5 class="mb-3">Proprietário</h5>
+            <div class="d-flex flex-column justify-content-center mb-3">
+              <div class="form-check m-1">
+                <input class="form-check-input" type="radio" name="acc_terrain" id="this_acc_terrain_option">
+                <label class="form-check-label" for="this_acc_terrain_option">
+                  Esta conta
+                </label>
+              </div>
+              <div class="form-check m-1">
+                <input class="form-check-input" type="radio" name="acc_terrain" id="other_acc_terrain_option" checked>
+                <label class="form-check-label" for="other_acc_terrain_option">
+                  Outra conta/pessoa
+                </label>
+              </div>
+            </div>
+            <div id="other_acc_terrain_checked">
+              <label for="other_acc_fullname_input" class="form-label">Nome Completo</label>
+              <input id="other_acc_fullname_input" class="form-control rounded-pill mb-3" value=""></input>
+              <label for="other_acc_id_input" class="form-label">NIF</label>
+              <input id="other_acc_id_input" class="form-control rounded-pill mb-3" value=""></input>
+              <label for="other_acc_telephone_input" class="form-label">Número de telefone</label>
+              <input id="other_acc_telephone_input" class="form-control rounded-pill mb-3" value=""></input>
+              <label for="other_acc_smartphone_input" class="form-label">Número de smartphone</label>
+              <input id="other_acc_smartphone_input" class="form-control rounded-pill mb-3" value=""></input>
+              <label for="other_acc_address_input" class="form-label">Morada</label>
+              <input id="other_acc_address_input" class="form-control rounded-pill" value=""></input>
+              <br>
+            </div>
+            
           </div>
 
+          <div class="alert alert-info alert-dismissible shadow-sm" role="alert">
+            <p>Certifique-se que preencheu os campos disponiveis de forma correta.</p>
+            <p>Não será possivel alterar os campos deste registo mais tarde. ;)</p>
+            
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
           <!-- Register Property Button --> 
-          <div class="input-group center-x" style="width: 17rem; margin-top: 1.5rem; margin-bottom: 1rem;"> 
-            <input id="redirect-request-property" type="button" style="width: 20rem;" class="btn btn-primary center-x rounded-pill" value="Registar" onclick="submitPolygon()"> 
+          <div class="input-group center-x mt-3 mb-3" style=""> 
+            <input id="redirect-request-property" type="button" style="width: 10rem;" class="btn btn-primary center-x rounded-pill" value="Registar" onclick="submitPolygon()"> 
           </div> 
         </div>
         

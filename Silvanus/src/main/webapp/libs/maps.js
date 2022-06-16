@@ -1,4 +1,5 @@
 let map;
+let geocoder;
 let drawing_control;
 let markers = [];
 
@@ -6,7 +7,8 @@ let last_index = 0;
 let other_markers = 0;
 let points = [];
 let lines = [];
-let polygons;
+let registed_polygon;
+let polygon_result = null;
 
 let click_listener;
 
@@ -25,8 +27,6 @@ const PORTUGAL_BOUND = {
     east: -175.81,
 };
 
-
-
 function initMap() 
 {
     var map_center = {lat:  38.659784, lng:  -9.202765};
@@ -37,13 +37,20 @@ function initMap()
         mapId: 'c5f91d16484f03de',
     });
 
+    geocoder = new google.maps.Geocoder();
+
+    viewport = map.getBounds();
+
     map.addListener("dragstart", function(){
         viewport_moving = true;
     });
 
     map.addListener("dragend", function(){
         //Stops moving the map
-        viewport_moving = false;
+        viewport_moving = false;        
+    });
+
+    map.addListener("idle", function(){
         console.log("Request chunks");
 
         //Send request to load chunks of this viewport
@@ -53,15 +60,12 @@ function initMap()
         console.log(bound_box);
 
         //Request to DB
-        
-    });
+
+    })
 
     map.addListener("bounds_changed", function(){
         //Bounds of the map
-        if (viewport_moving){
-            viewport = map.getBounds();
-            console.log(viewport);
-        }
+        viewport = map.getBounds();
         
     }); 
 
@@ -82,25 +86,50 @@ function initMap()
       });
 
       drawing_control.addListener("polygoncomplete", function(polygon){
-        //Get last polygon and deletes old one
-
         console.log("polygon complete");
-        const result = polygon.getPath().Qd;
-        console.log(result);
 
-        for(let i = 0 ; i < result.length ; i++){
-
-            const obj = {
-                "lat": result[i].lat(),
-                "lon": result[i].lng()
-            }
-
-            console.log(obj);
-        }
+        let polygon_path = polygon.getPath().Qd;
+        console.log(polygon_path);
 
         //Add event listener to edit and update all coords of last polygon
+        google.maps.event.addListener(polygon.getPath(), 'set_at', function() {
+            console.log("set_at");
+            polygon_result = convertPath(polygon.getPath().Qd);
+            console.log(polygon_result);
+            console.log("Area " + area(polygon_result));
+          });
+        
+        google.maps.event.addListener(polygon.getPath(), 'insert_at', function() {
+            console.log("insert_at");
+            polygon_result = convertPath(polygon.getPath().Qd);
+            console.log(polygon_result);
+            console.log("Area " + area(polygon_result));
 
-      })
+        });
+
+        google.maps.event.addListener(polygon.getPath(), 'remove_at', function() {
+            console.log("remove_at");
+            polygon_result = convertPath(polygon.getPath().Qd);
+            console.log(polygon_result);
+            console.log("Area " + area(polygon_result));
+
+        });
+
+        polygon_result = convertPath(polygon.getPath().Qd);
+        console.log(polygon_result);
+        console.log("Area " + area(polygon_result));
+
+        let coord = polygon_result[0].lat + "," + polygon_result[0].lng;
+        console.log(coord);
+        codeAddress(coord, function(results){
+            //Get most info of geocoding result
+            let formatted = results[results.length-3].formatted_address;
+            console.log(formatted);
+            document.getElementById("conselho-terrain").value = formatted;
+        });
+
+        setRegistedPolygon(null, polygon);
+      });
 
       toggleDrawingControl(false);
     
@@ -109,6 +138,38 @@ function initMap()
 
     //clearListeners(map, "click");
 }
+
+function convertPath(path_points){
+    let result = [];
+    for(let i = 0 ; i < path_points.length ; i++){
+        let polygon_point = point(path_points[i].lat(), path_points[i].lng());
+        result.push(polygon_point);
+    }
+    return result;
+}
+
+function setRegistedPolygon(visible, value){
+    //Get last polygon and deletes old one
+    if (registed_polygon != null){
+        registed_polygon.setMap(visible);
+    }
+    registed_polygon = value;
+}
+
+function codeAddress(addr, task) {
+    geocoder.geocode({ 'address': addr}, function(results, status) {
+        if(status == 'OK') {
+            //Function to execute
+            task(results);
+        }
+        else {
+            alert('Geocode was not successful for the following reason: '+status);
+        }
+    });
+}
+
+
+// --- Utils Functions --- 
 
 function point(_lat, _lng){
     return {lat: _lat , lng: _lng};
@@ -129,6 +190,24 @@ function box(top, bottom, left, right){
 
 function distanceSquared(p1, p2){
     return Math.pow(p2.lat-p1.lat,2) + Math.pow(p2.lng-p1.lng,2);
+}
+
+//TODO Testing
+
+function area(points){
+    //First convert latlng to meters
+
+    let factor = [0.0,0.0];
+    for(let i = 0 ; i < points.length - 1 ; i++){
+        let result = [
+            points[i].lat*points[i+1].lng,
+            points[i].lng*points[i+1].lat
+        ];
+        factor[0] += result[0];
+        factor[1] += result[1];
+    }
+    let area = (factor[0] + factor[1])/2.0;
+    return area;
 }
 
 function addMarker(coords){
@@ -221,10 +300,10 @@ function toggleDrawingControl(value){
     });
     if (value){
         drawing_control.setMap(map);
-        //polygons.setMap(map);
+        setRegistedPolygon(map, registed_polygon);
     } else {
         drawing_control.setMap(null);
-        //polygons.setMap(null);
+        setRegistedPolygon(null, registed_polygon);
     }
 }
 

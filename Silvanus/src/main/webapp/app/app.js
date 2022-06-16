@@ -29,3 +29,10 @@ function toggle(elem, attr){
     }
     elem.setAttribute(attr, value);
 }
+
+function loadTerrain(parent_id){
+  let parent = document.getElementById(parent_id);
+  createElement("p", "", parent);
+}
+
+
