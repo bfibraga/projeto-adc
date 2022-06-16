@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <!-- ChartJS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.0/chart.min.js"></script>
 
     <!--Aplication-->
     <script type="text/javascript" src="../libs/request_handler.js"></script>
@@ -26,10 +26,11 @@
     <link href="../styles/map.css" rel="stylesheet">
     <link href="../styles/navbar.css" rel="stylesheet">
     <link href="../styles/card.css" rel="stylesheet">
+    <link href="../styles/loader.css" rel="stylesheet">
 
 </head>
 <!--TODO Put getInfo() function-->
-<body id="main" class="" onload="getInfo(true)">
+<body id="main" class="" onload='getInfo(true)'>
   <div id="loader" class="overlay d-none" style="z-index: 100000;">
     <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
   </div>
@@ -48,7 +49,7 @@
 
       <li class="app-nav-item" onclick="toggleDrawingControl(false)">
         <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#user-properties">
-          <div class="avatar-wrapper d-flex" style="width: 2rem; height: 2rem;">
+          <div class="avatar-wrapper d-flex" data-user="" style="width: 2rem; height: 2rem;">
             <img id="usr_avatar_navbar" src="../media/imgs/user.png" class="rounded-circle shadow-sm">
           </div>
           <span class="app-link-text">
@@ -79,7 +80,6 @@
           </span>
         </a>
       </li>
-
     </ul>
   </nav>
 
@@ -136,8 +136,8 @@
         <div class="col">
           <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
             <div class="d-flex flex-row justify-content-center mb-3">
-              <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
-                <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+              <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
+                <img id="usr_avatar_perfil_credentials" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
               </div>
             </div>
             <h3 id="usr_username">Username
@@ -153,7 +153,7 @@
             </div>
           </div>
         </div>
-        <div class="col">
+        <div class="col" >
           <div id="usr_notifications_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
             <h5 class="mb-3">Notificações</h5>
             <div id="notification-list" class="container d-flex flex-column toast-container">
@@ -164,7 +164,7 @@
                   <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="toast-header">
         
-                      <div class="avatar-wrapper m-2" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
+                      <div class="avatar-wrapper m-2" data-user="not me" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
                         <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
                       </div>
                       <strong class="me-auto">Bootstrap</strong>
@@ -180,7 +180,7 @@
                   <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="toast-header">
         
-                      <div class="avatar-wrapper m-2" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
+                      <div class="avatar-wrapper m-2" data-user="not me2" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
                         <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
                       </div>
                       <strong class="me-auto">Bootstrap</strong>
@@ -216,14 +216,14 @@
                 </div>
               </div>
             </div>
-            <h6>Primeiro Nome</h6>
-            <p id="usr_firstname" class="border-bottom">-</p>
-            <h6>Último Nome</h6>
-            <p id="usr_lastname" class="border-bottom">-</p>
+            <h6>Nome Completo</h6>
+            <p id="usr_fullname" class="border-bottom">-</p>
             <h6>NIF</h6>
             <p id="usr_id" class="border-bottom">-</p>
             <h6>Número de telefone</h6>
-            <p id="usr_phone" class="border-bottom">-</p>
+            <p id="usr_telephone" class="border-bottom">-</p>
+            <h6>Número de smartphone</h6>
+            <p id="usr_smartphone" class="border-bottom">-</p>
             <h6>Morada</h6>
             <p id="usr_address" class="border-bottom">-</p>
     
@@ -253,7 +253,7 @@
     <div id="usr_change_profile_menu" class="offcanvas-body" data-app-menu-active="false">
       <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
         <div class="d-flex flex-row justify-content-center mb-3">
-          <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
+          <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
             <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
           </div>
         </div>
@@ -271,16 +271,16 @@
       </div>
       <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
         <h5 class="mb-3">Perfil</h5>
-        <h6>Primeiro Nome</h6>
-        <input id="usr_firstname_input" class="form-control rounded-pill mb-3"></input>
-        <h6>Último Nome</h6>
-        <input id="usr_lastname_input" class="form-control rounded-pill mb-3"></input>
+        <h6>Nome Completo</h6>
+        <input id="usr_fullname_input" class="form-control rounded-pill mb-3" value="-"></input>
         <h6>NIF</h6>
-        <input id="usr_id_input" class="form-control rounded-pill mb-3"></input>
+        <input id="usr_id_input" class="form-control rounded-pill mb-3" value="-"></input>
         <h6>Número de telefone</h6>
-        <input id="usr_phone_input" class="form-control rounded-pill mb-3"></input>
+        <input id="usr_telephone_input" class="form-control rounded-pill mb-3" value="-"></input>
+        <h6>Número de smartphone</h6>
+        <input id="usr_smartphone_input" class="form-control rounded-pill mb-3" value="-"></input>
         <h6>Morada</h6>
-        <input id="usr_address_input" class="form-control rounded-pill"></input>
+        <input id="usr_address_input" class="form-control rounded-pill" value="-"></input>
         <br>
         <div class="d-flex flex-column justify-content-center">
           <div class="d-flex flex-row justify-content-center">
@@ -291,9 +291,9 @@
       </div>
     </div>
     <div id="usr_change_password" class="offcanvas-body" data-app-menu-active="false">
-      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
+      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
         <div class="d-flex flex-row justify-content-center mb-3">
-          <div class="avatar-wrapper" style="width: 8rem; height: 8rem;">
+          <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
             <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
           </div>
         </div>
@@ -309,7 +309,7 @@
           <span class="badge rounded-pill bg-warning">Beta Tester</span>
         </div>
       </div>
-      <div class="light rounded-3 p-3 shadow-sm">
+      <div class="light rounded-3 p-3 m-1 shadow-sm">
         <h6>Palavra-passe nova</h6>
         <input id="usr_new_password_change_password" class="form-control rounded-pill"></input>
         <br>
@@ -416,6 +416,33 @@
             </div>
           </div>
         </div>
+        <div class="row d-flex align-items-center">
+          <div class="col ">
+            <div id="usr_stats_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm">
+              <h5 class="mb-3">Estatísticas</h5>
+              <div class="row d-flex flex-column justify-content-center ">
+                <div class="col">
+                  <div class="rounded-3 p-3 mb-3 shadow-sm">
+                    <h5 class="mb-3">Área Total</h5>
+                    <div class="p-3">
+                      <canvas id="terrain_total_area_chart" width="800" height="800"></canvas>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col">
+                  <div class="rounded-3 p-3 shadow-sm">
+                    <h5 class="mb-3">Número de Terrenos por Região</h5>
+                    <div class="p-3">
+                      <canvas id="terrain_nmr_per_region_chart" width="800" height="800"></canvas>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -432,7 +459,7 @@
       </div>
       <div class="offcanvas-body">
         <div class="alert alert-success shadow-sm" role="alert">
-          Crie novos pontos no mapa para delimitar a região que pretende delimitar.
+          Crie novos pontos no mapa para delimitar a região que pretende registar.
         </div>
         <div class="light p-3 mb-3 rounded-3 shadow-sm">
           <div class="mb-3">
@@ -504,6 +531,68 @@
 
   <script type="text/javascript">
 
+    const terrain_total_area_chart = document.getElementById('terrain_total_area_chart').getContext('2d');
+    const myChart = new Chart(terrain_total_area_chart, {
+    type: 'doughnut',
+    data: {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+    }
+});
+
+    const terrain_nmr_per_region_chart = document.getElementById('terrain_nmr_per_region_chart').getContext('2d');
+    const myChart2 = new Chart(terrain_nmr_per_region_chart, {
+    type: 'bar',
+    data: {
+        labels: ['Almada', 'Setúbal', 'Santarem', 'Évora', 'Lisboa', 'Viseu'],
+        datasets: [{
+            label: 'Número de Terrenos',
+            data: [7, 15, 5, 1, 7, 4],
+            backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+    }
+});
+
     let isRequest = false;
 
     function closeRequest(){
@@ -557,6 +646,8 @@
         closeRequest();
       }
     });
+
+    
 
     
   </script>

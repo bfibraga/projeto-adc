@@ -10,6 +10,9 @@ let polygons;
 
 let click_listener;
 
+let viewport;
+let viewport_moving = false;
+
 let MAP_MODE = {
     "LIGHT": 'c5f91d16484f03de'
 };
@@ -22,6 +25,8 @@ const PORTUGAL_BOUND = {
     east: -175.81,
 };
 
+
+
 function initMap() 
 {
     var map_center = {lat:  38.659784, lng:  -9.202765};
@@ -32,17 +37,39 @@ function initMap()
         mapId: 'c5f91d16484f03de',
     });
 
+    map.addListener("dragstart", function(){
+        viewport_moving = true;
+    });
+
+    map.addListener("dragend", function(){
+        //Stops moving the map
+        viewport_moving = false;
+        console.log("Request chunks");
+
+        //Send request to load chunks of this viewport
+        const ab = viewport.Ab;
+        const ua = viewport.Ua;
+        const bound_box = box(ua.hi, ua.lo, ab.hi, ab.lo);
+        console.log(bound_box);
+
+        //Request to DB
+        
+    });
+
     map.addListener("bounds_changed", function(){
         //Bounds of the map
-        let bounds = map.getBounds();
-        console.log(bounds);
+        if (viewport_moving){
+            viewport = map.getBounds();
+            console.log(viewport);
+        }
+        
     }); 
 
     drawing_control = new google.maps.drawing.DrawingManager({
         drawingMode: google.maps.drawing.OverlayType.POLYGON,
         drawingControl: false,
         drawingControlOptions: {
-          position: google.maps.ControlPosition.TOP_CENTER,
+          position: google.maps.ControlPosition.TOP_LEFT,
           drawingModes: [
             google.maps.drawing.OverlayType.POLYGON,
           ],
@@ -55,11 +82,8 @@ function initMap()
       });
 
       drawing_control.addListener("polygoncomplete", function(polygon){
-        /*if (polygons !== null){
-            polygons.setMap(null);  
-        }
-        polygons = polygon;*/
-        
+        //Get last polygon and deletes old one
+
         console.log("polygon complete");
         const result = polygon.getPath().Qd;
         console.log(result);
@@ -73,6 +97,9 @@ function initMap()
 
             console.log(obj);
         }
+
+        //Add event listener to edit and update all coords of last polygon
+
       })
 
       toggleDrawingControl(false);
@@ -89,6 +116,15 @@ function point(_lat, _lng){
 
 function line(p1, p2){
     return [p1,p2];
+}
+
+function box(top, bottom, left, right){
+    return [
+        point(left, top), //TL
+        point(right, top), //TR
+        point(right, bottom), //BR
+        point(left, bottom) //BL
+    ];
 }
 
 function distanceSquared(p1, p2){

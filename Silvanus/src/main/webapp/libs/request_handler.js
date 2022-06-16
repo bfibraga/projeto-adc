@@ -73,19 +73,32 @@ async function logout() {
 	}
 }
 
-async function getInfo(debug){
+async function getInfo(debug, user){
+	user = user === null ? "" : user;
+
 	try{
-		const response = await axios.get("/api/user/info/");
-		const response_data = response.data[0];
-		console.log(response_data);
+		let param = "";
+		if (user !== ""){
+			param = "?identifier=" + user;
+		}
 
 		//Avatar
 		//TODO Alter this avatar url
 		let avatar_url = "https://storage.googleapis.com/projeto-adc.appspot.com/92b2843145c13d62106f68d0b11153.jpg";
 		document.querySelectorAll('.avatar-wrapper')
-			.forEach(function(image) {
-				image.src = avatar_url;
+			.forEach(function(elem) {
+				const value = elem.getAttribute("data-user");
+				if (value.value === user){
+					elem.firstElementChild.src = avatar_url;
+					console.log(elem.firstElementChild.src);
+				}
 			});
+
+		const response = await axios.get("/api/user/info/" + param);
+		const response_data = response.data[0];
+		console.log(response_data);
+
+		
 
 		//Update User Profile
 		document.getElementById("usr_username").innerHTML = String(response_data.username);
@@ -102,13 +115,19 @@ async function getInfo(debug){
 
 function updatePerfil(data){
 	//User Visible Data
-	let name_parts = data.name.split(" ");
-	document.getElementById("usr_firstname").innerHTML = String(name_parts[0]);
-	document.getElementById("usr_lastname").innerHTML = String(name_parts[name_parts.length-1]);
+	document.getElementById("usr_fullname").innerHTML = String(name_parts[0]);
 
 	document.getElementById("usr_id").innerHTML = String(data.nif);
-	document.getElementById("usr_phone").innerHTML = String(data.telephone);
+	document.getElementById("usr_telephone").innerHTML = String(data.telephone);
+	document.getElementById("usr_smartphone").innerHTML = String(name_parts[name_parts.length-1]);
 	document.getElementById("usr_address").innerHTML = String(data.address);
+
+	document.getElementById("usr_fullname_input").value = String(name_parts[0]);
+
+	document.getElementById("usr_id_input").value = String(data.nif);
+	document.getElementById("usr_telephone_input").value = String(data.telephone);
+	document.getElementById("usr_smartphone_input").value = String(name_parts[name_parts.length-1]);
+	document.getElementById("usr_address_input").value = String(data.address);
 }
 
 async function activate(identifier){
