@@ -84,7 +84,7 @@ async function getInfo(debug, user){
 
 		//Avatar
 		//TODO Alter this avatar url
-		let avatar_url = "https://storage.googleapis.com/projeto-adc.appspot.com/92b2843145c13d62106f68d0b11153.jpg";
+		let avatar_url = "https://storage.cloud.google.com/projeto-adc.appspot.com/placeholder/user.png?authuser=2";
 		document.querySelectorAll('.avatar-wrapper')
 			.forEach(function(elem) {
 				const value = elem.getAttribute("data-user");

@@ -6,10 +6,13 @@ function toggleChangeProfileMenu(id1, id2){
 }
 
 function toggleExpandOffcanvas(id1){
-    console.log("Toggle Expand")
     let elem1 = document.getElementById(id1);
-    console.log(elem1);
     toggleExpand(elem1);
+}
+
+function toggleChooseAccMenu(id){
+    let elem1 = document.getElementById(id);
+    toggleMenu(elem1);
 }
 
 function toggleMenu(elem){

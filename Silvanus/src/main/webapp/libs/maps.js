@@ -122,8 +122,10 @@ function initMap()
         let coord = polygon_result[0].lat + "," + polygon_result[0].lng;
         console.log(coord);
         codeAddress(coord, function(results){
+            console.log(results);
             //Get most info of geocoding result
-            let formatted = results[results.length-3].formatted_address;
+            const index = 0 //results.length-3
+            const formatted = results[index].formatted_address;
             console.log(formatted);
             document.getElementById("conselho-terrain").value = formatted;
         });

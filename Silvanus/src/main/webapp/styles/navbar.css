@@ -101,7 +101,7 @@ main{
     transition: 200ms ease;
   }
   
-  .offcanvas-body[data-app-menu-active="false"]{
+  [data-app-menu-active="false"]{
     display: none;
   }
   

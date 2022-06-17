@@ -293,3 +293,11 @@ h1,p,label,a{
 .dropdown{
   transition: 200ms ease;
 }
+
+#no_pending_requests{
+  display: none;
+}
+
+[data-app-value="0"] #no_pending_requests{
+  display:block !important;
+}
