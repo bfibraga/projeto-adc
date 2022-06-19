@@ -40,7 +40,34 @@ public class LoginData {
 	public String getPassword() {
 		return this.password;
 	}
-	
+
+	/**
+	 *
+	 * @return the user's username
+	 */
+	public LoginData setUsername(String username) {
+		this.username = username;
+		return this;
+	}
+
+	/**
+	 *
+	 * @return the user's username
+	 */
+	public LoginData setEmail(String email) {
+		this.email = email;
+		return this;
+	}
+
+	/**
+	 *
+	 * @return the user's username
+	 */
+	public LoginData setPassword(String password) {
+		this.password = password;
+		return this;
+	}
+
 	/**
 	 * Checks if the given keyword is not equal to an empty string or null
 	 * @param keyword to validate
@@ -56,7 +83,7 @@ public class LoginData {
 	 * @return
 	 */
 	private boolean validPassword(String password) {
-		return password.length() > 5 && password.matches("/^[0-9A-Za-z]+$/");
+		return validField(password) && password.length() > 5 && password.matches("/^[0-9A-Za-z]+$/");
 	}
 
 	/**
@@ -64,11 +91,16 @@ public class LoginData {
 	 * @return if they are or not
 	 */
 	public boolean validation() {
-		return validField(username) && validField(email) && validField(password) && validPassword(password);
+		return validField(this.getUsername()) && validField(this.getEmail()) && validPassword(this.getPassword());
 	}
 
 	public String getID(){
 		return this.getUsername().hashCode() + "." +
 				this.getEmail().hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return String.format("LoginData:\n\tUsername: %s\n\tEmail: %s\n\tPassword: %s", this.getUsername(), this.getEmail(), this.getPassword());
 	}
 }

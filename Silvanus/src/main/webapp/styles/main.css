@@ -1,9 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 
 :root{
-  --primary-bg: white;
+  --bg-primary: rgb(245, 245, 245);
   --secundary-bg: rgb(240,240,240);
+
+
+    --primary-btn-color: rgb(100, 200, 100);
+    --primary-btn-color-hover: rgb(100, 170, 100) ;
 }
+
 .dark-mode{
   --primary-bg: rgb(30,30,30);
   --secundary-bg: rgb(20,20,20)
@@ -14,7 +19,7 @@ html{
 }
 
 .invisible{
-    opacity: 0%;
+    opacity: 0;
 }
 
 .center {
@@ -264,6 +269,7 @@ h1,p,label,a{
 
 .avatar-wrapper{
   display: block;
+  transform-origin: center center;
 }
 
 .avatar-wrapper img{
@@ -272,27 +278,26 @@ h1,p,label,a{
   object-fit: cover;
 }
 
-.grow { 
-  transition: all .2s ease-in-out;
+#edit-profile-btn{
+  display: none;
 }
 
-.grow:hover {
-  transform: scale(1.1);
+#usr_username:hover #edit-profile-btn{
+  display: contents;
 }
 
-ul.nav li a, ul.nav li a:visited {
-    color: #00dd00 !important;
+.toast{
+  transition: 200ms ease;
 }
 
-ul.nav li a:hover, ul.nav li a:active {
-    color: #00aa00 !important;
+.dropdown{
+  transition: 200ms ease;
 }
 
-ul.nav li.active a {
-    color: #00dd00 !important;
+#no_pending_requests{
+  display: none;
 }
 
-.btn-primary {
-    background-color: #00dd00 !important;
-    border-color: #00dd00 !important;
+[data-app-value="0"] #no_pending_requests{
+  display:block !important;
 }

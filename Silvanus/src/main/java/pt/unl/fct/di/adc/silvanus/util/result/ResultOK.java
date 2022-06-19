@@ -1,14 +1,13 @@
 package pt.unl.fct.di.adc.silvanus.util.result;
 
 import com.google.gson.Gson;
+import pt.unl.fct.di.adc.silvanus.util.JSON;
 
 import javax.ws.rs.core.Response;
 
 public class ResultOK<T> implements Result<T> {
 
 	final T result;
-
-	final Gson g = new Gson();
 
 	public ResultOK(T result) {
 		this.result = result;
@@ -31,7 +30,7 @@ public class ResultOK<T> implements Result<T> {
 
 	public String toString() {
 		String[] fields = {this.value().toString(),this.statusMessage()};
-		return g.toJson(fields);
+		return JSON.encode(fields);
 	}
 
 	@Override

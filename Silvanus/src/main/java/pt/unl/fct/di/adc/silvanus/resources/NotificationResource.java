@@ -1,25 +1,44 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
+import io.jsonwebtoken.Claims;
 import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
+import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.NotificationImplementation;
-import pt.unl.fct.di.adc.silvanus.util.interfaces.NotificationsRest;
+import pt.unl.fct.di.adc.silvanus.api.rest.RestNotifications;
+import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
+import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+import java.util.Set;
 
-@Path("/notification")
-public class NotificationResource implements NotificationsRest {
+@Path(RestNotifications.PATH)
+public class NotificationResource implements RestNotifications {
 
-    private final NotificationImplementation notificationResource;
+    private final NotificationImplementation notificationImplementation;
+    private final UserImplementation userImplementation;
 
     public NotificationResource() {
-        this.notificationResource = new NotificationImplementation();
+        this.notificationImplementation = new NotificationImplementation();
+        this.userImplementation = new UserImplementation();
     }
 
     @Override
-    public Response sendNotification(Notification data) {
-        Result res = notificationResource.sendNotification(data);
+    public Response send(String token, Notification data) {
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        Result<Set<UserInfoVisible>> userResult = userImplementation.getUser(token, data.getReceiver());
+
+        if (!userResult.isOK() || userResult.value().isEmpty()){
+            return Response.status(userResult.error()).entity(userResult.statusMessage()).build();
+        }
+
+        Result<Void> res = notificationImplementation.send(data);
         if (res.isOK())
             return Response.ok().build();
         else
@@ -27,8 +46,20 @@ public class NotificationResource implements NotificationsRest {
     }
 
     @Override
-    public Response listNotification(String userID) {
-        Result<String> res = notificationResource.listNotificationOfUser(userID);
+    public Response list(String token, String userID) {
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        Result<Set<UserInfoVisible>> userResult = userImplementation.getUser(token, userID);
+
+        if (!userResult.isOK() || userResult.value().isEmpty()){
+            return Response.status(userResult.error()).entity(userResult.statusMessage()).build();
+        }
+
+        Result<Set<Notification>> res = notificationImplementation.list(userID);
         if (res.isOK())
             return Response.ok(res.value()).build();
         else
@@ -36,8 +67,14 @@ public class NotificationResource implements NotificationsRest {
     }
 
     @Override
-    public Response deleteNotification(Notification data) {
-        Result res = notificationResource.deleteNotification(data);
+    public Response delete(String token, Notification data) {
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        Result<Void> res = notificationImplementation.delete(data);
         if (res.isOK())
             return Response.ok().build();
         else
