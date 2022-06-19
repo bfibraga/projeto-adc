@@ -4,11 +4,11 @@ import com.google.cloud.datastore.*;
 import com.google.gson.Gson;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
+import pt.unl.fct.di.adc.silvanus.api.impl.Parcel;
 import pt.unl.fct.di.adc.silvanus.data.parcel.Chunk;
-import pt.unl.fct.di.adc.silvanus.data.parcel.Coordinate;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
 import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
-import pt.unl.fct.di.adc.silvanus.util.interfaces.Parcel;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Response;
@@ -323,13 +323,13 @@ public class ParcelImplementation implements Parcel {
     /**
      * Dado um array de Coordenadas converte as mesmas num Polygon
      *
-     * @param coordinates coordenadas que compoem uma parcela
+     * @param latLngs coordenadas que compoem uma parcela
      * @return o objeto Polygon que representa uma parcela
      */
-    private Polygon coordinatesToPolygon(Coordinate[] coordinates) {
-        org.locationtech.jts.geom.Coordinate[] coordinatesPolygon = new org.locationtech.jts.geom.Coordinate[coordinates.length + 1];
-        for (int i = 0; i < coordinates.length; i++) {
-            coordinatesPolygon[i] = new org.locationtech.jts.geom.Coordinate(coordinates[i].getLat(), coordinates[i].getLon());
+    private Polygon coordinatesToPolygon(LatLng[] latLngs) {
+        org.locationtech.jts.geom.Coordinate[] coordinatesPolygon = new org.locationtech.jts.geom.Coordinate[latLngs.length + 1];
+        for (int i = 0; i < latLngs.length; i++) {
+            coordinatesPolygon[i] = new org.locationtech.jts.geom.Coordinate(latLngs[i].getLat(), latLngs[i].getLng());
         }
         coordinatesPolygon[coordinatesPolygon.length - 1] = new org.locationtech.jts.geom.Coordinate(coordinatesPolygon[0].getX(), coordinatesPolygon[0].getY());
         return factory.createPolygon(coordinatesPolygon);
@@ -341,7 +341,7 @@ public class ParcelImplementation implements Parcel {
     // ---------- METHODS USED TO CHECK IF A TERRAIN INTERSECTS ANOTHER ---------- \\
 
     @Override
-    public Result<String> checkIfParcelHasIntersections(Coordinate[] terrain) {
+    public Result<String> checkIfParcelHasIntersections(LatLng[] terrain) {
         Polygon terrainAsPolygon = coordinatesToPolygon(terrain);
         LOG.fine("Query was started.");
         Result<String> res;
@@ -366,7 +366,7 @@ public class ParcelImplementation implements Parcel {
         while (results.hasNext()) {
             Entity tmp = results.next();
             String coordenadas = tmp.getString(ENTITY_PROPERTY_COORDINATES);
-            Coordinate[] c = g.fromJson(coordenadas, Coordinate[].class);
+            LatLng[] c = g.fromJson(coordenadas, LatLng[].class);
             Polygon p = coordinatesToPolygon(c);
             if (p.intersects(polygonTerrain)) {
                 LOG.warning("Existe uma interseccao com a parcela: \"" + tmp.getString(ENTITY_PROPERTY_ID_OWNER) + "/" + tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN) + "\"");

@@ -1,6 +1,6 @@
-package pt.unl.fct.di.adc.silvanus.util.interfaces;
+package pt.unl.fct.di.adc.silvanus.api.rest;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.Coordinate;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
 import pt.unl.fct.di.adc.silvanus.util.Pair;
 
@@ -19,7 +19,7 @@ public interface RestParcel {
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
     Response doRegister(TerrainData terrainData);
 
     /**
@@ -28,11 +28,11 @@ public interface RestParcel {
      * @param terrain the terrain to evaluate
      * @return of if everything went correctly, an error otherwise
      */
-    @POST
-    @Path("/check_intersection")
+    @PUT
+    @Path("/intersect")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    Response checkIfTerrainHasIntersections(Coordinate[] terrain);
+    @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
+    Response checkIfTerrainHasIntersections(LatLng[] terrain);
 
     /**
      * This method is used to approve a terrain. It receives a pair of strings
@@ -40,10 +40,10 @@ public interface RestParcel {
      * @param pair this pair represents the owner and name of the terrain to approve
      * @return of if everything went correctly, an error otherwise
      */
-    @POST
-    @Path("/approve_parcel")
+    @PUT
+    @Path("/approve")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
     Response approveTerrain(Pair<String> pair);
 
     /**
@@ -52,10 +52,10 @@ public interface RestParcel {
      * @param pair this pair represents the owner and name of the terrain to approve
      * @return of if everything went correctly, an error otherwise
      */
-    @POST
-    @Path("/deny_parcel")
+    @PUT
+    @Path("/deny")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
     Response denyTerrain(Pair<String> pair);
 
     /**
@@ -64,8 +64,8 @@ public interface RestParcel {
      * @param info the information about the terrain
      * @return of if everything went correctly, an error otherwise
      */
-    @POST
-    @Path("/delete_terrain")
+    @DELETE
+    @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     Response deleteTerrain(String[] info);
@@ -78,9 +78,9 @@ public interface RestParcel {
      * @return of if everything went correctly, an error otherwise
      */
     @POST
-    @Path("/terrains_of_user/{idOfUser}")
+    @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainUser(@PathParam("idOfUser") String idOfUser);
+    Response listTerrainUser(@QueryParam("user") String idOfUser);
 
     /**
      * This method is used to list all the terrains in a certain county (concelho). Those terrains
@@ -90,9 +90,9 @@ public interface RestParcel {
      * @return of if everything went correctly, an error otherwise
      */
     @POST
-    @Path("/terrains_of_user/{nameOfCounty}")
+    @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainInCounty(@PathParam("nameOfCounty") String nameOfCounty);
+    Response listTerrainInCounty(@QueryParam("country") String nameOfCounty);
 
     /**
      * This method is used to list all the terrains in a certain district (distrito). Those terrains
@@ -102,7 +102,7 @@ public interface RestParcel {
      * @return of if everything went correctly, an error otherwise
      */
     @POST
-    @Path("/terrains_of_user/{nameOfDistrict}")
+    @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainInDistrict(@PathParam("nameOfDistrict") String nameOfDistrict);
+    Response listTerrainInDistrict(@QueryParam("district") String nameOfDistrict);
 }

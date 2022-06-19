@@ -1,11 +1,11 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
 import com.google.cloud.datastore.Entity;
-import pt.unl.fct.di.adc.silvanus.data.parcel.Coordinate;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
 import pt.unl.fct.di.adc.silvanus.util.Pair;
-import pt.unl.fct.di.adc.silvanus.util.interfaces.RestParcel;
+import pt.unl.fct.di.adc.silvanus.api.rest.RestParcel;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
@@ -32,7 +32,7 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response checkIfTerrainHasIntersections(Coordinate[] terrain) {
+    public Response checkIfTerrainHasIntersections(LatLng[] terrain) {
         Result<String> result = impl.checkIfParcelHasIntersections(terrain);
         if (result == null)
             return Response.ok("Nao ha intersecoes.").build();

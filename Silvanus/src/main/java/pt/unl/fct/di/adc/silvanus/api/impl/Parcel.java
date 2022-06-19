@@ -2,7 +2,7 @@ package pt.unl.fct.di.adc.silvanus.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.cloud.datastore.Entity;
-import pt.unl.fct.di.adc.silvanus.data.parcel.Coordinate;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
@@ -27,7 +27,7 @@ public interface Parcel {
      * @param parcela parcela a verificar a interseção
      * @return of if there is no intersection, an error otherwise
      */
-    Result<String> checkIfParcelHasIntersections(Coordinate[] parcela);
+    Result<String> checkIfParcelHasIntersections(LatLng[] parcela);
 
     /**
      * This method approves a terrain (moves it from the "wait list" to the table of approved terrains)

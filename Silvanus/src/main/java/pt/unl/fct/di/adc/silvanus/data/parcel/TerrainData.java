@@ -3,7 +3,7 @@ package pt.unl.fct.di.adc.silvanus.data.parcel;
 public class TerrainData {
 
     // --- Pontos do mapa, area e o centro da parcela ---
-    private Coordinate[] parcela;
+    private LatLng[] parcela;
     // --- Pontos do mapa, area e o centro da parcela ---
 
     // --- Informacao do utilizador ou que este insere ---
@@ -29,7 +29,7 @@ public class TerrainData {
 
     }
 
-    public TerrainData(Coordinate[] parcela, String id_of_owner, String name_of_terrain, String description_of_terrain,
+    public TerrainData(LatLng[] parcela, String id_of_owner, String name_of_terrain, String description_of_terrain,
                        String conselho_of_terrain, String distrito_of_terrain, String section_of_terrain,
                        String number_article_terrain, String type_of_soil_coverage, String current_use_of_soil, String previous_use_of_soil) {
         this.parcela = parcela;
@@ -45,7 +45,7 @@ public class TerrainData {
         this.previous_use_of_soil = previous_use_of_soil;
     }
 
-    public Coordinate[] getParcela() {
+    public LatLng[] getParcela() {
         return parcela;
     }
 
