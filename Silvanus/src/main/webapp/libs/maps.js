@@ -1,6 +1,7 @@
 let map;
 let geocoder;
-let drawing_control;
+let polygon_drawing_tools;
+let route_drawing_tools;
 let markers = [];
 
 let last_index = 0;
@@ -39,6 +40,14 @@ function initMap()
 
     geocoder = new google.maps.Geocoder();
 
+    initViewmap();
+    initPolygonDrawingTools();
+
+
+    //clearListeners(map, "click");
+}
+
+function initViewmap(){
     viewport = map.getBounds();
 
     map.addListener("dragstart", function(){
@@ -47,7 +56,7 @@ function initMap()
 
     map.addListener("dragend", function(){
         //Stops moving the map
-        viewport_moving = false;        
+        viewport_moving = false;
     });
 
     map.addListener("idle", function(){
@@ -66,30 +75,28 @@ function initMap()
     map.addListener("bounds_changed", function(){
         //Bounds of the map
         viewport = map.getBounds();
-        
-    }); 
+    });
+}
 
-    drawing_control = new google.maps.drawing.DrawingManager({
+function initPolygonDrawingTools(){
+    polygon_drawing_tools = new google.maps.drawing.DrawingManager({
         drawingMode: google.maps.drawing.OverlayType.POLYGON,
         drawingControl: false,
         drawingControlOptions: {
-          position: google.maps.ControlPosition.TOP_LEFT,
-          drawingModes: [
-            google.maps.drawing.OverlayType.POLYGON,
-          ],
+            position: google.maps.ControlPosition.TOP_LEFT,
+            drawingModes: [
+                google.maps.drawing.OverlayType.POLYGON,
+            ],
         },
         polygonOptions:{
             editable:true,
             fillColor: "#00dd00",
             strokeColor: "#00ff00"
         },
-      });
+    });
 
-      drawing_control.addListener("polygoncomplete", function(polygon){
+    polygon_drawing_tools.addListener("polygoncomplete", function(polygon){
         console.log("polygon complete");
-
-        let polygon_path = polygon.getPath().Qd;
-        console.log(polygon_path);
 
         //Add event listener to edit and update all coords of last polygon
         google.maps.event.addListener(polygon.getPath(), 'set_at', function() {
@@ -97,8 +104,8 @@ function initMap()
             polygon_result = convertPath(polygon.getPath().Qd);
             console.log(polygon_result);
             console.log("Area " + area(polygon_result));
-          });
-        
+        });
+
         google.maps.event.addListener(polygon.getPath(), 'insert_at', function() {
             console.log("insert_at");
             polygon_result = convertPath(polygon.getPath().Qd);
@@ -124,6 +131,7 @@ function initMap()
         codeAddress(coord, function(results){
             console.log(results);
             //Get most info of geocoding result
+            //TODO Alter this part
             const index = 0 //results.length-3
             const formatted = results[index].formatted_address;
             console.log(formatted);
@@ -131,14 +139,11 @@ function initMap()
         });
 
         setRegistedPolygon(null, polygon);
-      });
+    });
 
-      toggleDrawingControl(false);
-    
-      drawing_control.setMap(null);
+    toggleDrawingControl(false);
 
-
-    //clearListeners(map, "click");
+    polygon_drawing_tools.setMap(null);
 }
 
 function convertPath(path_points){
@@ -158,6 +163,8 @@ function setRegistedPolygon(visible, value){
     registed_polygon = value;
 }
 
+// --- Geocoding Functions ---
+
 function codeAddress(addr, task) {
     geocoder.geocode({ 'address': addr}, function(results, status) {
         if(status == 'OK') {
@@ -165,7 +172,7 @@ function codeAddress(addr, task) {
             task(results);
         }
         else {
-            alert('Geocode was not successful for the following reason: '+status);
+            console.log('Geocode was not successful for the following reason: '+status);
         }
     });
 }
@@ -297,14 +304,14 @@ function createPolygon(color){
 }
 
 function toggleDrawingControl(value){
-    drawing_control.setOptions({
+    polygon_drawing_tools.setOptions({
         drawingControl: value
     });
     if (value){
-        drawing_control.setMap(map);
+        polygon_drawing_tools.setMap(map);
         setRegistedPolygon(map, registed_polygon);
     } else {
-        drawing_control.setMap(null);
+        polygon_drawing_tools.setMap(null);
         setRegistedPolygon(null, registed_polygon);
     }
 }

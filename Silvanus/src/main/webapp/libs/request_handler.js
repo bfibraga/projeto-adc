@@ -82,6 +82,15 @@ async function getInfo(debug, user){
 			param = "?identifier=" + user;
 		}
 
+		const response = await axios.get("/api/user/info" + param);
+		const response_data = response.data[0];
+		console.log(response_data);
+
+		//Update User Profile
+		document.getElementById("usr_username").innerHTML = String(response_data.username);
+		document.getElementById("usr_email").innerHTML = String(response_data.email);
+		updatePerfil(response_data);
+
 		//Avatar
 		//TODO Alter this avatar url
 		let avatar_url = "https://storage.cloud.google.com/projeto-adc.appspot.com/placeholder/user.png?authuser=2";
@@ -93,17 +102,6 @@ async function getInfo(debug, user){
 					console.log(elem.firstElementChild.src);
 				}
 			});
-
-		const response = await axios.get("/api/user/info/" + param);
-		const response_data = response.data[0];
-		console.log(response_data);
-
-		
-
-		//Update User Profile
-		document.getElementById("usr_username").innerHTML = String(response_data.username);
-		document.getElementById("usr_email").innerHTML = String(response_data.email);
-		updatePerfil(response_data);
 
 	} catch (error){
 		console.log(error);
