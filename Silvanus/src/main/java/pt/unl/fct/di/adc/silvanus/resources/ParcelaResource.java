@@ -1,27 +1,42 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
 import com.google.cloud.datastore.Entity;
+import pt.unl.fct.di.adc.silvanus.api.rest.RestInterface;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
+import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.Pair;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestParcel;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Set;
 
-@Path("/parcela")
+import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.IDENTIFIER;
+
+@Path("/parcel")
 public class ParcelaResource implements RestParcel {
 
     private ParcelImplementation impl = new ParcelImplementation();
+    private UserImplementation userImplementation = new UserImplementation();
 
     public ParcelaResource() {
     }
 
     @Override
     public Response doRegister(TerrainData terrainData) {
+        Result<Set<UserInfoVisible>> user = userImplementation.getUser(terrainData.getId_of_owner(),terrainData.getId_of_owner());
+
+        if(!user.isOK() || user.value().isEmpty()){
+            return Response.status(user.error()).entity(user.statusMessage()).build();
+        }
+
         Result<Void> result = impl.createParcel(terrainData);
 
         if (!result.isOK()) {
@@ -41,30 +56,24 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response approveTerrain(Pair<String> pair) {
-        String idOwner = pair.getValue1();
-        String nameTerrain = pair.getValue2();
-        Result<Void> result = impl.approveTerrain(idOwner, nameTerrain);
+    public Response approveTerrain(String userID, String terrainName) {
+        Result<Void> result = impl.approveTerrain(userID, terrainName);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
         return Response.ok().build();
     }
 
     @Override
-    public Response denyTerrain(Pair<String> pair) {
-        String idOwner = pair.getValue1();
-        String nameTerrain = pair.getValue2();
-        Result<Void> result = impl.denyTerrain(idOwner, nameTerrain);
+    public Response denyTerrain(String userID, String terrainName) {
+        Result<Void> result = impl.denyTerrain(userID, terrainName);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
         return Response.ok().build();
     }
 
     @Override
-    public Response deleteTerrain(String[] info) {
-        String idOwner = info[0];
-        String nameTerrain = info[1];
-        Result<Void> result = impl.deleteTerrain(idOwner, nameTerrain);
+    public Response deleteTerrain(@PathParam(IDENTIFIER) String userID, @QueryParam("terrain") String terrainName) {
+        Result<Void> result = impl.deleteTerrain(userID, terrainName);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
         return Response.ok(result).build();

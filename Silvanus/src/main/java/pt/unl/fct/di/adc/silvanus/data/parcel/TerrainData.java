@@ -1,5 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.data.parcel;
 
+//TODO Rethink this part
 public class TerrainData {
 
     // --- Pontos do mapa, area e o centro da parcela ---

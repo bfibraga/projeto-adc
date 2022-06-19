@@ -6,7 +6,7 @@ public class LatLng {
     private float lng;
 
     public LatLng() {
-
+        this(0,0);
     }
 
     public LatLng(float lat, float lng) {

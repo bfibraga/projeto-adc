@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import java.util.HashSet;
 import java.util.Set;
 
 @Path(RestUsers.PATH)
@@ -46,7 +47,7 @@ public class UsersResource implements RestUsers {
 		System.out.println(url);
 		queue.add(TaskOptions.Builder.withUrl(url)
 						.param("userData", JSON.encode(data))
-				.param("secret", TOKEN.createNewJWS("silvanus:build", 1000, new String[]{})));
+				.param("secret", TOKEN.createNewJWS("silvanus:build", 1000, new HashSet<>())));
 		return Response.ok().cookie(TOKEN.cookie(result.value())).build();
 	}
 

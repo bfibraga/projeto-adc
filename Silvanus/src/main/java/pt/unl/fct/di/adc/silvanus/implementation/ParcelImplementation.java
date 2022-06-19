@@ -9,6 +9,8 @@ import pt.unl.fct.di.adc.silvanus.data.parcel.Chunk;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
 import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
+import pt.unl.fct.di.adc.silvanus.util.JSON;
+import pt.unl.fct.di.adc.silvanus.util.cache.ParcelCacheManager;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Response;
@@ -52,14 +54,14 @@ public class ParcelImplementation implements Parcel {
     public static final String ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL = "previous_use_of_soil";
     public static final String ENTITY_PROPERTY_CHUNKS_OF_PARCELA = "chunks_of_terrain";
 
+    //TODO Transferir esta parte para cache
     private Map<String, Chunk> chunksIslands;
 
     private static final Logger LOG = Logger.getLogger(ParcelaResource.class.getName());
 
-    private final Gson g = new Gson();
-
     private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
+    private ParcelCacheManager<String> cacheManager = new ParcelCacheManager<>();
     private Polygon bigBBPolygon;
 
     private Polygon portugalContinentalPolygon;
@@ -97,9 +99,10 @@ public class ParcelImplementation implements Parcel {
             return Result.error(Response.Status.FORBIDDEN, "Terrain already exists.");
         }
 
-        String coordinatesAsJSON = g.toJson(terrainData.getParcela());
+        String coordinatesAsJSON = JSON.encode(terrainData.getParcela());
 
-        terrainEntity = Entity.newBuilder(terrainKey).set(ENTITY_PROPERTY_COORDINATES, coordinatesAsJSON)
+        terrainEntity = Entity.newBuilder(terrainKey)
+                .set(ENTITY_PROPERTY_COORDINATES, coordinatesAsJSON)
                 .set(ENTITY_PROPERTY_ID_OWNER, terrainData.getId_of_owner())
                 .set(ENTITY_PROPERTY_NAME_OF_TERRAIN, terrainData.getName_of_terrain())
                 .set(ENTITY_PROPERTY_DESCRIPTION_OF_TERRAIN, terrainData.getDescription_of_terrain())
@@ -110,7 +113,7 @@ public class ParcelImplementation implements Parcel {
                 .set(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE, terrainData.getType_of_soil_coverage())
                 .set(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL, terrainData.getCurrent_use_of_soil())
                 .set(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL, terrainData.getPrevious_use_of_soil())
-                .set(ENTITY_PROPERTY_CHUNKS_OF_PARCELA, g.toJson(result)).build();
+                .set(ENTITY_PROPERTY_CHUNKS_OF_PARCELA, JSON.encode(result)).build();
 
         Transaction txn = datastore.newTransaction();
         try {
@@ -366,7 +369,7 @@ public class ParcelImplementation implements Parcel {
         while (results.hasNext()) {
             Entity tmp = results.next();
             String coordenadas = tmp.getString(ENTITY_PROPERTY_COORDINATES);
-            LatLng[] c = g.fromJson(coordenadas, LatLng[].class);
+            LatLng[] c = JSON.decode(coordenadas, LatLng[].class);
             Polygon p = coordinatesToPolygon(c);
             if (p.intersects(polygonTerrain)) {
                 LOG.warning("Existe uma interseccao com a parcela: \"" + tmp.getString(ENTITY_PROPERTY_ID_OWNER) + "/" + tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN) + "\"");
@@ -506,7 +509,7 @@ public class ParcelImplementation implements Parcel {
         while (results.hasNext()) {
             Entity tmp = results.next();
             tmp.getList("");
-            list.add(g.toJson(tmp.getProperties()));
+            list.add(JSON.encode(tmp.getProperties()));
         }
         return Result.ok(list);
     }

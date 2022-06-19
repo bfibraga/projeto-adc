@@ -117,7 +117,7 @@ public class UserImplementation implements Users {
 			this.cache.put(user_id, userStateData);
 
 			//TODO: First Registration information
-			String jws = TOKEN.createNewJWS(user_id, 1, new String[]{});
+			String jws = TOKEN.createNewJWS(user_id, 1, new HashSet<>());
 
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
@@ -214,7 +214,7 @@ public class UserImplementation implements Users {
 			System.out.println(cripto.execute(data.getPassword()));
 			System.out.println(hashedPassword.equals(cripto.execute(data.getPassword())));
 			if (hashedPassword.equals(cripto.execute(data.getPassword()))){
-				String jws = TOKEN.createNewJWS(user_id, 1, new String[]{});
+				String jws = TOKEN.createNewJWS(user_id, 1, new HashSet<>());
 
 				String refresh_token = TOKEN.newRefreshToken();
 
@@ -256,7 +256,7 @@ public class UserImplementation implements Users {
 
 					int operation_level = 1;
 
-					String jws = TOKEN.createNewJWS(data.getID(), operation_level, new String[]{});
+					String jws = TOKEN.createNewJWS(data.getID(), operation_level, new HashSet<>());
 
 					String refresh_token = TOKEN.newRefreshToken();
 
