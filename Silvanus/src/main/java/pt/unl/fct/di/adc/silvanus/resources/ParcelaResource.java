@@ -42,14 +42,7 @@ public class ParcelaResource implements RestParcel {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        /*TerrainIdentifierData terrainIdentifierData = terrainData.getId();
-        Result<Set<UserInfoVisible>> user = userImplementation.getUser(terrainIdentifierData.getUserID(),
-                terrainIdentifierData.getUserID());
-
-        if(!user.isOK() || user.value().isEmpty()){
-            return Response.status(user.error()).entity(user.statusMessage()).build();
-        }*/
-
+        terrainData.getCredentials().setUserID(jws.getSubject());
         Result<Void> result = impl.createParcel(terrainData);
 
         if (!result.isOK()) {

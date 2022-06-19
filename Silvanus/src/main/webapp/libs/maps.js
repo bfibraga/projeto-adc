@@ -357,9 +357,6 @@ function setLines(low_index, high_index, value){
     console.log(lines);
 }
 
-function submitPolygon(){
-    console.log(polygons[0]);
-    const data = polygons[0];
-    //TODO Apply to all polygons
-	submitTerrain(JSON.stringify(data));
+async function submitPolygon(){
+	await submitTerrain(polygon_result, []);
 }

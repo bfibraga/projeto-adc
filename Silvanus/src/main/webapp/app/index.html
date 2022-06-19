@@ -489,12 +489,16 @@
               <input type="text" class="form-control rounded-pill" id="name-terrain">
             </div>
             <div class="mb-3">
-              <label for="conselho-terrain" class="form-label">Conselho</label>
-              <input type="text" class="form-control rounded-pill" id="conselho-terrain">
+              <label for="townhall-terrain" class="form-label">Conselho</label>
+              <input type="text" class="form-control rounded-pill" id="townhall-terrain">
             </div>
             <div class="mb-3">
-              <label for="freguesia-terrain" class="form-label">Freguesia</label>
-              <input type="text" class="form-control rounded-pill" id="freguesia-terrain">
+              <label for="district-terrain" class="form-label">Distrito</label>
+              <input type="text" class="form-control rounded-pill" id="district-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="section-terrain" class="form-label">Número de Artigo</label>
+              <input type="text" class="form-control rounded-pill" id="section-terrain">
             </div>
             <div class="mb-3">
               <label for="number-article-terrain" class="form-label">Número de Artigo</label>
@@ -507,7 +511,7 @@
             <div class="mb-3">
               <label for="type_of_terrain" class="form-label">Tipo de Terreno</label>
               <select id="type_of_terrain" class="form-select">
-                <option value="empty">Vazio</option>
+                <option value="empty" selected>Vazio</option>
                 <option value="habitation">Habitação</option>
                 <option value="cultivation">Cultivo</option>
                 <option value="business">Empresarial/Adminstrativo</option>
@@ -517,6 +521,9 @@
                 <option value="infrastructure">Estrada/Infraestrutura</option>
                 <option value="other">Outro</option>
               </select>
+              <div id="other_type_of_terrain_checked" class="mb-3" data-app-menu-active="false">
+                <input type="text" class="form-control rounded-pill" id="other_type_of_terrain">
+              </div>
             </div>
           </div>
           
@@ -524,13 +531,13 @@
             <h5 class="mb-3">Proprietário</h5>
             <div class="d-flex flex-column justify-content-center mb-3">
               <div class="form-check m-1">
-                <input class="form-check-input" type="radio" name="acc_terrain" id="this_acc_terrain_option" onclick="toggleChooseAccMenu('other_acc_terrain_checked')" checked>
+                <input class="form-check-input" type="radio" name="acc_terrain" id="this_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'false')" checked>
                 <label class="form-check-label" for="this_acc_terrain_option">
                   Esta conta
                 </label>
               </div>
               <div class="form-check m-1">
-                <input class="form-check-input" type="radio" name="acc_terrain" id="other_acc_terrain_option" onclick="toggleChooseAccMenu('other_acc_terrain_checked')">
+                <input class="form-check-input" type="radio" name="acc_terrain" id="other_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'true')">
                 <label class="form-check-label" for="other_acc_terrain_option">
                   Outra conta/pessoa
                 </label>
@@ -563,10 +570,21 @@
               <input type="file" class="form-control rounded-pill" id="image-terrain">
             </div>
             <div class="mb-3">
-              <label for="type-terrain" class="form-label">Tipo de terra</label>
+              <label for="type-terrain" class="form-label">Cobertura de Solo</label>
               <input type="text" class="form-control rounded-pill" id="type-terrain">
             </div>
-
+            <div class="mb-3">
+              <label for="current-use-terrain" class="form-label">Uso atual</label>
+              <input type="text" class="form-control rounded-pill" id="current-use-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="previous-use-terrain" class="form-label">Uso anterior</label>
+              <input type="text" class="form-control rounded-pill" id="previous-use-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="define-route-terrain" class="form-label">Caminho de entrada para o terreno</label>
+              <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill" value="Definir um caminho" onclick="">
+            </div>
             
           </div>
 

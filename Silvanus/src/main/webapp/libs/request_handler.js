@@ -1,5 +1,12 @@
 const base_uri = window.location.origin;
 
+let perfil;
+
+const resource = {
+	"USER": "user",
+	"TERRAIN": "parcel"
+}
+
 function checkUndefined(keyword) {
 	return keyword.trim() === "" ? "UNDEFINED" : keyword;
 }
@@ -73,12 +80,18 @@ async function logout() {
 	}
 }
 
+function init(user){
+	Promise.all([getInfo(true, ""), getOwnTerrain()]);
+}
+
+
 async function getInfo(debug, user){
 	try{
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
 		console.log(response_data);
+		perfil = response_data;
 
 		//Update User Profile
 		document.getElementById("usr_username").innerHTML = String(response_data.username);
@@ -152,7 +165,8 @@ async function changing_att(){
 	try{
 		let u_name = String(document.getElementById("usr_fullname_input").value);
 		let u_nif = String(document.getElementById("usr_id_input").value);
-		let u_telephone = String(document.getElementById("usr_phone_input").value);
+		let u_telephone = String(document.getElementById("usr_telephone_input").value);
+		let u_smartphone = String(document.getElementById("usr_smartphone_input").value);
 		let u_address = String(document.getElementById("usr_address_input").value);
 
 		let obj = {
@@ -161,7 +175,7 @@ async function changing_att(){
 			"nif": u_nif,
 			"address": u_address,
 			"telephone": u_telephone,
-			"smartphone": ""
+			"smartphone": u_smartphone
 		}
 
 		console.log(obj);
@@ -171,6 +185,7 @@ async function changing_att(){
 		console.log(response);
 
 		const response_data = response.data;
+		perfil = response_data;
 		updatePerfil(response_data);
 
 	} catch (error){
@@ -193,43 +208,62 @@ async function time(){
 
 //--- Terrain ----
 
-async function submitTerrain(points_data) {
+async function submitTerrain(points_data, route_data) {
 	
 	//TODO Remake this function
+	let parcela = [];
 
-	let _id_of_owner = String(document.getElementById("usr_username").value);
-	let _name_of_terrain = String(document.getElementById("name-terrain").value);
-	let _description_of_terrain = String(document.getElementById("description-terrain").value);
-	let _conselho_of_terrain = String(document.getElementById("conselho-terrain").value);
-	let _freguesia_of_terrain = String(document.getElementById("freguesia-terrain").value);
-	let _section_of_terrain = String(document.getElementById("section-terrain").value);
-	let _number_article_terrain = String(document.getElementById("number-article-terrain").value);
-	let _verification_document_of_terrain = String(document.getElementById("documentation-validation-terrain").value);
-	let _type_of_soil_coverage = "";
-	let _current_use_of_soil = "";
-	let _previous_use_of_soil = "";
+	let credentials = {
+		"name": String(document.getElementById("name-terrain").value),
+		"townhall": String(document.getElementById("townhall-terrain").value),
+		"district": String(document.getElementById("district-terrain").value),
+		"section": String(document.getElementById("section-terrain").value),
+		"number_article": String(document.getElementById("number-article-terrain").value),
+	};
+
+	let checked = document.getElementById("this_acc_terrain_option").checked;
+	console.log(checked);
+	let owner = checked ? perfil : {
+		"name": String(document.getElementById("other_acc_fullname_input").value),
+		"visibility": "",
+		"nif": String(document.getElementById("other_acc_id_input").value),
+		"address": String(document.getElementById("other_acc_address_input").value),
+		"telephone": String(document.getElementById("other_acc_telephone_input").value),
+		"smartphone": String(document.getElementById("other_acc_smartphone_input").value),
+	};
+	console.log(owner);
+
+	let info = {
+		"description": String(document.getElementById("description-terrain").value),
+		"type_of_soil_coverage": String(document.getElementById("type-terrain").value),
+		"current_use": String(document.getElementById("current-use-terrain").value),
+		"previous_use": String(document.getElementById("previous-use-terrain").value),
+		"images": [
+			//String(document.getElementById("image-terrain").src)
+		], //TODO
+		"route": route_data
+	};
 
 	try{
-		const response = await axios.post("/api/parcela/create",
+		let check = await axios.put("/api/" + resource.TERRAIN + "/intersect", parcela)
+		console.log(check);
+
+		let response = await axios.post("/api/parcel/create",
 			{
-				"parcela": points_data,
-				"id_of_owner": _id_of_owner,
-				"name_of_terrain": _name_of_terrain,
-				"description_of_terrain": _description_of_terrain,
-				"conselho_of_terrain": _conselho_of_terrain,
-				"freguesia_of_terrain": _freguesia_of_terrain,
-				"section_of_terrain": _section_of_terrain,
-				"number_article_terrain": _number_article_terrain,
-				"verification_document_of_terrain": _verification_document_of_terrain,
-				"type_of_soil_coverage": _type_of_soil_coverage,
-				"current_use_of_soil": _current_use_of_soil,
-				"previous_use_of_soil": _previous_use_of_soil
+				parcela,
+				credentials,
+				owner,
+				info
 			});
 		console.log(response);
 	} catch (error){
+		alert(error);
 		console.log(error);
 	} finally {
 		console.log("Executed successfully");
 	}
 }
 
+async function getOwnTerrain(){
+
+}

@@ -10,7 +10,7 @@ public class TerrainData {
     // --- Pontos do mapa, area e o centro da parcela ---
     private LatLng center;
     private TerrainIdentifierData credentials;
-    private UserInfoData user;
+    private TerrainOwner owner;
     private TerrainInfoData info;
 
     /*
@@ -35,17 +35,23 @@ public class TerrainData {
 
     */
     public TerrainData() {
-        this(new LatLng[]{}, new TerrainIdentifierData(), new UserInfoData(), new TerrainInfoData());
+        this(new LatLng[]{}, new TerrainIdentifierData(), new TerrainOwner(), new TerrainInfoData());
     }
 
-    public TerrainData(LatLng[] parcela, TerrainIdentifierData credentials, UserInfoData user, TerrainInfoData info) {
+    public TerrainData(LatLng[] parcela, TerrainIdentifierData credentials, TerrainOwner owner, TerrainInfoData info) {
         this.parcela = parcela;
         this.credentials = credentials;
-        this.user = user;
+        this.owner = owner;
         this.info = info;
         //TODO Calculate centroid of this terrain
-        this.center = new LatLng();
 
+        int points = parcela.length;
+        float[] center_value = new float[2];
+        for (LatLng point: parcela) {
+            center_value[0] += point.getLat()/points;
+            center_value[1] += point.getLng()/points;
+        }
+        this.center = new LatLng(center_value[0], center_value[1]);
     }
 
     public LatLng[] getParcela() {
@@ -56,8 +62,8 @@ public class TerrainData {
         return credentials;
     }
 
-    public UserInfoData getUser() {
-        return user;
+    public TerrainOwner getOwner() {
+        return owner;
     }
 
     public TerrainInfoData getInfo() {
@@ -105,6 +111,6 @@ public class TerrainData {
     }*/
 
     public String getID(){
-        return String.format("%s:%s", this.credentials.getID(), this.user.getNif());
+        return String.format("%s:%s", this.credentials.getID(), this.owner.getNif());
     }
 }

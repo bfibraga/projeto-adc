@@ -101,7 +101,7 @@ public class ParcelImplementation implements Parcel {
         String coordinatesAsJSON = JSON.encode(terrainData.getParcela());
 
         TerrainIdentifierData id = terrainData.getCredentials();
-        UserInfoData user = terrainData.getUser();
+        TerrainOwner owner = terrainData.getOwner();
         TerrainInfoData info = terrainData.getInfo();
 
         terrainEntity = Entity.newBuilder(terrainKey)
