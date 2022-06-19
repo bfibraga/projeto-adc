@@ -1,13 +1,12 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
 import com.google.cloud.datastore.*;
-import com.google.gson.Gson;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 import pt.unl.fct.di.adc.silvanus.api.impl.Parcel;
-import pt.unl.fct.di.adc.silvanus.data.parcel.Chunk;
+import pt.unl.fct.di.adc.silvanus.data.parcel.*;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.cache.ParcelCacheManager;
@@ -89,7 +88,7 @@ public class ParcelImplementation implements Parcel {
             return Result.error(Response.Status.NOT_ACCEPTABLE, "Terrain is not well created.");
         }
 
-        String terrainID = terrainData.getId_of_owner() + "/" + terrainData.getName_of_terrain();
+        String terrainID = terrainData.getID();
         Key terrainKey = datastore.newKeyFactory().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME).newKey(terrainID);
         Key approvedTerrainKey = datastore.newKeyFactory().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME).newKey(terrainID);
 
@@ -101,18 +100,22 @@ public class ParcelImplementation implements Parcel {
 
         String coordinatesAsJSON = JSON.encode(terrainData.getParcela());
 
+        TerrainIdentifierData id = terrainData.getCredentials();
+        UserInfoData user = terrainData.getUser();
+        TerrainInfoData info = terrainData.getInfo();
+
         terrainEntity = Entity.newBuilder(terrainKey)
                 .set(ENTITY_PROPERTY_COORDINATES, coordinatesAsJSON)
-                .set(ENTITY_PROPERTY_ID_OWNER, terrainData.getId_of_owner())
-                .set(ENTITY_PROPERTY_NAME_OF_TERRAIN, terrainData.getName_of_terrain())
-                .set(ENTITY_PROPERTY_DESCRIPTION_OF_TERRAIN, terrainData.getDescription_of_terrain())
-                .set(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN, terrainData.getConselho_of_terrain())
-                .set(ENTITY_PROPERTY_DISTRITO_OF_CONCELHO, terrainData.getDistrito_of_terrain())
-                .set(ENTITY_PROPERTY_SECTION_OF_TERRAIN, terrainData.getSection_of_terrain())
-                .set(ENTITY_PROPERTY_NUMBER_ARTICLE_OF_TERRAIN, terrainData.getNumber_article_terrain())
-                .set(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE, terrainData.getType_of_soil_coverage())
-                .set(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL, terrainData.getCurrent_use_of_soil())
-                .set(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL, terrainData.getPrevious_use_of_soil())
+                .set(ENTITY_PROPERTY_ID_OWNER, id.getUserID())
+                .set(ENTITY_PROPERTY_NAME_OF_TERRAIN, id.getName())
+                .set(ENTITY_PROPERTY_DESCRIPTION_OF_TERRAIN, info.getDescription())
+                .set(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN, id.getTownhall())
+                .set(ENTITY_PROPERTY_DISTRITO_OF_CONCELHO, id.getDistrict())
+                .set(ENTITY_PROPERTY_SECTION_OF_TERRAIN, id.getSection())
+                .set(ENTITY_PROPERTY_NUMBER_ARTICLE_OF_TERRAIN, id.getNumber_article())
+                .set(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE, info.getType_of_soil_coverage())
+                .set(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL, info.getCurrent_use())
+                .set(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL, info.getPrevious_use())
                 .set(ENTITY_PROPERTY_CHUNKS_OF_PARCELA, JSON.encode(result)).build();
 
         Transaction txn = datastore.newTransaction();

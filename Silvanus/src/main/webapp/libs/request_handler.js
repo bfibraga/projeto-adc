@@ -74,15 +74,9 @@ async function logout() {
 }
 
 async function getInfo(debug, user){
-	user = user === null ? "" : user;
-
 	try{
-		let param = "";
-		if (user !== ""){
-			param = "?identifier=" + user;
-		}
 
-		const response = await axios.get("/api/user/info" + param);
+		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
 		console.log(response_data);
 
@@ -113,18 +107,18 @@ async function getInfo(debug, user){
 
 function updatePerfil(data){
 	//User Visible Data
-	document.getElementById("usr_fullname").innerHTML = String(name_parts[0]);
+	document.getElementById("usr_fullname").innerHTML = String(data.name);
 
 	document.getElementById("usr_id").innerHTML = String(data.nif);
 	document.getElementById("usr_telephone").innerHTML = String(data.telephone);
-	document.getElementById("usr_smartphone").innerHTML = String(name_parts[name_parts.length-1]);
+	document.getElementById("usr_smartphone").innerHTML = String(data.smartphone);
 	document.getElementById("usr_address").innerHTML = String(data.address);
 
-	document.getElementById("usr_fullname_input").value = String(name_parts[0]);
+	document.getElementById("usr_fullname_input").value = String(data.name);
 
 	document.getElementById("usr_id_input").value = String(data.nif);
 	document.getElementById("usr_telephone_input").value = String(data.telephone);
-	document.getElementById("usr_smartphone_input").value = String(name_parts[name_parts.length-1]);
+	document.getElementById("usr_smartphone_input").value = String(data.smartphone);
 	document.getElementById("usr_address_input").value = String(data.address);
 }
 
@@ -156,14 +150,13 @@ async function change_password(){
 
 async function changing_att(){
 	try{
-		let u_firstname = String(document.getElementById("usr_firstname_input").value);
-		let u_lastname = String(document.getElementById("usr_lastname_input").value);
+		let u_name = String(document.getElementById("usr_fullname_input").value);
 		let u_nif = String(document.getElementById("usr_id_input").value);
 		let u_telephone = String(document.getElementById("usr_phone_input").value);
 		let u_address = String(document.getElementById("usr_address_input").value);
 
 		let obj = {
-			"name": u_firstname + " " + u_lastname,
+			"name": u_name,
 			"visibility": "",
 			"nif": u_nif,
 			"address": u_address,

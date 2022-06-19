@@ -9,7 +9,9 @@ public class UserInfoData {
     private String telephone;
     private String smartphone;
 
-    public UserInfoData(){}
+    public UserInfoData(){
+        this("", "", "", "", "", "");
+    }
 
     public UserInfoData(String name, String visibility, String nif, String address, String telephone, String smartphone){
         this.name = name;

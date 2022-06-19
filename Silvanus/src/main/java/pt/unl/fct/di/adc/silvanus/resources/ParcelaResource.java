@@ -1,14 +1,18 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
 import com.google.cloud.datastore.Entity;
+import io.jsonwebtoken.Claims;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestInterface;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainIdentifierData;
+import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.Pair;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestParcel;
+import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
@@ -30,12 +34,21 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response doRegister(TerrainData terrainData) {
-        Result<Set<UserInfoVisible>> user = userImplementation.getUser(terrainData.getId_of_owner(),terrainData.getId_of_owner());
+    public Response doRegister(String token, TerrainData terrainData) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        /*TerrainIdentifierData terrainIdentifierData = terrainData.getId();
+        Result<Set<UserInfoVisible>> user = userImplementation.getUser(terrainIdentifierData.getUserID(),
+                terrainIdentifierData.getUserID());
 
         if(!user.isOK() || user.value().isEmpty()){
             return Response.status(user.error()).entity(user.statusMessage()).build();
-        }
+        }*/
 
         Result<Void> result = impl.createParcel(terrainData);
 
@@ -47,7 +60,14 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response checkIfTerrainHasIntersections(LatLng[] terrain) {
+    public Response checkIfTerrainHasIntersections(String token, LatLng[] terrain) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
         Result<String> result = impl.checkIfParcelHasIntersections(terrain);
         if (result == null)
             return Response.ok("Nao ha intersecoes.").build();
@@ -56,7 +76,14 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response approveTerrain(String userID, String terrainName) {
+    public Response approveTerrain(String token, String userID, String terrainName) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
         Result<Void> result = impl.approveTerrain(userID, terrainName);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -64,7 +91,14 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response denyTerrain(String userID, String terrainName) {
+    public Response denyTerrain(String token, String userID, String terrainName) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
         Result<Void> result = impl.denyTerrain(userID, terrainName);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -72,7 +106,14 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response deleteTerrain(@PathParam(IDENTIFIER) String userID, @QueryParam("terrain") String terrainName) {
+    public Response deleteTerrain(String token, String userID, String terrainName) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
         Result<Void> result = impl.deleteTerrain(userID, terrainName);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -80,7 +121,14 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response listTerrainUser(String idOfUser) {
+    public Response listTerrainUser(String token, String idOfUser) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
         Result<List<String>> result = impl.getAllTerrainsOfUser(idOfUser);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -88,7 +136,14 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response listTerrainInCounty(String nameOfCounty) {
+    public Response listTerrainInCounty(String token, String nameOfCounty) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
         Result<List<Entity>> result = impl.getAllTerrainsInCounty(nameOfCounty);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -96,7 +151,14 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response listTerrainInDistrict(String nameOfDistrict) {
+    public Response listTerrainInDistrict(String token, String nameOfDistrict) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
         Result<List<Entity>> result = impl.getAllTerrainsInDistrict(nameOfDistrict);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();

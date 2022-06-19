@@ -1,12 +1,19 @@
 package pt.unl.fct.di.adc.silvanus.data.parcel;
 
+import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
+
 //TODO Rethink this part
 public class TerrainData {
 
     // --- Pontos do mapa, area e o centro da parcela ---
     private LatLng[] parcela;
     // --- Pontos do mapa, area e o centro da parcela ---
+    private LatLng center;
+    private TerrainIdentifierData credentials;
+    private UserInfoData user;
+    private TerrainInfoData info;
 
+    /*
     // --- Informacao do utilizador ou que este insere ---
     private String id_of_owner;
     private String name_of_terrain;
@@ -22,35 +29,42 @@ public class TerrainData {
 
     // --- Informacoes Relacionadas com o solo ---
     private String type_of_soil_coverage;
-    private String current_use_of_soil; // TODO verificar se pode ser um ENUM {vazio, habitacao, cultivo, ... }
-    private String previous_use_of_soil; // TODO verificar se pode ser um ENUM {vazio, habitacao, cultivo, ... }
+    private String current_use_of_soil; //TODO verificar se pode ser um ENUM {vazio, habitacao, cultivo, ... }
+    private String previous_use_of_soil; //TODO verificar se pode ser um ENUM {vazio, habitacao, cultivo, ... }
     // --- Informacoes Relacionadas com o solo ---
 
+    */
     public TerrainData() {
-
+        this(new LatLng[]{}, new TerrainIdentifierData(), new UserInfoData(), new TerrainInfoData());
     }
 
-    public TerrainData(LatLng[] parcela, String id_of_owner, String name_of_terrain, String description_of_terrain,
-                       String conselho_of_terrain, String distrito_of_terrain, String section_of_terrain,
-                       String number_article_terrain, String type_of_soil_coverage, String current_use_of_soil, String previous_use_of_soil) {
+    public TerrainData(LatLng[] parcela, TerrainIdentifierData credentials, UserInfoData user, TerrainInfoData info) {
         this.parcela = parcela;
-        this.id_of_owner = id_of_owner;
-        this.name_of_terrain = name_of_terrain;
-        this.description_of_terrain = description_of_terrain;
-        this.conselho_of_terrain = conselho_of_terrain;
-        this.distrito_of_terrain = distrito_of_terrain;
-        this.section_of_terrain = section_of_terrain;
-        this.number_article_terrain = number_article_terrain;
-        this.type_of_soil_coverage = type_of_soil_coverage;
-        this.current_use_of_soil = current_use_of_soil;
-        this.previous_use_of_soil = previous_use_of_soil;
+        this.credentials = credentials;
+        this.user = user;
+        this.info = info;
+        //TODO Calculate centroid of this terrain
+        this.center = new LatLng();
+
     }
 
     public LatLng[] getParcela() {
         return parcela;
     }
 
-    public String getId_of_owner() {
+    public TerrainIdentifierData getCredentials() {
+        return credentials;
+    }
+
+    public UserInfoData getUser() {
+        return user;
+    }
+
+    public TerrainInfoData getInfo() {
+        return info;
+    }
+
+    /*public String getId_of_owner() {
         return id_of_owner;
     }
 
@@ -88,6 +102,9 @@ public class TerrainData {
 
     public String getPrevious_use_of_soil() {
         return previous_use_of_soil;
-    }
+    }*/
 
+    public String getID(){
+        return String.format("%s:%s", this.credentials.getID(), this.user.getNif());
+    }
 }

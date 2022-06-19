@@ -20,7 +20,7 @@ public interface RestParcel {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + CHARSET)
-    Response doRegister(TerrainData terrainData);
+    Response doRegister(@CookieParam(TOKEN) String token, TerrainData terrainData);
 
     /**
      * This method is use to check if a terrain intersects any other terrain.
@@ -32,7 +32,7 @@ public interface RestParcel {
     @Path("/intersect")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + CHARSET)
-    Response checkIfTerrainHasIntersections(LatLng[] terrain);
+    Response checkIfTerrainHasIntersections(@CookieParam(TOKEN) String token, LatLng[] terrain);
 
     /**
      * This method is used to approve a terrain. It receives a pair of strings
@@ -44,7 +44,7 @@ public interface RestParcel {
     @Path("/approve/{" + IDENTIFIER + "}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + CHARSET)
-    Response approveTerrain(@PathParam(IDENTIFIER) String userID, @QueryParam("terrain") String terrainName);
+    Response approveTerrain(@CookieParam(TOKEN) String token, @PathParam(IDENTIFIER) String userID, @QueryParam("terrain") String terrainName);
 
     /**
      * This method is used to approve a terrain. It receives a pair of strings
@@ -56,7 +56,7 @@ public interface RestParcel {
     @Path("/deny/{" + IDENTIFIER + "}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + CHARSET)
-    Response denyTerrain(@PathParam(IDENTIFIER) String userID, @QueryParam("terrain") String terrainName);
+    Response denyTerrain(@CookieParam(TOKEN) String token, @PathParam(IDENTIFIER) String userID, @QueryParam("terrain") String terrainName);
 
     /**
      * This method is used to delete a terrain (it is already approved). It an array of strings
@@ -68,7 +68,7 @@ public interface RestParcel {
     @Path("/delete/{" + IDENTIFIER + "}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response deleteTerrain(@PathParam(IDENTIFIER) String userID, @QueryParam("terrain") String terrainName);
+    Response deleteTerrain(@CookieParam(TOKEN) String token, @PathParam(IDENTIFIER) String userID, @QueryParam("terrain") String terrainName);
 
     /**
      * This method is used to list all the terrains a certain user as registered. Those terrains
@@ -81,7 +81,7 @@ public interface RestParcel {
     @Path("/list/user/{user}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainUser(@PathParam("user") String idOfUser);
+    Response listTerrainUser(@CookieParam(TOKEN) String token, @PathParam("user") String idOfUser);
 
     /**
      * This method is used to list all the terrains in a certain county (concelho). Those terrains
@@ -94,7 +94,7 @@ public interface RestParcel {
     @Path("/list/country/{country}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainInCounty(@PathParam("country") String nameOfCounty);
+    Response listTerrainInCounty(@CookieParam(TOKEN) String token, @PathParam("country") String nameOfCounty);
 
     /**
      * This method is used to list all the terrains in a certain district (distrito). Those terrains
@@ -107,5 +107,5 @@ public interface RestParcel {
     @Path("/list/district/{district}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainInDistrict(@PathParam("district") String nameOfDistrict);
+    Response listTerrainInDistrict(@CookieParam(TOKEN) String token, @PathParam("district") String nameOfDistrict);
 }
