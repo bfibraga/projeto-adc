@@ -17,6 +17,10 @@ public enum UserRole {
 		this.role_color = role_color;
 	}
 
+	UserRole(){
+		this("User", "#6aa84f");
+	}
+
 	public static UserRole compareType(String type) {
 		for (UserRole r : UserRole.values()) {
 			if (r.toString().equalsIgnoreCase(type)) {

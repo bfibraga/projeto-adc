@@ -2,9 +2,7 @@ package pt.unl.fct.di.adc.silvanus.api.impl;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
+import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
@@ -18,7 +16,7 @@ public interface Users {
 	
 	Result<String> login(LoginData data);
 	
-	Result<Void> logout(String token);
+	Result<Void> logout(String token, LogoutData data);
 	
 	Result<Void> promote(String token, String identifier, String new_role);
 

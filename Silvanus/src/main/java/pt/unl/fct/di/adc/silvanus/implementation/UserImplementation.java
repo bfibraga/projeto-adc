@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response.Status;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import io.jsonwebtoken.*;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
@@ -298,14 +299,28 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> logout(String userID) {
+	public Result<Void> logout(String userID, LogoutData data) {
 
 		LOG.fine("Logout attempt");
 
 		//Create new Logout timestamp
 		Key logoutKey = datastore.newKeyFactory().setKind("UserLastLogout").newKey(userID);
-		Entity logoutEntity = Entity.newBuilder(logoutKey)
-				.build();
+
+		Transaction txn = datastore.newTransaction();
+
+		try{
+			Entity logoutEntity = Entity.newBuilder(logoutKey)
+					.set("map_center_location", JSON.encode(data.getCenter()))
+					.set("map_zoom", data.getZoom())
+					.build();
+
+			txn.put(logoutEntity);
+			txn.commit();
+		}  finally {
+			if (txn.isActive()){
+				txn.rollback();
+			}
+		}
 
 		//Revoke token
 		this.cache.remove(userID, "token");
@@ -495,28 +510,38 @@ public class UserImplementation implements Users {
 		Key infoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 		Key stateKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 		Key roleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
+		Key lastLogoutKey = datastore.newKeyFactory().setKind("UserLastLogout").newKey(user_id);
 
 		Entity infoEntity = datastore.get(infoKey);
 		Entity stateEntity = datastore.get(stateKey);
 		Entity roleEntiry  = datastore.get(roleKey);
+		Entity lastLogout = datastore.get(lastLogoutKey);
 
-		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
-		System.out.println(role);
-		//UserRoleData roleData = new UserRoleData(role);
-
-		//TODO Change the way to return result
-		UserInfoVisible result = new UserInfoVisible(
-				userEntity.getString("usr_username"),
-				userEntity.getString("usr_email"),
+		UserInfoData info = new UserInfoData(
 				infoEntity.getString("usr_name"),
 				infoEntity.getString("usr_visibility"),
 				infoEntity.getString("usr_NIF"),
 				infoEntity.getString("usr_address"),
 				infoEntity.getString("usr_telephone"),
-				infoEntity.getString("usr_smartphone"),
+				infoEntity.getString("usr_smartphone"));
+		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
+		System.out.println(role);
+		UserRoleData roleData = new UserRoleData(role.getRoleName(), role.getRoleColor());
+		System.out.println(roleData);
+		LogoutData logoutData = lastLogout == null ?
+				new LogoutData() :
+				new LogoutData(JSON.decode(lastLogout.getString("map_center_location"), LatLng.class),
+						lastLogout.getDouble("map_zoom"));
+
+		//TODO Change the way to return result
+		UserInfoVisible result = new UserInfoVisible(
+				userEntity.getString("usr_username"),
+				userEntity.getString("usr_email"),
+				info,
 				stateEntity.getString("usr_state"),
 				role.getRoleName(),
-				role.getRoleColor()
+				role.getRoleColor(),
+				logoutData
 		);
 
 		return result;

@@ -55,8 +55,8 @@ public class NotificationResource implements RestNotifications {
 
         Result<Set<UserInfoVisible>> userResult = userImplementation.getUser(token, userID);
 
-        if (!userResult.isOK() || userResult.value().isEmpty()){
-            return Response.status(userResult.error()).entity(userResult.statusMessage()).build();
+        if (userResult.value().isEmpty()){
+            return Response.status(Response.Status.FORBIDDEN).entity(userResult.statusMessage()).build();
         }
 
         Result<Set<Notification>> res = notificationImplementation.list(userID);

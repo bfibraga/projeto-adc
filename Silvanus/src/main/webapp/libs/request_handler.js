@@ -70,7 +70,13 @@ async function login(){
 
 async function logout() {
 	try{
-		const response = await axios.post("/api/user/logout");
+		const viewport = getViewport();
+		console.log(viewport);
+		const response = await axios.post("/api/user/logout",
+			{
+				"center": viewport.center,
+				"zoom": viewport.zoom
+			});
 		console.log(response);
 		window.location.replace(base_uri);
 	} catch (error){
@@ -94,8 +100,10 @@ async function getInfo(debug, user){
 
 		//Put all user badges
 		badge(response_data.role_name,response_data.role_color);
+		updatePerfil(response_data.info);
 
-		updatePerfil(response_data);
+		let lastLogout = response_data.logoutData;
+		setCenter(lastLogout.center);
 
 		//Avatar
 		//TODO Alter this avatar url
@@ -125,14 +133,12 @@ async function getInfo(debug, user){
 function updatePerfil(data){
 	//User Visible Data
 	document.getElementById("usr_fullname").innerHTML = String(data.name);
-
 	document.getElementById("usr_id").innerHTML = String(data.nif);
 	document.getElementById("usr_telephone").innerHTML = String(data.telephone);
 	document.getElementById("usr_smartphone").innerHTML = String(data.smartphone);
 	document.getElementById("usr_address").innerHTML = String(data.address);
 
 	document.getElementById("usr_fullname_input").value = String(data.name);
-
 	document.getElementById("usr_id_input").value = String(data.nif);
 	document.getElementById("usr_telephone_input").value = String(data.telephone);
 	document.getElementById("usr_smartphone_input").value = String(data.smartphone);
@@ -166,7 +172,7 @@ async function change_password(){
 }
 
 async function changing_att(){
-	try{
+	try {
 		let u_name = String(document.getElementById("usr_fullname_input").value);
 		let u_nif = String(document.getElementById("usr_id_input").value);
 		let u_telephone = String(document.getElementById("usr_telephone_input").value);
@@ -213,11 +219,13 @@ async function time(){
 //--- Notifications ---
 
 async function listNotification(){
-	try{
+	try {
+		console.log(perfil);
 		const response = await axios.get("/api/notification/list/" + perfil.username);
 		console.log(response.data);
 		response.data.forEach(element => {
-			notification(element.sender, '', element.description);
+			console.log(element);
+			notification(element.receiver, '', element.description);
 		});
 	} catch (error){
 		console.log(error);
@@ -243,7 +251,7 @@ async function submitTerrain(points_data, route_data) {
 
 	let checked = document.getElementById("this_acc_terrain_option").checked;
 	console.log(checked);
-	let owner = checked ? perfil : {
+	let owner = checked ? perfil.info : {
 		"name": String(document.getElementById("other_acc_fullname_input").value),
 		"visibility": "",
 		"nif": String(document.getElementById("other_acc_id_input").value),

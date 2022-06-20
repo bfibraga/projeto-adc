@@ -14,6 +14,8 @@ let polygon_result = null;
 let click_listener;
 
 let viewport;
+let viewport_center;
+let viewport_zoom;
 let viewport_moving = false;
 
 let MAP_MODE = {
@@ -49,6 +51,8 @@ function initMap()
 
 function initViewmap(){
     viewport = map.getBounds();
+    viewport_center = map.getCenter();
+    viewport_zoom = map.getZoom();
 
     map.addListener("dragstart", function(){
         viewport_moving = true;
@@ -75,7 +79,21 @@ function initViewmap(){
     map.addListener("bounds_changed", function(){
         //Bounds of the map
         viewport = map.getBounds();
+        viewport_center = map.getCenter();
+        viewport_zoom = map.getZoom();
     });
+}
+
+function setCenter(latlng){
+    map.setCenter(latlng);
+}
+
+function getViewport(){
+    return {
+        "bounds":viewport,
+        "center":viewport_center,
+        "zoom": viewport_zoom
+    }
 }
 
 function initPolygonDrawingTools(){

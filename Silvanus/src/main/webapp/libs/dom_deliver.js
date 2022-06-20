@@ -50,8 +50,9 @@ function LoadHTMLDoc(dname, callback, params){
     }
     //xhttp.overrideMimeType('text/xml');
     xhttp.onreadystatechange = function() {
-        if(this.readyState == 4 && this.status == 200) {
-            callback(xhttp.responseXML, params);
+        if(this.readyState === 4 && this.status === 200) {
+            let response = xhttp.responseXML;
+            callback(response, params);
         }
     }
     xhttp.open("GET", dname, true);
@@ -67,12 +68,13 @@ function notification(sender, avatar, content){
 
 function handleNotification(xmlDoc, params){
     let elem = xmlDoc.querySelector(".toast");
+    console.log(elem);
     elem.querySelector(".me-auto").innerText = params[0];
     elem.querySelector(".avatar-wrapper").setAttribute("data-user", params[1]);
     console.log(elem.querySelector(".avatar-wrapper"));
     elem.querySelector(".toast-body").innerText = params[2];
     document.getElementById("usr_list_notification").append(elem);
-    return elem;
+    //return elem;
 }
 
 function badge(name, color){
@@ -85,6 +87,6 @@ function handleBadge(xmlDoc, params){
     elem.innerText = params[0];
     elem.style.backgroundColor = params[1];
     document.getElementById("usr_roles").append(elem);
-    return elem;
+    //return elem;
 }
 

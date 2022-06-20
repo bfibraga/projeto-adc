@@ -31,7 +31,7 @@ public interface RestNotifications {
     @GET
     @Path("/list/{" + IDENTIFIER + "}")
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    Response list(@CookieParam(TOKEN) String token, @PathParam(IDENTIFIER) @DefaultValue(" ") String userID);
+    Response list(@CookieParam(TOKEN) String token, @PathParam(IDENTIFIER) String userID);
 
     /**
      * Metodo que e usada para apagar uma notificacao do user que invoca esta operacao.
