@@ -1,14 +1,12 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import com.google.cloud.storage.Acl;
 import io.jsonwebtoken.*;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
@@ -503,6 +501,8 @@ public class UserImplementation implements Users {
 		Entity roleEntiry  = datastore.get(roleKey);
 
 		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
+		System.out.println(role);
+		//UserRoleData roleData = new UserRoleData(role);
 
 		//TODO Change the way to return result
 		UserInfoVisible result = new UserInfoVisible(
@@ -515,7 +515,8 @@ public class UserImplementation implements Users {
 				infoEntity.getString("usr_telephone"),
 				infoEntity.getString("usr_smartphone"),
 				stateEntity.getString("usr_state"),
-				role
+				role.getRoleName(),
+				role.getRoleColor()
 		);
 
 		return result;

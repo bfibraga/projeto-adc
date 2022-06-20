@@ -27,7 +27,7 @@ public enum UserRole {
 	}
 	
 	public String toString() {
-		return JSON.encode(this);
+		return String.format("%s:%s", this.getRoleName(), this.getRoleColor());
 	}
 
 	public String getRoleName(){

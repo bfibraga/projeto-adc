@@ -16,7 +16,8 @@ public class UserInfoVisible {
     private String telephone;
     private String smartphone;
     private String state;
-    private UserRole role;
+    private String role_name;
+    private String role_color;
 
     public UserInfoVisible(
             String username,
@@ -28,7 +29,8 @@ public class UserInfoVisible {
             String telephone,
             String smartphone,
             String state,
-            UserRole role
+            String role_name,
+            String role_color
     ){
         this.username = username;
         this.email = email;
@@ -39,11 +41,12 @@ public class UserInfoVisible {
         this.telephone = telephone;
         this.smartphone = smartphone;
         this.state = state;
-        this.role = role;
+        this.role_name = role_name;
+        this.role_color = role_color;
     }
 
     public UserInfoVisible(){
-        this(NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, UserRole.USER);
+        this(NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, NOT_DEFINED, UserRole.USER.getRoleName(), UserRole.USER.getRoleColor());
     }
 
     public String getUsername() {
@@ -82,7 +85,11 @@ public class UserInfoVisible {
         return state;
     }
 
-    public UserRole getRole() {
-        return role;
+    public String getRole_color() {
+        return role_color;
+    }
+
+    public String getRole_name() {
+        return role_name;
     }
 }

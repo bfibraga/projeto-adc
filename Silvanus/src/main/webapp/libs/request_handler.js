@@ -80,25 +80,21 @@ async function logout() {
 	}
 }
 
-function init(user){
-	Promise.all([getInfo(true, ""),
-		getOwnTerrain(),
-		listNotification()]);
-}
-
-
 async function getInfo(debug, user){
 	try{
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
-		console.log(response_data);
 		perfil = response_data;
+		console.log(perfil);
 
 		//Update User Profile
 		document.getElementById("usr_username").innerHTML = String(response_data.username);
 		document.getElementById("usr_email").innerHTML = String(response_data.email);
-		badge('Teste','#090909');
+
+		//Put all user badges
+		badge(response_data.role_name,response_data.role_color);
+
 		updatePerfil(response_data);
 
 		//Avatar
@@ -111,7 +107,12 @@ async function getInfo(debug, user){
 					elem.firstElementChild.src = avatar_url;
 					console.log(elem.firstElementChild.src);
 				}
-			});
+		});
+		
+		await Promise.all([
+			getOwnTerrain(),
+			listNotification()
+		]);
 
 	} catch (error){
 		console.log(error);
@@ -213,9 +214,9 @@ async function time(){
 
 async function listNotification(){
 	try{
-		const response = await axios.get("/api/notification/" + perfil.username);
-		console.log(response);
-		response.forEach(element => {
+		const response = await axios.get("/api/notification/list/" + perfil.username);
+		console.log(response.data);
+		response.data.forEach(element => {
 			notification(element.sender, '', element.description);
 		});
 	} catch (error){

@@ -30,7 +30,7 @@
     <link href="../styles/loader.css" rel="stylesheet">
 
 </head>
-<body id="main" class="" onload='init("")'>
+<body id="main" class="" onload='getInfo(true, "")'>
   <div id="loader" class="overlay d-none" style="z-index: 100000;">
     <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
   </div>
@@ -148,7 +148,7 @@
               </div>
             </div>
             <h3 id="usr_username">Username
-              <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="">
+              <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="notification('Nao sei', '', 'Sei la')">
                 <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
               </a>
             </h3>
