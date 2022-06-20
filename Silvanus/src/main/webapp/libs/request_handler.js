@@ -81,7 +81,9 @@ async function logout() {
 }
 
 function init(user){
-	Promise.all([getInfo(true, ""), getOwnTerrain()]);
+	Promise.all([getInfo(true, ""),
+		getOwnTerrain(),
+		listNotification()]);
 }
 
 
@@ -96,6 +98,7 @@ async function getInfo(debug, user){
 		//Update User Profile
 		document.getElementById("usr_username").innerHTML = String(response_data.username);
 		document.getElementById("usr_email").innerHTML = String(response_data.email);
+		badge('Teste','#090909');
 		updatePerfil(response_data);
 
 		//Avatar
@@ -199,6 +202,22 @@ async function time(){
 	try{
 		const response = await axios.get("/api/utils/time");
 		console.log(response);
+	} catch (error){
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
+}
+
+//--- Notifications ---
+
+async function listNotification(){
+	try{
+		const response = await axios.get("/api/notification/" + perfil.username);
+		console.log(response);
+		response.forEach(element => {
+			notification(element.sender, '', element.description);
+		});
 	} catch (error){
 		console.log(error);
 	} finally {

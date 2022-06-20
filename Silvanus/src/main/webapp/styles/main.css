@@ -301,3 +301,8 @@ h1,p,label,a{
 [data-app-value="0"] #no_pending_requests{
   display:block !important;
 }
+
+.toast::marker{
+  display: none;
+  list-style: none;
+}

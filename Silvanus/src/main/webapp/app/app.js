@@ -46,15 +46,16 @@ function loadTerrain(parent_id){
   createElement("p", "", parent);
 }
 
-document.getElementById("type_of_terrain")
-    .addEventListener('change', (event) =>{
-    let value = event.target.value;
-    console.log(value);
-    if (value === "other"){
-        setMenuID("other_type_of_terrain_checked", "true")
-    } else {
-        setMenuID("other_type_of_terrain_checked", "false")
-    }
-})
+function typeTerrain(id, menu_id){
+  let elem = document.getElementById(id)
+  let value = elem.value;
+
+  if (value === "other"){
+    setMenuID(menu_id, "true");
+  } else {
+    setMenuID(menu_id, "false");
+  }
+}
+
 
 
