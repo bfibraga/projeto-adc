@@ -2,6 +2,8 @@ package pt.unl.fct.di.adc.silvanus.data.parcel;
 
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 
+import java.util.Arrays;
+
 //TODO Rethink this part
 public class TerrainData {
 
@@ -112,5 +114,10 @@ public class TerrainData {
 
     public String getID(){
         return String.format("%s:%s", this.credentials.getID(), this.owner.getNif());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("TerrainData:\n\tParcela:%s\n\tCredentials:%s\n\tOwner:%s\n\tInfo:%s\n", Arrays.toString(parcela), credentials, owner, info);
     }
 }

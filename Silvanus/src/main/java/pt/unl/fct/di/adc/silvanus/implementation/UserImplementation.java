@@ -60,6 +60,7 @@ public class UserImplementation implements Users {
 		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
 		Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
+		Key logoutKey = datastore.newKeyFactory().setKind("UserLastLogout").newKey(user_id);
 
 		//Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
 		Key userKey = userKeyFactory.newKey(user_id);
@@ -114,6 +115,11 @@ public class UserImplementation implements Users {
 					.set("list_usr_validation", verified)
 					.build();
 			this.cache.put(user_id, userStateData);
+
+			Entity logoutEntity = Entity.newBuilder(logoutKey)
+					.set("map_center_location", JSON.encode(new LatLng((float) 38.659784, (float) -9.202765)))
+					.set("map_zoom", 15.0)
+					.build();
 
 			//TODO: First Registration information
 			String jws = TOKEN.createNewJWS(user_id, 1, new HashSet<>());

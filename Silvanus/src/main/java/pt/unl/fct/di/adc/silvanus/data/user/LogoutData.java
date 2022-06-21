@@ -13,7 +13,7 @@ public class LogoutData {
     }
 
     public LogoutData(){
-        this(new LatLng(), 10.0);
+        this(new LatLng(), 15.0);
     }
 
     public LatLng getCenter() {

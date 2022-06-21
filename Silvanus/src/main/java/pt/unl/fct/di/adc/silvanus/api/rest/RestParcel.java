@@ -88,10 +88,10 @@ public interface RestParcel {
      * @return ok if everything went correctly, an error otherwise
      */
     @POST
-    @Path("/list/user/{user}")
+    @Path("/list")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainUser(@CookieParam(TOKEN) String token, @PathParam("user") String idOfUser);
+    Response listTerrainUser(@CookieParam(TOKEN) String token, @QueryParam("user") @DefaultValue(" ") String idOfUser);
 
     /**
      * This method is used to list all the terrains in a certain county (concelho). Those terrains
@@ -128,18 +128,19 @@ public interface RestParcel {
      * @return ok if everything went correctly, an error otherwise
      */
     @POST
-    @Path("/list/{idOfOwner}")
+    @Path("/list/{idOfOwner}/county")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     Response listTerrainsOfUserInCounty(@PathParam("idOfOwner") String idOfOwner, @QueryParam("terrain") String county);
 
     /**
      * This method is used to list all the terrains in a given chunk.
-     * @param chunk the id of the chunk to query
+     * @param pos position of the user on the map
      * @return ok if everything went correctly, an error otherwise
      */
     @POST
-    @Path("/list/chunk/{chunk}")
+    @Path("/list/chunk/")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainsInChunk(@PathParam("chunk") String chunk);
+    Response listTerrainsInChunk(LatLng pos);
 }

@@ -55,4 +55,9 @@ public class TerrainInfoData {
     public List<LatLng> getRoute() {
         return route;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s:\n\tDescription:%s\n\tType of Soil:%s\n\tCurrent Use:%s\n\tPrevious Use:%s\n\tImages:%s\n\tRoute:%s\n", this.getClass().getName(), getDescription(), getType_of_soil_coverage(), getCurrent_use(), getPrevious_use(),getImages(),getRoute());
+    }
 }

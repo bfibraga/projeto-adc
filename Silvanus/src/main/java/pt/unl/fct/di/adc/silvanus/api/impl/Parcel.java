@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.cloud.datastore.Entity;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import java.util.List;
@@ -61,7 +62,7 @@ public interface Parcel {
      * @param ownerTerrain the name of the owner
      * @return a list with all the terrains
      */
-    Result<List<String>> getAllTerrainsOfUser(String ownerTerrain);
+    Result<List<TerrainResultData>> getAllTerrainsOfUser(String ownerTerrain);
 
     /**
      * Generates a list of all the terrains in a given county (cocelho)
@@ -86,6 +87,6 @@ public interface Parcel {
      */
     Result<List<String>> queryTerrainsOfUserInCounty(String idOfOwner, String nameOfConselho);
 
-    Result<List<LatLng[]>> queryTerrainsInChunk(String chunk);
+    Result<List<LatLng[]>> queryTerrainsInChunk(LatLng pos);
 
 }

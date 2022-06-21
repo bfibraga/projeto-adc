@@ -63,11 +63,19 @@ public class TerrainIdentifierData {
     }
 
     public String getID(){
+        if (this.getUserID() == null || this.getName() == null){
+            return "";
+        }
         return String.format("%s:%s", this.getUserID().hashCode(), this.getName().hashCode());
     }
 
     public TerrainIdentifierData setUserID(String userID){
         this.userID = userID;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s:\n\tUserID:%s\n\tName:%s\n\tTownhall:%s\n\tDistrict:%s\n\tSection:%s\n\tArticle:%s\n", this.getClass().getName(), getUserID(), getName(), getTownhall(), getDistrict(), getSection(), getNumber_article());
     }
 }

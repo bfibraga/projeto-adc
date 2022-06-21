@@ -4,6 +4,7 @@ import com.google.cloud.datastore.Entity;
 import io.jsonwebtoken.Claims;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestParcel;
@@ -112,7 +113,13 @@ public class ParcelaResource implements RestParcel {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        Result<List<String>> result = impl.getAllTerrainsOfUser(idOfUser);
+        //TODO Test
+        System.out.println(idOfUser);
+        if (idOfUser.trim().equals("")) {
+            idOfUser = jws.getSubject();
+        }
+
+        Result<List<TerrainResultData>> result = impl.getAllTerrainsOfUser(idOfUser);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
         return Response.ok(result.value()).build();
@@ -157,8 +164,8 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response listTerrainsInChunk(String chunk) {
-        Result<List<LatLng[]>> result = impl.queryTerrainsInChunk(chunk);
+    public Response listTerrainsInChunk(LatLng pos) {
+        Result<List<LatLng[]>> result = impl.queryTerrainsInChunk(pos);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
         return Response.ok().entity(result.value()).build();

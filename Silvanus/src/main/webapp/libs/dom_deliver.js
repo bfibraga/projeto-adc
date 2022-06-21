@@ -1,4 +1,5 @@
-let xhttp;
+let xhttp = new XMLHttpRequest();
+let parser = new DOMParser();
 
 function createElement(type, class_list, parent){
     
@@ -41,7 +42,7 @@ function LoadXMLDoc(dname, callback){
   xhttp.send();
 }
 
-function LoadHTMLDoc(dname, callback, params){
+function LoadHTMLDoc(dname, callback, timeout, params){
     if (window.XMLHttpRequest) {
         xhttp = new XMLHttpRequest();
     }
@@ -49,6 +50,7 @@ function LoadHTMLDoc(dname, callback, params){
         xhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     //xhttp.overrideMimeType('text/xml');
+    xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if(this.readyState === 4 && this.status === 200) {
             let response = xhttp.responseXML;
@@ -57,7 +59,7 @@ function LoadHTMLDoc(dname, callback, params){
     }
     xhttp.open("GET", dname, true);
     xhttp.responseType = "document";
-    xhttp.send();
+    xhttp.send(null);
   }
 
 //------
@@ -67,14 +69,14 @@ function notification(sender, avatar, content){
 }
 
 function handleNotification(xmlDoc, params){
-    let elem = xmlDoc.querySelector(".toast");
-    console.log(elem);
-    elem.querySelector(".me-auto").innerText = params[0];
-    elem.querySelector(".avatar-wrapper").setAttribute("data-user", params[1]);
-    console.log(elem.querySelector(".avatar-wrapper"));
-    elem.querySelector(".toast-body").innerText = params[2];
-    document.getElementById("usr_list_notification").append(elem);
-    //return elem;
+    var doc = xmlDoc.innerHTML;
+    doc = parser.parseFromString(doc, "text/html");
+
+    /*elem.querySelector("strong.me-auto").innerText = params[0];
+    //elem.querySelector(".avatar-wrapper").setAttribute("data-user", params[1]);
+    elem.querySelector("div.toast-body").innerText = params[2];*/
+    document.getElementById("usr_list_notification").innerHTML += doc;
+
 }
 
 function badge(name, color){
@@ -86,7 +88,13 @@ function handleBadge(xmlDoc, params){
     console.log(elem);
     elem.innerText = params[0];
     elem.style.backgroundColor = params[1];
-    document.getElementById("usr_roles").append(elem);
+    document.getElementById("usr_roles_menu").append(elem);
+    document.getElementById("usr_roles_change_profile").append(elem);
+    document.getElementById("usr_roles_change_password").append(elem);
     //return elem;
+}
+
+function clone(doc){
+    
 }
 

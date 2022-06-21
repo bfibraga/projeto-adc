@@ -88,7 +88,10 @@ async function logout() {
 
 async function getInfo(debug, user){
 	try{
+		notification('2', '', 'Teste 2');
+		notification('2', '', 'Teste 2');
 
+		
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
 		perfil = response_data;
@@ -239,7 +242,8 @@ async function listNotification(){
 async function submitTerrain(points_data, route_data) {
 	
 	//TODO Remake this function
-	let parcela = [];
+	let parcela = points_data;
+	console.log(points_data);
 
 	let credentials = {
 		"name": String(document.getElementById("name-terrain").value),
@@ -251,9 +255,16 @@ async function submitTerrain(points_data, route_data) {
 
 	let checked = document.getElementById("this_acc_terrain_option").checked;
 	console.log(checked);
-	let owner = checked ? perfil.info : {
+	let owner = checked ? 
+	{
+		"name": String(perfil.info.name),
+		"nif": String(perfil.info.nif),
+		"address": String(perfil.info.address),
+		"telephone": String(perfil.info.telephone),
+		"smartphone": String(perfil.info.smartphone),
+	} :
+	 {
 		"name": String(document.getElementById("other_acc_fullname_input").value),
-		"visibility": "",
 		"nif": String(document.getElementById("other_acc_id_input").value),
 		"address": String(document.getElementById("other_acc_address_input").value),
 		"telephone": String(document.getElementById("other_acc_telephone_input").value),
@@ -273,16 +284,16 @@ async function submitTerrain(points_data, route_data) {
 	};
 
 	try{
-		let check = await axios.put("/api/" + resource.TERRAIN + "/intersect", parcela)
-		console.log(check);
+		/*let check = await axios.put("/api/" + resource.TERRAIN + "/intersect", parcela)
+		console.log(check);*/
 
-		let response = await axios.post("/api/parcel/create",
-			{
-				parcela,
-				credentials,
-				owner,
-				info
-			});
+		let parcel = {
+			parcela,
+			credentials,
+			owner,
+			info
+		};
+		let response = await axios.post("/api/parcel/create", parcel);
 		console.log(response);
 	} catch (error){
 		alert(error);
@@ -293,5 +304,26 @@ async function submitTerrain(points_data, route_data) {
 }
 
 async function getOwnTerrain(){
+	try{
+		let response = await axios.post("/api/parcel/list/user/");
+		console.log(response);
+	} catch (error){
+		alert(error);
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
+}
 
+async function loadChunk(pos){
+	try{
+		let response = await axios.post("/api/parcel/list/chunk",
+			pos
+		);
+		console.log(response.data);
+	} catch (error){
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
 }

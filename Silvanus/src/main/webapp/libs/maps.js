@@ -73,7 +73,9 @@ function initViewmap(){
         console.log(bound_box);
 
         //Request to DB
-
+        let center = point(viewport_center.lat, viewport_center.lng);
+        console.log(center);
+        loadChunk(center);
     })
 
     map.addListener("bounds_changed", function(){
@@ -375,6 +377,6 @@ function setLines(low_index, high_index, value){
     console.log(lines);
 }
 
-async function submitPolygon(){
-	await submitTerrain(polygon_result, []);
+function submitPolygon(){
+	submitTerrain(polygon_result, []);
 }
