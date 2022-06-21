@@ -2,27 +2,17 @@ package pt.unl.fct.di.adc.silvanus.resources;
 
 import com.google.cloud.datastore.Entity;
 import io.jsonwebtoken.Claims;
-import pt.unl.fct.di.adc.silvanus.api.rest.RestInterface;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainIdentifierData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
-import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
 import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
-import pt.unl.fct.di.adc.silvanus.util.Pair;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestParcel;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.Set;
-
-import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.IDENTIFIER;
 
 @Path("/parcel")
 public class ParcelaResource implements RestParcel {
@@ -38,7 +28,7 @@ public class ParcelaResource implements RestParcel {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -47,7 +37,7 @@ public class ParcelaResource implements RestParcel {
                 terrainIdentifierData.getUserID());
 
         if(!user.isOK() || user.value().isEmpty()){
-            return Response.status(user.error()).entity(user.statusMessage()).build();
+            return Response.status(Response.Status.FORBIDDEN).build();
         }*/
 
         Result<Void> result = impl.createParcel(terrainData);
@@ -64,7 +54,7 @@ public class ParcelaResource implements RestParcel {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -80,7 +70,7 @@ public class ParcelaResource implements RestParcel {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -95,7 +85,7 @@ public class ParcelaResource implements RestParcel {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -110,7 +100,7 @@ public class ParcelaResource implements RestParcel {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -125,7 +115,7 @@ public class ParcelaResource implements RestParcel {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -140,7 +130,7 @@ public class ParcelaResource implements RestParcel {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -155,7 +145,7 @@ public class ParcelaResource implements RestParcel {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -163,5 +153,21 @@ public class ParcelaResource implements RestParcel {
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
         return Response.ok(result.value()).build();
+    }
+
+    @Override
+    public Response listTerrainsOfUserInCounty(String idOfOwner, String county) {
+        Result<List<String>> result = impl.queryTerrainsOfUserInCounty(idOfOwner, county);
+        if (!result.isOK())
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+        return Response.ok().entity(result.value()).build();
+    }
+
+    @Override
+    public Response listTerrainsInChunk(String chunk) {
+        Result<List<LatLng[]>> result = impl.queryTerrainsInChunk(chunk);
+        if (!result.isOK())
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+        return Response.ok().entity(result.value()).build();
     }
 }

@@ -77,5 +77,15 @@ public interface Parcel {
      */
     Result<List<Entity>> getAllTerrainsInDistrict(String nameOfDistrict);
 
+    /**
+     * Generates a list of strings composed of the owner of a terrain and the name
+     * of the same terrain, that are in a certain county (conselho)
+     * @param idOfOwner id of the owner of the terrain
+     * @param nameOfConselho name of the county in which to query
+     * @return a list if they exist, an error otherwise
+     */
+    Result<List<String>> queryTerrainsOfUserInCounty(String idOfOwner, String nameOfConselho);
+
+    Result<List<LatLng[]>> queryTerrainsInChunk(String chunk);
 
 }

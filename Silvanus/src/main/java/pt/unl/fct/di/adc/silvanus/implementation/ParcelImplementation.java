@@ -1,6 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
 import com.google.cloud.datastore.*;
+import com.google.gson.Gson;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 import pt.unl.fct.di.adc.silvanus.api.impl.Parcel;
@@ -13,6 +14,7 @@ import pt.unl.fct.di.adc.silvanus.util.cache.ParcelCacheManager;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Response;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +46,8 @@ public class ParcelImplementation implements Parcel {
     public static final String ENTITY_PROPERTY_ID_OWNER = "id_owner";
     public static final String ENTITY_PROPERTY_NAME_OF_TERRAIN = "name_of_terrain";
     public static final String ENTITY_PROPERTY_DESCRIPTION_OF_TERRAIN = "description_of_terrain";
-    public static final String ENTITY_PROPERTY_CONSELHO_OF_TERRAIN = "conselho_of_terrain";
-    public static final String ENTITY_PROPERTY_DISTRITO_OF_CONCELHO = "freguesia_of_concelho";
+    public static final String ENTITY_PROPERTY_CONSELHO_OF_TERRAIN = "county_of_terrain";
+    public static final String ENTITY_PROPERTY_DISTRITO_OF_TERRAIN = "district_of_concelho";
     public static final String ENTITY_PROPERTY_SECTION_OF_TERRAIN = "section_of_terrain";
     public static final String ENTITY_PROPERTY_NUMBER_ARTICLE_OF_TERRAIN = "number_article_of_terrain";
     public static final String ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE = "type_of_soil_coverage";
@@ -110,7 +112,7 @@ public class ParcelImplementation implements Parcel {
                 .set(ENTITY_PROPERTY_NAME_OF_TERRAIN, id.getName())
                 .set(ENTITY_PROPERTY_DESCRIPTION_OF_TERRAIN, info.getDescription())
                 .set(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN, id.getTownhall())
-                .set(ENTITY_PROPERTY_DISTRITO_OF_CONCELHO, id.getDistrict())
+                .set(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN, id.getDistrict())
                 .set(ENTITY_PROPERTY_SECTION_OF_TERRAIN, id.getSection())
                 .set(ENTITY_PROPERTY_NUMBER_ARTICLE_OF_TERRAIN, id.getNumber_article())
                 .set(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE, info.getType_of_soil_coverage())
@@ -544,7 +546,7 @@ public class ParcelImplementation implements Parcel {
         QueryResults<Entity> results;
 
         query = Query.newEntityQueryBuilder().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
-                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_DISTRITO_OF_CONCELHO, nameOfDistrict))
+                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN, nameOfDistrict))
                 .build();
 
         results = datastore.run(query);
@@ -556,6 +558,58 @@ public class ParcelImplementation implements Parcel {
             Entity tmp = results.next();
             tmp.getList("");
             list.add(tmp);
+        }
+        return Result.ok(list);
+    }
+
+    @Override
+    public Result<List<String>> queryTerrainsOfUserInCounty(String idOfOwner, String nameOfConselho) {
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        query = Query.newEntityQueryBuilder().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
+                .setFilter(StructuredQuery.CompositeFilter.and(
+                        StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_ID_OWNER, idOfOwner),
+                        StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN, nameOfConselho)))
+                .build();
+
+        results = datastore.run(query);
+
+        if (!results.hasNext())
+            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
+        List<String> list = new ArrayList<>();
+        while (results.hasNext()) {
+            Entity tmp = results.next();
+            list.add(tmp.getValue(ENTITY_PROPERTY_ID_OWNER).toString() +
+                    "/" + tmp.getValue(ENTITY_PROPERTY_NAME_OF_TERRAIN).toString());
+        }
+        return Result.ok(list);
+    }
+
+    @Override
+    public Result<List<LatLng[]>> queryTerrainsInChunk(String chunk) {
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        query = Query.newEntityQueryBuilder().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME).build();
+        results = datastore.run(query);
+
+        if (!results.hasNext())
+            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
+
+        List<LatLng[]> list = new ArrayList<>();
+
+        Gson g = new Gson();
+
+        while (results.hasNext()) {
+            Entity tmp = results.next();
+            LOG.severe("\n\n\n\n BANANA \n\n\n\n");
+            List<Value<?>> chunkList = tmp.getList(ENTITY_PROPERTY_CHUNKS_OF_PARCELA);
+            LOG.severe(chunkList.toString() + " BANANA \n\n\n");
+            if (chunkList.contains(chunk)) {
+                LatLng[] coordinates = g.fromJson(String.valueOf(tmp.getValue(ENTITY_PROPERTY_COORDINATES)), (Type) LatLng.class);
+                list.add(coordinates);
+            }
         }
         return Result.ok(list);
     }
