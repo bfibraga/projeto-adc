@@ -30,8 +30,7 @@
     <link href="../styles/loader.css" rel="stylesheet">
 
 </head>
-<!--TODO Put getInfo() function-->
-<body id="main" class="" onload='getInfo(true)'>
+<body id="main" class="" onload='getInfo(true, "")'>
   <div id="loader" class="overlay d-none" style="z-index: 100000;">
     <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
   </div>
@@ -122,10 +121,6 @@
       </div>
     </div>
     
-    <!-- Alerts -->
-    <div id="request-property-alert" class="position-absolute bottom-0 start-50 translate-middle-x alert alert-primary d-none" role="alert">
-      Crie novos pontos no mapa para delimitar a região que pretende delimitar.
-    </div>
   </main>
   <!-- User Properties Offcanvas -->
   <div class="offcanvas offcanvas-start bg-light rounded-3 border-0 shadow-sm" style="" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-5" id="user-properties" aria-labelledby="offcanvasScrollingLabel">
@@ -145,7 +140,7 @@
     <div id="usr_menu" class="offcanvas-body" data-app-menu-active="true">
       
       <div class="row">
-        <div class="col">
+        <div class="col-12">
           <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
             <div class="d-flex flex-row justify-content-center mb-3">
               <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
@@ -153,64 +148,22 @@
               </div>
             </div>
             <h3 id="usr_username">Username
-              <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="loadTerrain('usr_menu')">
+              <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="notification('Nao sei', '', 'Sei la')">
                 <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
               </a>
             </h3>
             <h5 id="usr_email" class="">Email</h5>
             <div id="usr_roles">
-              <span class="badge rounded-pill bg-primary">User</span>
-              <span class="badge rounded-pill bg-danger">Alpha Tester</span>
-              <span class="badge rounded-pill bg-warning">Beta Tester</span>
             </div>
           </div>
         </div>
-        <div class="col" >
+        <div class="col-12" >
           <div id="usr_notifications_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
             <h5 class="mb-3">Notificações</h5>
             <div id="notification-list" class="container d-flex flex-column toast-container">
               <!-- Available Notifications -->
-              
-              <div class="row flex-column align-items-center">
-                <div class="col mb-3">
-                  <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header">
-        
-                      <div class="avatar-wrapper m-2" data-user="not me" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
-                        <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-                      </div>
-                      <strong class="me-auto">Bootstrap</strong>
-                      <small class="text-muted">just now</small>
-                      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                      See? Just like this.
-                    </div>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header">
-        
-                      <div class="avatar-wrapper m-2" data-user="not me2" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
-                        <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-                      </div>
-                      <strong class="me-auto">Bootstrap</strong>
-                      <small class="text-muted">just now</small>
-                      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                      See? Just like this.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              
-
-              
-
-
+              <ul id="usr_list_notification" class="list-group">
+              </ul>
             </div>
           </div>
         </div>
@@ -489,12 +442,16 @@
               <input type="text" class="form-control rounded-pill" id="name-terrain">
             </div>
             <div class="mb-3">
-              <label for="conselho-terrain" class="form-label">Conselho</label>
-              <input type="text" class="form-control rounded-pill" id="conselho-terrain">
+              <label for="townhall-terrain" class="form-label">Conselho</label>
+              <input type="text" class="form-control rounded-pill" id="townhall-terrain">
             </div>
             <div class="mb-3">
-              <label for="freguesia-terrain" class="form-label">Freguesia</label>
-              <input type="text" class="form-control rounded-pill" id="freguesia-terrain">
+              <label for="district-terrain" class="form-label">Distrito</label>
+              <input type="text" class="form-control rounded-pill" id="district-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="section-terrain" class="form-label">Número de Artigo</label>
+              <input type="text" class="form-control rounded-pill" id="section-terrain">
             </div>
             <div class="mb-3">
               <label for="number-article-terrain" class="form-label">Número de Artigo</label>
@@ -505,9 +462,9 @@
               <input type="file" class="form-control rounded-pill" id="documentation-validation-terrain">
             </div>
             <div class="mb-3">
-              <label for="type_of_terrain" class="form-label">Tipo de Terreno</label>
-              <select id="type_of_terrain" class="form-select">
-                <option value="empty">Vazio</option>
+              <label for="type_of_terrain_select" class="form-label">Tipo de Terreno</label>
+              <select id="type_of_terrain_select" class="form-select" onchange="typeTerrain('type_of_terrain_select', 'other_type_of_terrain_checked')">
+                <option value="empty" selected>Vazio</option>
                 <option value="habitation">Habitação</option>
                 <option value="cultivation">Cultivo</option>
                 <option value="business">Empresarial/Adminstrativo</option>
@@ -518,19 +475,24 @@
                 <option value="other">Outro</option>
               </select>
             </div>
+            <div id="other_type_of_terrain_checked" class="mb-3" data-app-menu-active="false">
+              <div class="mb-3">
+                <input type="text" class="form-control rounded-pill" id="other_type_of_terrain">
+              </div>
+            </div>
           </div>
           
           <div class="light p-3 mb-3 rounded-3 shadow-sm">
             <h5 class="mb-3">Proprietário</h5>
             <div class="d-flex flex-column justify-content-center mb-3">
               <div class="form-check m-1">
-                <input class="form-check-input" type="radio" name="acc_terrain" id="this_acc_terrain_option" onclick="toggleChooseAccMenu('other_acc_terrain_checked')" checked>
+                <input class="form-check-input" type="radio" name="acc_terrain" id="this_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'false')" checked>
                 <label class="form-check-label" for="this_acc_terrain_option">
                   Esta conta
                 </label>
               </div>
               <div class="form-check m-1">
-                <input class="form-check-input" type="radio" name="acc_terrain" id="other_acc_terrain_option" onclick="toggleChooseAccMenu('other_acc_terrain_checked')">
+                <input class="form-check-input" type="radio" name="acc_terrain" id="other_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'true')">
                 <label class="form-check-label" for="other_acc_terrain_option">
                   Outra conta/pessoa
                 </label>
@@ -563,10 +525,21 @@
               <input type="file" class="form-control rounded-pill" id="image-terrain">
             </div>
             <div class="mb-3">
-              <label for="type-terrain" class="form-label">Tipo de terra</label>
+              <label for="type-terrain" class="form-label">Cobertura de Solo</label>
               <input type="text" class="form-control rounded-pill" id="type-terrain">
             </div>
-
+            <div class="mb-3">
+              <label for="current-use-terrain" class="form-label">Uso atual</label>
+              <input type="text" class="form-control rounded-pill" id="current-use-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="previous-use-terrain" class="form-label">Uso anterior</label>
+              <input type="text" class="form-control rounded-pill" id="previous-use-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="define-route-terrain" class="form-label">Caminho de entrada para o terreno</label>
+              <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill" value="Definir um caminho" onclick="">
+            </div>
             
           </div>
 

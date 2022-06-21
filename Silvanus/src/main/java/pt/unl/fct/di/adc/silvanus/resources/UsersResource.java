@@ -6,6 +6,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 import io.jsonwebtoken.Claims;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestInterface;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
+import pt.unl.fct.di.adc.silvanus.data.user.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
@@ -88,7 +89,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response logout(String token) {
+	public Response logout(String token, LogoutData data) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -96,7 +97,7 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		Result<Void> result = impl.logout(jws.getSubject());
+		Result<Void> result = impl.logout(jws.getSubject(), data);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
