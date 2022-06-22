@@ -1,7 +1,5 @@
 package pt.unl.fct.di.adc.silvanus.data.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 public class UserRoleData {
 
     private String name;

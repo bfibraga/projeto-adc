@@ -1,5 +1,6 @@
 let xhttp = new XMLHttpRequest();
 let parser = new DOMParser();
+let elems = {};
 
 function createElement(type, class_list, parent){
     
@@ -42,59 +43,75 @@ function LoadXMLDoc(dname, callback){
   xhttp.send();
 }
 
-function LoadHTMLDoc(dname, callback, timeout, params){
-    if (window.XMLHttpRequest) {
-        xhttp = new XMLHttpRequest();
+async function LoadHTMLDoc(dname, callback, params){
+    try{
+        const response = await axios.get(dname);
+        console.log(response.data);
+        callback(dname, response.data, params);
+    } catch(error){
+        console.log(error);
     }
-    else {
-        xhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    //xhttp.overrideMimeType('text/xml');
-    xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if(this.readyState === 4 && this.status === 200) {
-            let response = xhttp.responseXML;
-            callback(response, params);
-        }
-    }
-    xhttp.open("GET", dname, true);
-    xhttp.responseType = "document";
-    xhttp.send(null);
   }
 
 //------
 
 function notification(sender, avatar, content){
-  LoadHTMLDoc("elems/notification.html", handleNotification, [sender, avatar, content]);
+    const elemName = "elems/notification.html";
+    let params = [sender, avatar, content];
+    
+    LoadHTMLDoc(elemName, handleNotification, params);
 }
 
-function handleNotification(xmlDoc, params){
-    var doc = xmlDoc.innerHTML;
-    doc = parser.parseFromString(doc, "text/html");
+function handleNotification(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
 
-    /*elem.querySelector("strong.me-auto").innerText = params[0];
-    //elem.querySelector(".avatar-wrapper").setAttribute("data-user", params[1]);
-    elem.querySelector("div.toast-body").innerText = params[2];*/
-    document.getElementById("usr_list_notification").innerHTML += doc;
+    //Insertion of params
+    elems[name].querySelector(".me-auto").insertAdjacentHTML("beforeend",params[0]);
+    elems[name].querySelector(".toast-body").insertAdjacentHTML("beforeend",params[2]);
 
+    document.getElementById("usr_list_notification").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
 
 function badge(name, color){
-    LoadHTMLDoc("elems/badge.html", handleBadge, [name, color]);
+    const elemName = "elems/badge.html"; 
+    let params = [name, color];
+
+    LoadHTMLDoc(elemName, handleBadge, params);
 }
 
-function handleBadge(xmlDoc, params){
-    let elem = xmlDoc.querySelector(".badge");
-    console.log(elem);
-    elem.innerText = params[0];
-    elem.style.backgroundColor = params[1];
-    document.getElementById("usr_roles_menu").append(elem);
-    document.getElementById("usr_roles_change_profile").append(elem);
-    document.getElementById("usr_roles_change_password").append(elem);
-    //return elem;
+function handleBadge(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    //Insertion of params
+    let badge = elems[name].querySelector("span.badge");
+    badge.insertAdjacentHTML("beforeend", params[0]);
+    badge.style.backgroundColor = params[1];
+
+    document.getElementById("usr_roles_menu").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+    document.getElementById("usr_roles_change_profile").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+    document.getElementById("usr_roles_change_password").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
 
-function clone(doc){
+//TODO Implement more params
+function terrainCard(title, status, description){
+    const elemName = "elems/terrain_card.html"; 
+    let params = [title, status, description];
+
+    LoadHTMLDoc(elemName, handleTerrainCard, params);
+}
+
+function handleTerrainCard(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    elems[name].querySelector(".card__title").insertAdjacentHTML("beforeend", params[0]);
+    elems[name].querySelector(".card__status").insertAdjacentHTML("beforeend", params[1]);
+    elems[name].querySelector(".card__description").insertAdjacentHTML("beforeend", params[2]);
+
+    let target = document.getElementById("usr_terrain_count");
+    let count = target.getAttribute("data-app-value");
+    target.setAttribute("data-app-value", String(parseInt(count)+1));
+
+    target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
     
 }
 

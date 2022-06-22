@@ -47,7 +47,9 @@ async function register(){
 			});
 		window.location.replace(base_uri + "/app");
 	} catch (error){
+
 		console.log(error);
+	
 	} finally {
 	}
 }
@@ -88,8 +90,19 @@ async function logout() {
 
 async function getInfo(debug, user){
 	try{
+		/*notification('1', '', 'Teste 1');
 		notification('2', '', 'Teste 2');
-		notification('2', '', 'Teste 2');
+		notification('3', '', 'Teste 3');
+		notification('4', '', 'Teste 4');
+		notification('5', '', 'Teste 5');
+		notification('6', '', 'Teste 6');
+		notification('7', '', 'Teste 7');*/
+
+		/*badge("Teste 1", "#0612f5");
+		badge("Teste 2", "#111111");*/
+
+		/*terrainCard('Teste 1','Status 1','Descrição 1');
+		terrainCard('Teste 2','Status 2','Descrição 2');*/
 
 		
 		const response = await axios.get("/api/user/info");
@@ -107,6 +120,7 @@ async function getInfo(debug, user){
 
 		let lastLogout = response_data.logoutData;
 		setCenter(lastLogout.center);
+		setZoom(lastLogout.zoom);
 
 		//Avatar
 		//TODO Alter this avatar url
@@ -120,7 +134,7 @@ async function getInfo(debug, user){
 				}
 		});
 		
-		await Promise.all([
+		Promise.all([
 			getOwnTerrain(),
 			listNotification()
 		]);
@@ -305,7 +319,14 @@ async function submitTerrain(points_data, route_data) {
 
 async function getOwnTerrain(){
 	try{
-		let response = await axios.post("/api/parcel/list/user/");
+		let response = await axios.post("/api/parcel/list");
+		const data = response.data;
+		console.log(data);
+		/*response.data.forEach(element => {
+			console.log(element);
+			terrainCard(element.receiver, '', element.description);
+		});*/
+
 		console.log(response);
 	} catch (error){
 		alert(error);

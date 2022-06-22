@@ -260,9 +260,9 @@ public class ParcelImplementation implements Parcel {
         int collumnFirstCoordinate = 0;
         Coordinate firstCoordinate = terrain.getCoordinates()[0];
         //TODO Improve time complexity and refactor
-        for (int i = 1; i <= NUMBER_OF_COLLUMNS_IN_CONTINENTE; i++) { // Searching through the collumns
-            double leftLongitude = LEFT_MOST_LONGITUDE_CONTINENTE + (FATOR_ADITIVO_LONGITUDE * (i - 1));
-            double rightLongitude = LEFT_MOST_LONGITUDE_CONTINENTE + (FATOR_ADITIVO_LONGITUDE * i);
+        /*for (int i = 1; i <= NUMBER_OF_COLLUMNS_IN_CONTINENTE; i++) { // Searching through the collumns
+            double leftLongitude = LEFT_MOST_LONGITUDE_CONTINENTE + (sizeX * (i - 1));
+            double rightLongitude = LEFT_MOST_LONGITUDE_CONTINENTE + (sizeX * i);
             if (firstCoordinate.getY() > leftLongitude && firstCoordinate.getY() <= rightLongitude) {
                 collumnFirstCoordinate = i;
                 break;
@@ -272,31 +272,39 @@ public class ParcelImplementation implements Parcel {
 
         //TODO Improve time complexity and refactor
         for (int j = 1; j <= NUMBER_OF_LINES_IN_CONTINENTE; j++) { // Searching through the lines
-            double topLatitude = TOP_MOST_LATITUDE_CONTINENTE - (FATOR_ADITIVO_LATITUDE * (j - 1));
-            double bottomLatitude = TOP_MOST_LATITUDE_CONTINENTE - (FATOR_ADITIVO_LATITUDE * (j));
+            double topLatitude = TOP_MOST_LATITUDE_CONTINENTE - (sizeY * (j - 1));
+            double bottomLatitude = TOP_MOST_LATITUDE_CONTINENTE - (sizeY * (j));
             if (firstCoordinate.getX() < topLatitude && firstCoordinate.getX() >= bottomLatitude) {
                 lineFirstCoordinate = j;
                 break;
             }
-        }
+        }*/
 
+        //TODO Figure it out the right offset to do
+        System.out.println((firstCoordinate.getX() - LEFT_MOST_LONGITUDE_CONTINENTE) + "," + (TOP_MOST_LATITUDE_CONTINENTE - firstCoordinate.getY()));
+        int[] chunkPos = ChunkManager.worldToChunk(
+                (firstCoordinate.getX() - LEFT_MOST_LONGITUDE_CONTINENTE),
+                (TOP_MOST_LATITUDE_CONTINENTE - firstCoordinate.getY()), sizeX, sizeY);
+
+        System.out.println(Arrays.toString(chunkPos));
         // - Find out in which chunk the first coordinate is - \\
 
         List<String> list = new ArrayList<>(); // List that contains the chunks that intersect the terrain
 
         // Check if the terrain is contained in the chunk \\
-        Polygon chunkPrimeiroPonto = chunkGivenLineAndCollumn(lineFirstCoordinate, collumnFirstCoordinate, factory);
-        list.add(String.format("%d,%d", lineFirstCoordinate, collumnFirstCoordinate));
+        Polygon chunkPrimeiroPonto = chunkGivenLineAndCollumn(chunkPos[0], chunkPos[1], factory);
+        list.add(String.format("%d,%d", chunkPos[0], chunkPos[1]));
         if (terrain.within(chunkPrimeiroPonto)) {
             return list;
         }
         // - Check if the terrain is contained in the chunk - \\
 
         // Since the chunk doesn't contain the terrain it is needed to check which of the surrouding chunks intersect it  \\
-        List<String> chunksAdjacentes = generatesChunksAroundAChunk(lineFirstCoordinate, collumnFirstCoordinate);
+        List<String> chunksAdjacentes = generatesChunksAroundAChunk( chunkPos[0], chunkPos[1]);
         for (String tmpString : chunksAdjacentes) {
-            int latitude = Integer.parseInt(tmpString.split(",")[0]);
-            int longitude = Integer.parseInt(tmpString.split(",")[1]);
+            String[] parts = tmpString.split(",");
+            int latitude = Integer.parseInt(parts[0]);
+            int longitude = Integer.parseInt(parts[1]);
             Polygon tmPolygon = chunkGivenLineAndCollumn(latitude, longitude, factory);
             if (tmPolygon.intersects(terrain))
                 list.add(String.format("%d,%d", latitude, longitude));
@@ -689,8 +697,9 @@ public class ParcelImplementation implements Parcel {
                 (TOP_MOST_LATITUDE_CONTINENTE - pos.getLat())
         };
         int[] chunkPos = ChunkManager.worldToChunk(finalPos[0], finalPos[1], sizeX, sizeY);
-        String chunk = chunkPos[0]+","+chunkPos[1];
+        String chunk = (chunkPos[0]+1)+","+chunkPos[1];
 
+        System.out.println(chunk);
         Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
         Entity selectedChunk = datastore.get(chunkKey);
 

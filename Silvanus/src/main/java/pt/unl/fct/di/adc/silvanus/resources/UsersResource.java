@@ -43,12 +43,12 @@ public class UsersResource implements RestUsers {
 
 		//TODO Testing
 		//Build not essential entities
-		Queue queue = QueueFactory.getDefaultQueue();
+		/*Queue queue = QueueFactory.getDefaultQueue();
 		String url = String.format("%s%s%s", RestInterface.PATH, RestUsers.PATH, "/build");
 		System.out.println(url);
 		queue.add(TaskOptions.Builder.withUrl(url)
 						.param("userData", JSON.encode(data))
-				.param("secret", TOKEN.createNewJWS("silvanus:build", 1000, new HashSet<>())));
+				.param("secret", TOKEN.createNewJWS("silvanus:build", 1000, new HashSet<>())));*/
 		return Response.ok().cookie(TOKEN.cookie(result.value())).build();
 	}
 

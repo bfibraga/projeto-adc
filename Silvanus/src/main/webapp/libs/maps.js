@@ -90,6 +90,10 @@ function setCenter(latlng){
     map.setCenter(latlng);
 }
 
+function setZoom(zoom){
+    map.setZoom(zoom);
+}
+
 function getViewport(){
     return {
         "bounds":viewport,
