@@ -1,6 +1,7 @@
 const base_uri = window.location.origin;
 
 let perfil;
+let terrain_list = [];
 
 const resource = {
 	"USER": "user",
@@ -320,13 +321,16 @@ async function submitTerrain(points_data, route_data) {
 async function getOwnTerrain(){
 	try{
 		let response = await axios.post("/api/parcel/list");
-		const data = response.data;
-		console.log(data);
-		/*response.data.forEach(element => {
-			console.log(element);
-			terrainCard(element.receiver, '', element.description);
-		});*/
-
+		terrain_list = response.data;
+		console.log(terrain_list);
+		if (terrain_list != null || terrain_list != []){
+			terrain_list.forEach(element => {
+				console.log(element);
+				const status = String(element.credentials.townhall) + " " + String(element.credentials.district);
+				terrainCard(element.credentials.name, status, element.info.description);
+			});
+		}
+		
 		console.log(response);
 	} catch (error){
 		alert(error);

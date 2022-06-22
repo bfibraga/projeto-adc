@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
@@ -464,14 +466,14 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Set<UserInfoVisible>> getUser(String request_user, String identifier) {
+	public Result<List<UserInfoVisible>> getUser(String request_user, String identifier) {
 
 		//TODO Change key to remove some values when changing the values in other commands
 		String key = request_user + "." + identifier;
 		String property = "getUser:" + request_user + "." + identifier;
 		//TODO to test this set object
 		@SuppressWarnings("unchecked")
-		Set<UserInfoVisible> stored = this.cache.get(key, property, Set.class);
+		List<UserInfoVisible> stored = this.cache.get(key, property, List.class);
 		//List<String> result_mapper = this.resultCacheManager.get(identifier);
 
 		if (stored != null){
@@ -479,7 +481,7 @@ public class UserImplementation implements Users {
 			return Result.ok(stored);
 		}
 
-		Set<UserInfoVisible> result_set = new HashSet<>();
+		List<UserInfoVisible> result_set = new LinkedList<>();
 
 		if (identifier.trim().equals("")){
 			Key userKey = userKeyFactory.newKey(request_user);

@@ -101,25 +101,49 @@
         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFF-sduDxFSBjCD_C-leaSI-sTkoCNO6Y&callback=initMap&libraries=drawing"></script>
 
     <!-- Terrain Properties Sidebar -->
-    <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
-      <div class="offcanvas-header">
-        <h4>Property Name</h4>
-        <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <p>Description:</p>
-        <p>Conselho:</p>
-        <p>Freguesia:</p>
-        <p>Section:</p>
-        <p>Number Article:</p>
-        <p>Verification:</p>
-  
-        <p>Other info of this terrain: Risco Incendio, Humidade, etc</p>
+    <div class="terrain-list">
+      <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
+        <div class="offcanvas-header">
+          <h4 id="">Nome Terreno</h4>
+          <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <p id="terrain_description">Descrição:</p>
+          <p id="terrain_townhall">Conselho:</p>
+          <p id="terrain_district">Distrito:</p>
+          <p id="terrain_number_section">Secção:</p>
+          <p id="terrain_number_article">Numero de Artigo:</p>
+          <p id="terrain_documents_validation">Documentos de Validação</p>
     
-        <!-- Toast Handler-->
-          
+          <p>Other info of this terrain: Risco Incendio, Humidade, etc</p>
+      
+          <div class="row d-flex flex-column justify-content-center ">
+            <div class="col">
+              <div class="rounded-3 p-3 mb-3 border rounded">
+                <h5 class="mb-3">Área Total</h5>
+                <div class="p-3">
+                  <canvas id="terrain_total_area_chart" width="800" height="800"></canvas>
+                </div>
+              </div>
+
+            </div>
+            <div class="col">
+              <div class="rounded-3 p-3 mb-3 border rounded">
+                <h5 class="mb-3">Número de Terrenos por Região</h5>
+                <div class="p-3">
+                  <canvas id="terrain_nmr_per_region_chart" width="800" height="800"></canvas>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Toast Handler-->
+            
+        </div>
       </div>
     </div>
+    
     
   </main>
   <!-- User Properties Offcanvas -->
@@ -359,26 +383,7 @@
           <div class="col ">
             <div id="usr_stats_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm">
               <h5 class="mb-3">Estatísticas</h5>
-              <div class="row d-flex flex-column justify-content-center ">
-                <div class="col">
-                  <div class="rounded-3 p-3 mb-3 shadow-sm">
-                    <h5 class="mb-3">Área Total</h5>
-                    <div class="p-3">
-                      <canvas id="terrain_total_area_chart" width="800" height="800"></canvas>
-                    </div>
-                  </div>
-
-                </div>
-                <div class="col">
-                  <div class="rounded-3 p-3 shadow-sm">
-                    <h5 class="mb-3">Número de Terrenos por Região</h5>
-                    <div class="p-3">
-                      <canvas id="terrain_nmr_per_region_chart" width="800" height="800"></canvas>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
+              
             </div>
           </div>
         </div>

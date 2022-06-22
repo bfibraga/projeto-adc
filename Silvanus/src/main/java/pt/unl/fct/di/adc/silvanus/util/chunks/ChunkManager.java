@@ -41,9 +41,7 @@ public class ChunkManager<C> {
         return new int[]{x,y};
     }
 
-    public static int[] worldToChunk(double posX, double posY, double chunkLength, double chunkHeight){
-        System.out.println(posX / chunkLength);
-        System.out.println(posY / chunkHeight);
+    public static int[] worldCoordToChunk(double posX, double posY, double chunkLength, double chunkHeight){
         int x = (int) Math.round(posX / chunkLength);
         int y = (int) Math.round(posY / chunkHeight);
         return new int[]{x,y};

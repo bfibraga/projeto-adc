@@ -11,6 +11,7 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.Set;
 
 @Path(RestNotifications.PATH)
@@ -32,7 +33,7 @@ public class NotificationResource implements RestNotifications {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        Result<Set<UserInfoVisible>> userResult = userImplementation.getUser(token, data.getReceiver());
+        Result<List<UserInfoVisible>> userResult = userImplementation.getUser(token, data.getReceiver());
 
         if (!userResult.isOK() || userResult.value().isEmpty()){
             return Response.status(userResult.error()).entity(userResult.statusMessage()).build();
@@ -53,7 +54,7 @@ public class NotificationResource implements RestNotifications {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        Result<Set<UserInfoVisible>> userResult = userImplementation.getUser(token, userID);
+        Result<List<UserInfoVisible>> userResult = userImplementation.getUser(token, userID);
 
         if (userResult.value().isEmpty()){
             return Response.status(Response.Status.FORBIDDEN).entity(userResult.statusMessage()).build();

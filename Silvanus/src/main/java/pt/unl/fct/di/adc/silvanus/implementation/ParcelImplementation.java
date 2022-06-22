@@ -1,7 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
 import com.google.cloud.datastore.*;
-import com.google.gson.Gson;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -9,17 +8,14 @@ import pt.unl.fct.di.adc.silvanus.api.impl.Parcel;
 import pt.unl.fct.di.adc.silvanus.data.parcel.*;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
-import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
 import pt.unl.fct.di.adc.silvanus.util.Random;
 import pt.unl.fct.di.adc.silvanus.util.cache.ParcelCacheManager;
 import pt.unl.fct.di.adc.silvanus.util.chunks.ChunkManager;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Response;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -281,10 +277,11 @@ public class ParcelImplementation implements Parcel {
         }*/
 
         //TODO Figure it out the right offset to do
-        System.out.println((firstCoordinate.getX() - LEFT_MOST_LONGITUDE_CONTINENTE) + "," + (TOP_MOST_LATITUDE_CONTINENTE - firstCoordinate.getY()));
-        int[] chunkPos = ChunkManager.worldToChunk(
+        System.out.println();
+        System.out.println((firstCoordinate.getX() - LEFT_MOST_LONGITUDE_CONTINENTE) + "," + (firstCoordinate.getY() - TOP_MOST_LATITUDE_CONTINENTE));
+        int[] chunkPos = ChunkManager.worldCoordToChunk(
                 (firstCoordinate.getX() - LEFT_MOST_LONGITUDE_CONTINENTE),
-                (TOP_MOST_LATITUDE_CONTINENTE - firstCoordinate.getY()), sizeX, sizeY);
+                (firstCoordinate.getY() - TOP_MOST_LATITUDE_CONTINENTE), sizeX, sizeY);
 
         System.out.println(Arrays.toString(chunkPos));
         // - Find out in which chunk the first coordinate is - \\
@@ -692,12 +689,14 @@ public class ParcelImplementation implements Parcel {
             }
         }*/
         //TODO Testing
+        System.out.println(pos.getLat() +"," + pos.getLng());
         float[] finalPos = new float[]{
                 (pos.getLng() - LEFT_MOST_LONGITUDE_CONTINENTE),
-                (TOP_MOST_LATITUDE_CONTINENTE - pos.getLat())
+                (pos.getLat() - TOP_MOST_LATITUDE_CONTINENTE)
         };
-        int[] chunkPos = ChunkManager.worldToChunk(finalPos[0], finalPos[1], sizeX, sizeY);
-        String chunk = (chunkPos[0]+1)+","+chunkPos[1];
+        System.out.println(finalPos[0]+","+finalPos[1]);
+        int[] chunkPos = ChunkManager.worldCoordToChunk(finalPos[0], finalPos[1], sizeX, sizeY);
+        String chunk = (chunkPos[0])+","+chunkPos[1];
 
         System.out.println(chunk);
         Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
@@ -724,7 +723,7 @@ public class ParcelImplementation implements Parcel {
 
             System.out.println(parcelID);
             System.out.println(selectedParcel);
-            if (selectedParcel != null){
+            if (selectedParcel != null) {
                 LatLng[] points = JSON.decode(selectedParcel.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
                 result.add(points);
                 System.out.println(Arrays.toString(points));

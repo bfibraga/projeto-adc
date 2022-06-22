@@ -23,6 +23,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Path(RestUsers.PATH)
@@ -134,7 +135,7 @@ public class UsersResource implements RestUsers {
 		}
 
 		//TODO Alter getUser implementation
-		Result<Set<UserInfoVisible>> result = impl.getUser(jws.getSubject(), identifier);
+		Result<List<UserInfoVisible>> result = impl.getUser(jws.getSubject(), identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
