@@ -6,6 +6,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 import io.jsonwebtoken.Claims;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestInterface;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
+import pt.unl.fct.di.adc.silvanus.data.user.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
@@ -21,6 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Path(RestUsers.PATH)
@@ -41,12 +44,12 @@ public class UsersResource implements RestUsers {
 
 		//TODO Testing
 		//Build not essential entities
-		Queue queue = QueueFactory.getDefaultQueue();
+		/*Queue queue = QueueFactory.getDefaultQueue();
 		String url = String.format("%s%s%s", RestInterface.PATH, RestUsers.PATH, "/build");
 		System.out.println(url);
 		queue.add(TaskOptions.Builder.withUrl(url)
 						.param("userData", JSON.encode(data))
-				.param("secret", TOKEN.createNewJWS("silvanus:build", 1000, new String[]{})));
+				.param("secret", TOKEN.createNewJWS("silvanus:build", 1000, new HashSet<>())));*/
 		return Response.ok().cookie(TOKEN.cookie(result.value())).build();
 	}
 
@@ -87,7 +90,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response logout(String token) {
+	public Response logout(String token, LogoutData data) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -95,7 +98,7 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		Result<Void> result = impl.logout(jws.getSubject());
+		Result<Void> result = impl.logout(jws.getSubject(), data);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -132,7 +135,7 @@ public class UsersResource implements RestUsers {
 		}
 
 		//TODO Alter getUser implementation
-		Result<Set<UserInfoVisible>> result = impl.getUser(jws.getSubject(), identifier);
+		Result<List<UserInfoVisible>> result = impl.getUser(jws.getSubject(), identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();

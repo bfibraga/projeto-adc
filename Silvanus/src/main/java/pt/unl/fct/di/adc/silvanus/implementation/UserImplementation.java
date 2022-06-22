@@ -1,15 +1,16 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import com.google.appengine.repackaged.org.apache.commons.codec.digest.DigestUtils;
+
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import com.google.cloud.storage.Acl;
 import io.jsonwebtoken.*;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
@@ -61,6 +62,7 @@ public class UserImplementation implements Users {
 		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
 		Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
+		Key logoutKey = datastore.newKeyFactory().setKind("UserLastLogout").newKey(user_id);
 
 		//Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
 		Key userKey = userKeyFactory.newKey(user_id);
@@ -116,8 +118,13 @@ public class UserImplementation implements Users {
 					.build();
 			this.cache.put(user_id, userStateData);
 
+			Entity logoutEntity = Entity.newBuilder(logoutKey)
+					.set("map_center_location", JSON.encode(new LatLng((float) 38.659784, (float) -9.202765)))
+					.set("map_zoom", 15.0)
+					.build();
+
 			//TODO: First Registration information
-			String jws = TOKEN.createNewJWS(user_id, 1, new String[]{});
+			String jws = TOKEN.createNewJWS(user_id, 1, new HashSet<>());
 
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
@@ -214,7 +221,7 @@ public class UserImplementation implements Users {
 			System.out.println(cripto.execute(data.getPassword()));
 			System.out.println(hashedPassword.equals(cripto.execute(data.getPassword())));
 			if (hashedPassword.equals(cripto.execute(data.getPassword()))){
-				String jws = TOKEN.createNewJWS(user_id, 1, new String[]{});
+				String jws = TOKEN.createNewJWS(user_id, 1, new HashSet<>());
 
 				String refresh_token = TOKEN.newRefreshToken();
 
@@ -256,7 +263,7 @@ public class UserImplementation implements Users {
 
 					int operation_level = 1;
 
-					String jws = TOKEN.createNewJWS(data.getID(), operation_level, new String[]{});
+					String jws = TOKEN.createNewJWS(data.getID(), operation_level, new HashSet<>());
 
 					String refresh_token = TOKEN.newRefreshToken();
 
@@ -300,14 +307,28 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> logout(String userID) {
+	public Result<Void> logout(String userID, LogoutData data) {
 
 		LOG.fine("Logout attempt");
 
 		//Create new Logout timestamp
 		Key logoutKey = datastore.newKeyFactory().setKind("UserLastLogout").newKey(userID);
-		Entity logoutEntity = Entity.newBuilder(logoutKey)
-				.build();
+
+		Transaction txn = datastore.newTransaction();
+
+		try{
+			Entity logoutEntity = Entity.newBuilder(logoutKey)
+					.set("map_center_location", JSON.encode(data.getCenter()))
+					.set("map_zoom", data.getZoom())
+					.build();
+
+			txn.put(logoutEntity);
+			txn.commit();
+		}  finally {
+			if (txn.isActive()){
+				txn.rollback();
+			}
+		}
 
 		//Revoke token
 		this.cache.remove(userID, "token");
@@ -445,14 +466,14 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Set<UserInfoVisible>> getUser(String request_user, String identifier) {
+	public Result<List<UserInfoVisible>> getUser(String request_user, String identifier) {
 
 		//TODO Change key to remove some values when changing the values in other commands
 		String key = request_user + "." + identifier;
 		String property = "getUser:" + request_user + "." + identifier;
 		//TODO to test this set object
 		@SuppressWarnings("unchecked")
-		Set<UserInfoVisible> stored = this.cache.get(key, property, Set.class);
+		List<UserInfoVisible> stored = this.cache.get(key, property, List.class);
 		//List<String> result_mapper = this.resultCacheManager.get(identifier);
 
 		if (stored != null){
@@ -460,7 +481,7 @@ public class UserImplementation implements Users {
 			return Result.ok(stored);
 		}
 
-		Set<UserInfoVisible> result_set = new HashSet<>();
+		List<UserInfoVisible> result_set = new LinkedList<>();
 
 		if (identifier.trim().equals("")){
 			Key userKey = userKeyFactory.newKey(request_user);
@@ -497,25 +518,38 @@ public class UserImplementation implements Users {
 		Key infoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 		Key stateKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 		Key roleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
+		Key lastLogoutKey = datastore.newKeyFactory().setKind("UserLastLogout").newKey(user_id);
 
 		Entity infoEntity = datastore.get(infoKey);
 		Entity stateEntity = datastore.get(stateKey);
 		Entity roleEntiry  = datastore.get(roleKey);
+		Entity lastLogout = datastore.get(lastLogoutKey);
 
-		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
-
-		//TODO Change the way to return result
-		UserInfoVisible result = new UserInfoVisible(
-				userEntity.getString("usr_username"),
-				userEntity.getString("usr_email"),
+		UserInfoData info = new UserInfoData(
 				infoEntity.getString("usr_name"),
 				infoEntity.getString("usr_visibility"),
 				infoEntity.getString("usr_NIF"),
 				infoEntity.getString("usr_address"),
 				infoEntity.getString("usr_telephone"),
-				infoEntity.getString("usr_smartphone"),
+				infoEntity.getString("usr_smartphone"));
+		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
+		System.out.println(role);
+		UserRoleData roleData = new UserRoleData(role.getRoleName(), role.getRoleColor());
+		System.out.println(roleData);
+		LogoutData logoutData = lastLogout == null ?
+				new LogoutData() :
+				new LogoutData(JSON.decode(lastLogout.getString("map_center_location"), LatLng.class),
+						lastLogout.getDouble("map_zoom"));
+
+		//TODO Change the way to return result
+		UserInfoVisible result = new UserInfoVisible(
+				userEntity.getString("usr_username"),
+				userEntity.getString("usr_email"),
+				info,
 				stateEntity.getString("usr_state"),
-				role
+				role.getRoleName(),
+				role.getRoleColor(),
+				logoutData
 		);
 
 		return result;

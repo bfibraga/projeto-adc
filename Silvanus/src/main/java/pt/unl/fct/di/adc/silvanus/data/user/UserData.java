@@ -64,8 +64,7 @@ public class UserData {
 
 	public String getID(){
 		LoginData data = this.getCredentials();
-		return data.getUsername().hashCode() + SEPARATOR +
-				data.getEmail().hashCode();
+		return data.getID();
 	}
 
 	private boolean validField(String keyword) {

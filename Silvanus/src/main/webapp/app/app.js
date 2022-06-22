@@ -10,9 +10,17 @@ function toggleExpandOffcanvas(id1){
     toggleExpand(elem1);
 }
 
-function toggleChooseAccMenu(id){
+function setMenuID(id, value){
     let elem1 = document.getElementById(id);
-    toggleMenu(elem1);
+    setMenu(elem1, value);
+}
+
+function setMenu(elem, value){
+    set(elem, "data-app-menu-active", value);
+}
+
+function set(elem, attr, value){
+    elem.setAttribute(attr, value);
 }
 
 function toggleMenu(elem){
@@ -37,5 +45,17 @@ function loadTerrain(parent_id){
   let parent = document.getElementById(parent_id);
   createElement("p", "", parent);
 }
+
+function typeTerrain(id, menu_id){
+  let elem = document.getElementById(id)
+  let value = elem.value;
+
+  if (value === "other"){
+    setMenuID(menu_id, "true");
+  } else {
+    setMenuID(menu_id, "false");
+  }
+}
+
 
 

@@ -1,10 +1,10 @@
 package pt.unl.fct.di.adc.silvanus.api.rest;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import pt.unl.fct.di.adc.silvanus.data.user.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 
@@ -40,7 +40,7 @@ public interface RestUsers {
 	@Path("/logout")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response logout(@CookieParam(TOKEN) String cookie);
+	Response logout(@CookieParam(TOKEN) String cookie, LogoutData data);
 	
 	@PUT
 	@Path("/promote/{" + IDENTIFIER + "}")

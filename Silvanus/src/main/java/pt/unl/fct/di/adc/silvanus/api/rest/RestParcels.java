@@ -1,6 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.api.rest;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.ParcelaData;
+import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -13,5 +13,5 @@ public interface RestParcels {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
-    Response doRegister(@CookieParam("token") String token, ParcelaData dataParcela);
+    Response doRegister(@CookieParam("token") String token, TerrainData dataParcela);
 }

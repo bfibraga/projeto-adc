@@ -1,21 +1,20 @@
-package pt.unl.fct.di.adc.silvanus.data.user;
+package pt.unl.fct.di.adc.silvanus.data.parcel;
 
-public class UserInfoData {
+import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 
+public class TerrainOwner {
     private String name;
-    private String visibility;
     private String nif;
     private String address;
     private String telephone;
     private String smartphone;
 
-    public UserInfoData(){
-        this("", "", "", "", "", "");
+    public TerrainOwner(){
+        this("", "", "", "", "");
     }
 
-    public UserInfoData(String name, String visibility, String nif, String address, String telephone, String smartphone){
+    public TerrainOwner(String name, String nif, String address, String telephone, String smartphone){
         this.name = name;
-        this.visibility = visibility.toUpperCase();
         this.nif = nif;
         this.address = address;
         this.telephone = telephone;
@@ -26,38 +25,25 @@ public class UserInfoData {
         return this.name;
     }
 
-    public UserInfoData setName(String name) {
+    public TerrainOwner setName(String name) {
         this.name = name;
         return this;
     }
 
-    public UserInfoData replaceName(String name) {
+    public TerrainOwner replaceName(String name) {
         return !validField(this.getName()) && validField(name) ? this.setName(name) : this ;
-    }
-
-    public String getVisibility() {
-        return this.visibility;
-    }
-
-    public UserInfoData setVisibility(String visibility) {
-        this.visibility = visibility;
-        return this;
-    }
-
-    public UserInfoData replaceVisibility(String visibility) {
-        return !validVisibality(this.getVisibility()) && validField(visibility) ? this.setVisibility(visibility) : this ;
     }
 
     public String getNif() {
         return this.nif;
     }
 
-    public UserInfoData setNif(String nif) {
+    public TerrainOwner setNif(String nif) {
         this.nif = nif;
         return this;
     }
 
-    public UserInfoData replaceNIF(String nif) {
+    public TerrainOwner replaceNIF(String nif) {
         return !validField(this.getNif()) && validField(nif) ? this.setNif(nif) : this ;
     }
 
@@ -65,12 +51,12 @@ public class UserInfoData {
         return this.address;
     }
 
-    public UserInfoData setAddress(String address) {
+    public TerrainOwner setAddress(String address) {
         this.address = address;
         return this;
     }
 
-    public UserInfoData replaceAddress(String address) {
+    public TerrainOwner replaceAddress(String address) {
         return !validField(this.getAddress()) && validField(address) ? this.setAddress(address) : this ;
     }
 
@@ -78,12 +64,12 @@ public class UserInfoData {
         return this.telephone;
     }
 
-    public UserInfoData setTelephone(String telephone) {
+    public TerrainOwner setTelephone(String telephone) {
         this.telephone = telephone;
         return this;
     }
 
-    public UserInfoData replaceTelephone(String telephone) {
+    public TerrainOwner replaceTelephone(String telephone) {
         return !validField(this.getTelephone()) && validField(telephone) ? this.setTelephone(telephone) : this ;
     }
 
@@ -91,12 +77,12 @@ public class UserInfoData {
         return this.smartphone;
     }
 
-    public UserInfoData setSmartphone(String smartphone) {
+    public TerrainOwner setSmartphone(String smartphone) {
         this.smartphone = smartphone;
         return this;
     }
 
-    public UserInfoData replaceSmartphone(String smartphone) {
+    public TerrainOwner replaceSmartphone(String smartphone) {
         return !validField(this.getSmartphone()) && validField(smartphone) ? this.setSmartphone(smartphone) : this ;
     }
 
@@ -121,7 +107,6 @@ public class UserInfoData {
         return validField(this.getName()) &&
                 validField(this.getAddress()) &&
                 validField(this.getNif()) &&
-                validVisibality(this.getVisibility()) &&
                 validField(this.getTelephone()) &&
                 validField(this.getSmartphone());
     }
@@ -129,9 +114,8 @@ public class UserInfoData {
     @Override
     public String toString() {
         return String.format(
-                "UserInfo:\n\tName:%s\n\tVisibility:%s\n\tNIF:%s\n\tAddress:%s\n\tTelephone:%s\n\tSmartphone:%s",
+                "UserInfo:\n\tName:%s\n\tNIF:%s\n\tAddress:%s\n\tTelephone:%s\n\tSmartphone:%s",
                 this.getName(),
-                this.getVisibility(),
                 this.getNif(),
                 this.getAddress(),
                 this.getTelephone(),

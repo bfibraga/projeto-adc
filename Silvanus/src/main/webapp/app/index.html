@@ -30,8 +30,7 @@
     <link href="../styles/loader.css" rel="stylesheet">
 
 </head>
-<!--TODO Put getInfo() function-->
-<body id="main" class="" onload='getInfo(true)'>
+<body id="main" class="" onload='getInfo(true, "")'>
   <div id="loader" class="overlay d-none" style="z-index: 100000;">
     <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
   </div>
@@ -102,30 +101,50 @@
         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFF-sduDxFSBjCD_C-leaSI-sTkoCNO6Y&callback=initMap&libraries=drawing"></script>
 
     <!-- Terrain Properties Sidebar -->
-    <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
-      <div class="offcanvas-header">
-        <h4>Property Name</h4>
-        <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <p>Description:</p>
-        <p>Conselho:</p>
-        <p>Freguesia:</p>
-        <p>Section:</p>
-        <p>Number Article:</p>
-        <p>Verification:</p>
-  
-        <p>Other info of this terrain: Risco Incendio, Humidade, etc</p>
+    <div class="terrain-list">
+      <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
+        <div class="offcanvas-header">
+          <h4 id="">Nome Terreno</h4>
+          <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <p id="terrain_description">Descrição:</p>
+          <p id="terrain_townhall">Conselho:</p>
+          <p id="terrain_district">Distrito:</p>
+          <p id="terrain_number_section">Secção:</p>
+          <p id="terrain_number_article">Numero de Artigo:</p>
+          <p id="terrain_documents_validation">Documentos de Validação</p>
     
-        <!-- Toast Handler-->
-          
+          <p>Other info of this terrain: Risco Incendio, Humidade, etc</p>
+      
+          <div class="row d-flex flex-column justify-content-center ">
+            <div class="col">
+              <div class="rounded-3 p-3 mb-3 border rounded">
+                <h5 class="mb-3">Área Total</h5>
+                <div class="p-3">
+                  <canvas id="terrain_total_area_chart" width="800" height="800"></canvas>
+                </div>
+              </div>
+
+            </div>
+            <div class="col">
+              <div class="rounded-3 p-3 mb-3 border rounded">
+                <h5 class="mb-3">Número de Terrenos por Região</h5>
+                <div class="p-3">
+                  <canvas id="terrain_nmr_per_region_chart" width="800" height="800"></canvas>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Toast Handler-->
+            
+        </div>
       </div>
     </div>
     
-    <!-- Alerts -->
-    <div id="request-property-alert" class="position-absolute bottom-0 start-50 translate-middle-x alert alert-primary d-none" role="alert">
-      Crie novos pontos no mapa para delimitar a região que pretende delimitar.
-    </div>
+    
   </main>
   <!-- User Properties Offcanvas -->
   <div class="offcanvas offcanvas-start bg-light rounded-3 border-0 shadow-sm" style="" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-5" id="user-properties" aria-labelledby="offcanvasScrollingLabel">
@@ -145,7 +164,7 @@
     <div id="usr_menu" class="offcanvas-body" data-app-menu-active="true">
       
       <div class="row">
-        <div class="col">
+        <div class="col-12">
           <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
             <div class="d-flex flex-row justify-content-center mb-3">
               <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
@@ -153,64 +172,22 @@
               </div>
             </div>
             <h3 id="usr_username">Username
-              <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="loadTerrain('usr_menu')">
+              <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="notification('Nao sei', '', 'Sei la')">
                 <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
               </a>
             </h3>
             <h5 id="usr_email" class="">Email</h5>
-            <div id="usr_roles">
-              <span class="badge rounded-pill bg-primary">User</span>
-              <span class="badge rounded-pill bg-danger">Alpha Tester</span>
-              <span class="badge rounded-pill bg-warning">Beta Tester</span>
+            <div id="usr_roles_menu">
             </div>
           </div>
         </div>
-        <div class="col" >
+        <div class="col-12" >
           <div id="usr_notifications_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm">
             <h5 class="mb-3">Notificações</h5>
             <div id="notification-list" class="container d-flex flex-column toast-container">
               <!-- Available Notifications -->
-              
-              <div class="row flex-column align-items-center">
-                <div class="col mb-3">
-                  <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header">
-        
-                      <div class="avatar-wrapper m-2" data-user="not me" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
-                        <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-                      </div>
-                      <strong class="me-auto">Bootstrap</strong>
-                      <small class="text-muted">just now</small>
-                      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                      See? Just like this.
-                    </div>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="toast show shadow-sm border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header">
-        
-                      <div class="avatar-wrapper m-2" data-user="not me2" style="width: 1.5rem; height: 1.5rem;" data-app-notification-avatar="">
-                        <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-                      </div>
-                      <strong class="me-auto">Bootstrap</strong>
-                      <small class="text-muted">just now</small>
-                      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                      See? Just like this.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              
-
-              
-
-
+              <ul id="usr_list_notification" class="list-group">
+              </ul>
             </div>
           </div>
         </div>
@@ -275,10 +252,7 @@
           </a>
         </h3>
         <h5 id="usr_email" class="">Email</h5>
-        <div id="usr_roles">
-          <span class="badge rounded-pill bg-primary">User</span>
-          <span class="badge rounded-pill bg-danger">Alpha Tester</span>
-          <span class="badge rounded-pill bg-warning">Beta Tester</span>
+        <div id="usr_roles_change_profile">
         </div>
       </div>
       <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
@@ -315,10 +289,7 @@
           </a>
         </h3>
         <h5 id="usr_email" class="">Email</h5>
-        <div id="usr_roles">
-          <span class="badge rounded-pill bg-primary">User</span>
-          <span class="badge rounded-pill bg-danger">Alpha Tester</span>
-          <span class="badge rounded-pill bg-warning">Beta Tester</span>
+        <div id="usr_roles_change_password">
         </div>
       </div>
       <div class="light rounded-3 p-3 mt-3 shadow-sm">
@@ -382,35 +353,7 @@
             <div id="usr_list_terrain_scollspy" class="row light rounded-3 m-1 p-3 shadow-sm">
               <h5 class="mb-3">Lista de Terrenos</h5>
               <div class="d-flex flex-row justify-content-center align-items-center">
-                <div class="row" data-app-value=2>
-                  <div class="col m-3">
-                    <a href="" class="card shadow-sm" style="width: 16rem;">
-                      <img src="../media/imgs/register-wallpaper.jpg" class="card__image" alt="" />
-                      <div class="card__overlay">
-                        <div class="card__header">
-                          <div class="card__header-text">
-                            <h3 class="card__title">Terreno 1</h3>            
-                            <span class="card__status">Setubal / Sesimbra</span>
-                          </div>
-                        </div>
-                        <p class="card__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, blanditiis?</p>
-                      </div>
-                    </a> 
-                  </div>
-                  <div class="col m-3" >
-                    <a href="" class="card shadow-sm" style="width: 16rem;">
-                      <img src="../media/imgs/register-wallpaper.jpg" class="card__image" alt="" />
-                      <div class="card__overlay">
-                        <div class="card__header">
-                          <div class="card__header-text">
-                            <h3 class="card__title">Terreno 1</h3>            
-                            <span class="card__status">Setubal / Sesimbra</span>
-                          </div>
-                        </div>
-                        <p class="card__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, blanditiis?</p>
-                      </div>
-                    </a> 
-                  </div>
+                <div class="row" id="usr_terrain_count" data-app-value=0>
                 </div>
               </div>
               
@@ -440,26 +383,7 @@
           <div class="col ">
             <div id="usr_stats_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm">
               <h5 class="mb-3">Estatísticas</h5>
-              <div class="row d-flex flex-column justify-content-center ">
-                <div class="col">
-                  <div class="rounded-3 p-3 mb-3 shadow-sm">
-                    <h5 class="mb-3">Área Total</h5>
-                    <div class="p-3">
-                      <canvas id="terrain_total_area_chart" width="800" height="800"></canvas>
-                    </div>
-                  </div>
-
-                </div>
-                <div class="col">
-                  <div class="rounded-3 p-3 shadow-sm">
-                    <h5 class="mb-3">Número de Terrenos por Região</h5>
-                    <div class="p-3">
-                      <canvas id="terrain_nmr_per_region_chart" width="800" height="800"></canvas>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -489,12 +413,16 @@
               <input type="text" class="form-control rounded-pill" id="name-terrain">
             </div>
             <div class="mb-3">
-              <label for="conselho-terrain" class="form-label">Conselho</label>
-              <input type="text" class="form-control rounded-pill" id="conselho-terrain">
+              <label for="townhall-terrain" class="form-label">Conselho</label>
+              <input type="text" class="form-control rounded-pill" id="townhall-terrain">
             </div>
             <div class="mb-3">
-              <label for="freguesia-terrain" class="form-label">Freguesia</label>
-              <input type="text" class="form-control rounded-pill" id="freguesia-terrain">
+              <label for="district-terrain" class="form-label">Distrito</label>
+              <input type="text" class="form-control rounded-pill" id="district-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="section-terrain" class="form-label">Número de Artigo</label>
+              <input type="text" class="form-control rounded-pill" id="section-terrain">
             </div>
             <div class="mb-3">
               <label for="number-article-terrain" class="form-label">Número de Artigo</label>
@@ -505,12 +433,23 @@
               <input type="file" class="form-control rounded-pill" id="documentation-validation-terrain">
             </div>
             <div class="mb-3">
-              <label for="type_of_terrain" class="form-label">Tipo de Terreno</label>
-              <select id="type_of_terrain" class="form-select">
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
+              <label for="type_of_terrain_select" class="form-label">Tipo de Terreno</label>
+              <select id="type_of_terrain_select" class="form-select" onchange="typeTerrain('type_of_terrain_select', 'other_type_of_terrain_checked')">
+                <option value="empty" selected>Vazio</option>
+                <option value="habitation">Habitação</option>
+                <option value="cultivation">Cultivo</option>
+                <option value="business">Empresarial/Adminstrativo</option>
+                <option value="cultivation">Ensino</option>
+                <option value="commerce">Comércio</option>
+                <option value="hospital">Hospitalar</option>
+                <option value="infrastructure">Estrada/Infraestrutura</option>
+                <option value="other">Outro</option>
               </select>
+            </div>
+            <div id="other_type_of_terrain_checked" class="mb-3" data-app-menu-active="false">
+              <div class="mb-3">
+                <input type="text" class="form-control rounded-pill" id="other_type_of_terrain">
+              </div>
             </div>
           </div>
           
@@ -518,13 +457,13 @@
             <h5 class="mb-3">Proprietário</h5>
             <div class="d-flex flex-column justify-content-center mb-3">
               <div class="form-check m-1">
-                <input class="form-check-input" type="radio" name="acc_terrain" id="this_acc_terrain_option" onclick="toggleChooseAccMenu('other_acc_terrain_checked')" checked>
+                <input class="form-check-input" type="radio" name="acc_terrain" id="this_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'false')" checked>
                 <label class="form-check-label" for="this_acc_terrain_option">
                   Esta conta
                 </label>
               </div>
               <div class="form-check m-1">
-                <input class="form-check-input" type="radio" name="acc_terrain" id="other_acc_terrain_option" onclick="toggleChooseAccMenu('other_acc_terrain_checked')">
+                <input class="form-check-input" type="radio" name="acc_terrain" id="other_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'true')">
                 <label class="form-check-label" for="other_acc_terrain_option">
                   Outra conta/pessoa
                 </label>
@@ -557,10 +496,21 @@
               <input type="file" class="form-control rounded-pill" id="image-terrain">
             </div>
             <div class="mb-3">
-              <label for="type-terrain" class="form-label">Tipo de terra</label>
+              <label for="type-terrain" class="form-label">Cobertura de Solo</label>
               <input type="text" class="form-control rounded-pill" id="type-terrain">
             </div>
-
+            <div class="mb-3">
+              <label for="current-use-terrain" class="form-label">Uso atual</label>
+              <input type="text" class="form-control rounded-pill" id="current-use-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="previous-use-terrain" class="form-label">Uso anterior</label>
+              <input type="text" class="form-control rounded-pill" id="previous-use-terrain">
+            </div>
+            <div class="mb-3">
+              <label for="define-route-terrain" class="form-label">Caminho de entrada para o terreno</label>
+              <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill" value="Definir um caminho" onclick="">
+            </div>
             
           </div>
 
