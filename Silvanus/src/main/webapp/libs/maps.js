@@ -67,15 +67,15 @@ function initViewmap(){
         console.log("Request chunks");
 
         //Send request to load chunks of this viewport
-        const ab = viewport.Ab;
+        /*const ab = viewport.Ab;
         const ua = viewport.Ua;
         const bound_box = box(ua.hi, ua.lo, ab.hi, ab.lo);
-        console.log(bound_box);
+        console.log(bound_box);*/
 
         //Request to DB
         let center = point(viewport_center.lat, viewport_center.lng);
         console.log(center);
-        loadChunk(center);
+        //loadChunk(center);
     })
 
     map.addListener("bounds_changed", function(){
@@ -125,14 +125,14 @@ function initPolygonDrawingTools(){
         //Add event listener to edit and update all coords of last polygon
         google.maps.event.addListener(polygon.getPath(), 'set_at', function() {
             console.log("set_at");
-            polygon_result = convertPath(polygon.getPath().Qd);
+            polygon_result = convertPath(polygon.getPath().getArray());
             console.log(polygon_result);
             console.log("Area " + area(polygon_result));
         });
 
         google.maps.event.addListener(polygon.getPath(), 'insert_at', function() {
             console.log("insert_at");
-            polygon_result = convertPath(polygon.getPath().Qd);
+            polygon_result = convertPath(polygon.getPath().getArray());
             console.log(polygon_result);
             console.log("Area " + area(polygon_result));
 
@@ -140,13 +140,14 @@ function initPolygonDrawingTools(){
 
         google.maps.event.addListener(polygon.getPath(), 'remove_at', function() {
             console.log("remove_at");
-            polygon_result = convertPath(polygon.getPath().Qd);
+            polygon_result = convertPath(polygon.getPath().getArray());
             console.log(polygon_result);
             console.log("Area " + area(polygon_result));
 
         });
+        console.log(polygon.getPath().getArray());
 
-        polygon_result = convertPath(polygon.getPath().Qd);
+        polygon_result = convertPath(polygon.getPath().getArray());
         console.log(polygon_result);
         console.log("Area " + area(polygon_result));
 
@@ -156,10 +157,12 @@ function initPolygonDrawingTools(){
             console.log(results);
             //Get most info of geocoding result
             //TODO Alter this part
-            const index = 0 //results.length-3
-            const formatted = results[index].formatted_address;
+            const index = results.length-3 //results.length-3
+            const formatted = results[index].address_components;
             console.log(formatted);
-            document.getElementById("conselho-terrain").value = formatted;
+            document.getElementById("townhall-terrain").value = formatted[0].long_name;
+            document.getElementById("district-terrain").value = formatted[1].long_name;
+
         });
 
         setRegistedPolygon(null, polygon);

@@ -94,6 +94,19 @@ public interface RestParcel {
     Response listTerrainUser(@CookieParam(TOKEN) String token, @QueryParam("user") @DefaultValue(" ") String idOfUser);
 
     /**
+     * This method is used to list all the terrains a certain user as registered. Those terrains
+     * need to be approved to be included in this list.
+     *
+     * @param idOfUser the id of the user who'se terrains are requested
+     * @return ok if everything went correctly, an error otherwise
+     */
+    @POST
+    @Path("/list/pending")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    Response listPendingTerrainUser(@CookieParam(TOKEN) String token, @QueryParam("user") @DefaultValue(" ") String idOfUser);
+
+    /**
      * This method is used to list all the terrains in a certain county (concelho). Those terrains
      * need to be approved to be included in this list.
      *
