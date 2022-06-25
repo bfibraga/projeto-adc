@@ -91,21 +91,9 @@ async function logout() {
 
 async function getInfo(debug, user){
 	try{
-		/*notification('1', '', 'Teste 1');
-		notification('2', '', 'Teste 2');
-		notification('3', '', 'Teste 3');
-		notification('4', '', 'Teste 4');
-		notification('5', '', 'Teste 5');
-		notification('6', '', 'Teste 6');
-		notification('7', '', 'Teste 7');*/
-
-		/*badge("Teste 1", "#0612f5");
-		badge("Teste 2", "#111111");*/
-
-		/*terrainCard('Teste 1','Status 1','Descrição 1');
-		terrainCard('Teste 2','Status 2','Descrição 2');*/
-
 		
+		//terrainCard('1:1', 'Teste', 'Status', 'Description');
+
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
 		perfil = response_data;
@@ -137,6 +125,7 @@ async function getInfo(debug, user){
 		
 		Promise.all([
 			getOwnTerrain(),
+			getPendingTerrain(),
 			listNotification()
 		]);
 
@@ -310,8 +299,11 @@ async function submitTerrain(points_data, route_data) {
 		};
 		let response = await axios.post("/api/parcel/create", parcel);
 		console.log(response);
+		const status = String(credentials.townhall) + " " + String(credentials.district);
+		terrainPendingCard(credentials.name, status, info.description);
+
 	} catch (error){
-		alert(error);
+		//alert(error);
 		console.log(error);
 	} finally {
 		console.log("Executed successfully");
@@ -322,18 +314,42 @@ async function getOwnTerrain(){
 	try{
 		let response = await axios.post("/api/parcel/list");
 		terrain_list = response.data;
-		console.log(terrain_list);
-		if (terrain_list != null || terrain_list != []){
-			terrain_list.forEach(element => {
+		if (terrain_list != null || terrain_list !== []){
+			for (let i = 0; i < terrain_list.length; i++) {
+				const element = terrain_list[i];
+				//const id = element.credentials.id;
+				//terrain_list[i] = element;
+
+				const status = String(element.credentials.townhall) + " " + String(element.credentials.district);
+				terrainCard(String(i), element.credentials.name, status, element.info.description);
+			}
+		}
+		
+		console.log(response);
+	} catch (error){
+		//alert(error);
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
+}
+
+async function getPendingTerrain(){
+	try{
+		let response = await axios.post("/api/parcel/list/pending");
+		const data = response.data;
+		console.log(data);
+		if (data != null || data != []) {
+			data.forEach(element => {
 				console.log(element);
 				const status = String(element.credentials.townhall) + " " + String(element.credentials.district);
-				terrainCard(element.credentials.name, status, element.info.description);
+				terrainPendingCard(element.credentials.name, status, element.info.description);
 			});
 		}
 		
 		console.log(response);
 	} catch (error){
-		alert(error);
+		//alert(error);
 		console.log(error);
 	} finally {
 		console.log("Executed successfully");
@@ -351,4 +367,19 @@ async function loadChunk(pos){
 	} finally {
 		console.log("Executed successfully");
 	}
+}
+
+function loadTerrainInfo(id){
+	const terrain = terrain_list[parseInt(id)];
+	console.log(terrain);
+	if (terrain == null) return;
+
+	document.getElementById("terrain_name").innerHTML += terrain.credentials.name;
+	document.getElementById("terrain_description").innerHTML += terrain.info.description;
+	document.getElementById("terrain_townhall").innerHTML += terrain.info.townhall;
+	document.getElementById("terrain_district").innerHTML += terrain.info.district;
+	document.getElementById("terrain_number_section").innerHTML += terrain.info.section;
+	document.getElementById("terrain_number_article").innerHTML += terrain.info.number_article;
+	//document.getElementById("terrain_documents_validation").insertAdjacentHTML("beforeend", terrain.info.district);
+
 }

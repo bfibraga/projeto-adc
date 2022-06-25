@@ -93,9 +93,9 @@ function handleBadge(name, xmlDoc, params){
 }
 
 //TODO Implement more params
-function terrainCard(title, status, description){
+function terrainCard(id, title, status, description){
     const elemName = "elems/terrain_card.html"; 
-    let params = [title, status, description];
+    let params = [id, title, status, description];
 
     LoadHTMLDoc(elemName, handleTerrainCard, params);
 }
@@ -103,15 +103,46 @@ function terrainCard(title, status, description){
 function handleTerrainCard(name, xmlDoc, params){
     elems[name] = parser.parseFromString(xmlDoc, "text/html");
 
-    elems[name].querySelector(".card__title").insertAdjacentHTML("beforeend", params[0]);
-    elems[name].querySelector(".card__status").insertAdjacentHTML("beforeend", params[1]);
-    elems[name].querySelector(".card__description").insertAdjacentHTML("beforeend", params[2]);
-
     let target = document.getElementById("usr_terrain_count");
     let count = target.getAttribute("data-app-value");
     target.setAttribute("data-app-value", String(parseInt(count)+1));
 
+    elems[name].querySelector(".card").setAttribute("data-app-terrain-id", params[0]);
+
+    elems[name].querySelector(".card").addEventListener("click", function (){
+        loadTerrainInfo(params[0]);
+    });
+
+    elems[name].querySelector(".card__title").insertAdjacentHTML("beforeend", params[1]);
+    elems[name].querySelector(".card__status").insertAdjacentHTML("beforeend", params[2]);
+    elems[name].querySelector(".card__description").insertAdjacentHTML("beforeend", params[3]);
+
+
+
     target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+    
+}
+
+function terrainPendingCard(title, status, description){
+    const elemName = "elems/terrain_pending_card.html"; 
+    let params = [title, status, description];
+
+    LoadHTMLDoc(elemName, handleTerrainPendingCard, params);
+}
+
+function handleTerrainPendingCard(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    elems[name].querySelector(".card-title").insertAdjacentHTML("beforeend", params[0]);
+    //elems[name].querySelector(".card__status").insertAdjacentHTML("beforeend", params[1]);
+
+    elems[name].querySelector(".card-text").insertAdjacentHTML("beforeend", params[2]);
+
+    let target = document.getElementById("usr_pending_terrain_scrollpsy");
+    let count = target.getAttribute("data-app-value");
+    target.setAttribute("data-app-value", String(parseInt(count)+1));
+
+    document.getElementById("usr_pending_terrain_list").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
     
 }
 

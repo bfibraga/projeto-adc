@@ -37,7 +37,7 @@
 
   <div class="overlay d-none" style="z-index: 100000;">
     <div class="position-absolute translate-middle top-50 start-50">
-      <div class="light rounded-3 p-3 mt-3 shadow-sm">
+      <div class="light rounded-3 p-3 mt-3 shadow-sm" style="width: 20rem; height: 40rem;">
         Text
       </div>
     </div>
@@ -58,7 +58,7 @@
         </a>
       </li>
 
-      <li class="app-nav-item" onclick="toggleDrawingControl(false)">
+      <!-- <li class="app-nav-item" onclick="toggleDrawingControl(false)">
         <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#search-user" aria-controls="offcanvasScrolling" data-tooltip="Pesquisar">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
@@ -67,7 +67,7 @@
             Pesquisar
           </span>
         </a>
-      </li>
+      </li> -->
 
       <li class="app-nav-item" onclick="toggleDrawingControl(false)">
         <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-placement="right" data-tooltip="Mostrar o mapa">
@@ -104,7 +104,7 @@
     <div class="terrain-list">
       <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
         <div class="offcanvas-header">
-          <h4 id="">Nome Terreno</h4>
+          <h4 id="terrain_name">Nome Terreno</h4>
           <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
@@ -115,7 +115,7 @@
           <p id="terrain_number_article">Numero de Artigo:</p>
           <p id="terrain_documents_validation">Documentos de Validação</p>
     
-          <p>Other info of this terrain: Risco Incendio, Humidade, etc</p>
+          <!-- <p>Other info of this terrain: Risco Incendio, Humidade, etc</p> -->
       
           <div class="row d-flex flex-column justify-content-center ">
             <div class="col">
@@ -127,7 +127,7 @@
               </div>
 
             </div>
-            <div class="col">
+            <!--<div class="col">
               <div class="rounded-3 p-3 mb-3 border rounded">
                 <h5 class="mb-3">Número de Terrenos por Região</h5>
                 <div class="p-3">
@@ -135,7 +135,7 @@
                 </div>
               </div>
 
-            </div>
+            </div>-->
           </div>
 
           <!-- Toast Handler-->
@@ -364,9 +364,12 @@
             <div id="usr_pending_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm" data-app-value=0>
               <h5 class="mb-3">Pedidos Pendentes</h5>
               
+              <div class="row" id="usr_pending_terrain_list">
+              </div>
+
               <!-- No Properties? -->
               <div id="no_pending_requests">
-                <p class="text-center">Não tem pedidos pendentes.<br>Com vontade de registar um terreno? :D </p>
+                <p class="text-center"></p>
               </div>
               
               <!-- Add New Property Button --> 

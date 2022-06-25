@@ -126,6 +126,27 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
+    public Response listPendingTerrainUser(String token, String idOfUser) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        //TODO Test
+        System.out.println(idOfUser);
+        if (idOfUser.trim().equals("")) {
+            idOfUser = jws.getSubject();
+        }
+
+        Result<List<TerrainResultData>> result = impl.getAllPendingTerrainsOfUser(idOfUser);
+        if (!result.isOK())
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+        return Response.ok(result.value()).build();
+    }
+
+    @Override
     public Response listTerrainInCounty(String token, String nameOfCounty) {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);

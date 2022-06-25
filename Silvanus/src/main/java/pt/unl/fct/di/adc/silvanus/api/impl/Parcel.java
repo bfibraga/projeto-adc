@@ -65,6 +65,14 @@ public interface Parcel {
     Result<List<TerrainResultData>> getAllTerrainsOfUser(String ownerTerrain);
 
     /**
+     * Lists all the terrains that are registered by an owner
+     *
+     * @param ownerTerrain the name of the owner
+     * @return a list with all the terrains
+     */
+    Result<List<TerrainResultData>> getAllPendingTerrainsOfUser(String ownerTerrain);
+
+    /**
      * Generates a list of all the terrains in a given county (cocelho)
      * @param nameOfCounty name of the county to query
      * @return a list with all the terrains if they exist, an error otherwise
