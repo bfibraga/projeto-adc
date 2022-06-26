@@ -101,10 +101,6 @@ main{
     transition: 200ms ease;
   }
   
-  [data-app-menu-active="false"]{
-    display: none;
-  }
-  
   div[data-app-pending="false"]{
     display: none;
   }

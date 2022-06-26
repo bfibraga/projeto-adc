@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.implementation;
+package pt.unl.fct.di.adc.silvanus.implementation.user;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,19 +13,18 @@ import io.jsonwebtoken.*;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
+import pt.unl.fct.di.adc.silvanus.implementation.user.perms.UserRole;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.cache.ResultCacheManager;
 import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
 
-import pt.unl.fct.di.adc.silvanus.util.cripto.CRIPTO;
-import pt.unl.fct.di.adc.silvanus.util.cache.CriptoCacheManager;
-import pt.unl.fct.di.adc.silvanus.util.cripto.SHA512HEX;
+import pt.unl.fct.di.adc.silvanus.util.cripto.PASSWORD;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import java.util.HashSet;
-import java.util.Set;
 
 public class UserImplementation implements Users {
 
@@ -33,11 +32,16 @@ public class UserImplementation implements Users {
 	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
 	// Datastore
 	private Datastore datastore;
+
 	private KeyFactory userKeyFactory;
+	private KeyFactory userRoleKeyFactory;
+	private KeyFactory userPerfilFactory;
+	private KeyFactory userPermissionKeyFactory;
+
+
 
 	//Cache
 	private UserCacheManager<String> cache = new UserCacheManager<>();
-	private CriptoCacheManager<String> criptoCacheManager = new CriptoCacheManager();
 	private ResultCacheManager<String> resultCacheManager = new ResultCacheManager<>();
 
 	public UserImplementation(){
@@ -80,13 +84,11 @@ public class UserImplementation implements Users {
 			}
 
 			// Create a new User
-			CRIPTO cripto = this.criptoCacheManager.get(user_id);
-			String encriptedPassword = cripto.execute(loginData.getPassword());
+			String encriptedPassword = PASSWORD.digest(loginData.getPassword());
 			user = Entity.newBuilder(userKey)
 					.set("usr_username", loginData.getUsername())
 					.set("usr_email", loginData.getEmail())
 					.set("usr_password", encriptedPassword)
-					.set("usr_cripto", cripto.name())
 					.build();
 			this.cache.put(user_id, loginData);
 
@@ -131,7 +133,7 @@ public class UserImplementation implements Users {
 
 			long time = System.currentTimeMillis() - now;
 			LOG.info("User register " + loginData.getUsername() + " successfully: " + time);
-			return Result.ok(jws);
+			return Result.ok(jws, "User register " + loginData.getUsername() + " successfully");
 		} finally {
 			if (txn.isActive()) {
 				txn.rollback();
@@ -183,7 +185,7 @@ public class UserImplementation implements Users {
 			txn.commit();
 
 			LOG.info("Build user " + user_id + " successfully");
-			return Result.ok("Build Done in: " + System.currentTimeMillis() + "miliseconds.");
+			return Result.ok();
 		} catch (Exception e){
 			return Result.error(Status.INTERNAL_SERVER_ERROR, "Something went wrong with building " + data.getCredentials().getUsername() + "\n" + e.getMessage());
 		} finally {
@@ -206,34 +208,25 @@ public class UserImplementation implements Users {
 
 		//TODO refactor this cache part
 		LoginData loginData = this.cache.getLoginData(user_id);
-		CRIPTO cripto = loginData != null ? this.criptoCacheManager.get(user_id) : null;
-		if (cripto == null){
-			cripto = new SHA512HEX();
-		}
 
 		// Verify if the user is in cache
 		String hashedPassword = "";
 		if (loginData != null) {
 			hashedPassword = loginData.getPassword();
 
-			System.out.println(hashedPassword);
-			System.out.println(cripto.name());
-			System.out.println(cripto.execute(data.getPassword()));
-			System.out.println(hashedPassword.equals(cripto.execute(data.getPassword())));
-			if (hashedPassword.equals(cripto.execute(data.getPassword()))){
+			if (hashedPassword.equals(PASSWORD.digest(data.getPassword()))){
 				String jws = TOKEN.createNewJWS(user_id, 1, new HashSet<>());
 
 				String refresh_token = TOKEN.newRefreshToken();
 
 				System.out.println(jws);
 
-				return Result.ok(jws);
+				return Result.ok(jws, "Login success");
 			} else {
 				LOG.warning("Wrong Password: Line 153");
 				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
 			}
 		} else {
-			//TODO Testing
 			QueryResults<Entity> result = this.find(data.getUsername(), "UserCredentials", "usr_username", 5);
 			if (!result.hasNext()){
 				result = this.find(data.getEmail(), "UserCredentials", "usr_email", 5);
@@ -241,16 +234,9 @@ public class UserImplementation implements Users {
 
 			while (result.hasNext()) {
 				Entity curr_result = result.next();
-				String cripto_name = "";
-				try {
-					cripto_name = curr_result.getString("usr_cripto");
-					cripto = this.criptoCacheManager.map(cripto_name);
-				} catch (DatastoreException e) {
-					cripto = new SHA512HEX();
-					LOG.info(String.format("Using %s to encript %s's password", cripto.name(), data.getUsername()));
-				}
+
 				hashedPassword = curr_result.getString("usr_password");
-				String givenPassword = cripto.execute(data.getPassword());
+				String givenPassword = PASSWORD.digest(data.getPassword());
 
 				if (hashedPassword.equals(givenPassword)) {
 					// Correct password
@@ -268,16 +254,10 @@ public class UserImplementation implements Users {
 					String refresh_token = TOKEN.newRefreshToken();
 
 					//Store in cache
-					//TODO Check if this works
-					/*LoginData store_data = new LoginData(curr_result.getString("usr_username"),
-							curr_result.getString("usr_email"),
-							curr_result.getString("usr_password"));*/
-					System.out.println(cripto.name());
 					this.cache.put(data.getID(), data);
 					this.cache.put(data.getID(), "token:" + operation_level, jws);
-					this.criptoCacheManager.put(data.getID(), cripto.name());
 
-					return Result.ok(jws);
+					return Result.ok(jws, "Login success");
 				}
 			}
 
@@ -478,7 +458,7 @@ public class UserImplementation implements Users {
 
 		if (stored != null){
 			System.out.println("Result in cache");
-			return Result.ok(stored);
+			return Result.ok(stored, "");
 		}
 
 		List<UserInfoVisible> result_set = new LinkedList<>();
@@ -488,7 +468,7 @@ public class UserImplementation implements Users {
 			Entity user = datastore.get(userKey);
 			UserInfoVisible info = this.getInfo(user);
 			result_set.add(info);
-			return Result.ok(result_set);
+			return Result.ok(result_set, "");
 		}
 
 		//Query only for user identifiers
@@ -508,7 +488,7 @@ public class UserImplementation implements Users {
 
 		this.cache.put(key, property, result_set);
 
-		return Result.ok(result_set);
+		return Result.ok(result_set, "");
 	}
 
 	private UserInfoVisible getInfo(Entity userEntity){
@@ -558,25 +538,54 @@ public class UserImplementation implements Users {
 	//TODO
 	@Override
 	public Result<String> refresh_token(String old_refresh_token) {
-		return Result.ok(TOKEN.newRefreshToken());
+		return Result.ok(TOKEN.newRefreshToken(), "");
 	}
 
 	@Override
-	public Result<Void> remove(String token, String username) {
-		LOG.fine("Removing user " + username);
+	public Result<Void> remove(String userID, String identifier) {
+		LOG.fine("Removing user " + identifier);
 
-		Claims jws = TOKEN.verifyToken(token);
+		if (identifier.trim().equals("")){
+			//Try to remove his account
+			Key remove_userKey = userKeyFactory.newKey(userID);
+			Key remove_userRoleKey = userRoleKeyFactory.newKey(userID);
+			Key remove_userPermissionKey = userPermissionKeyFactory.newKey(userID);
+			Key remove_userInfoKey = userPerfilFactory.newKey(userID);
 
-		if (jws == null){
-			return Result.error(Status.FORBIDDEN, "Invalid Token");
+			Transaction txn = datastore.newTransaction();
+
+			try {
+				//Has permission to remove himself?
+
+				//Verify if this user is active
+
+				txn.delete(remove_userKey, remove_userRoleKey, remove_userPermissionKey, remove_userInfoKey);
+				txn.commit();
+			} finally {
+				if(txn.isActive()){
+					txn.rollback();
+				}
+			}
+
+		} else {
+			String remove_id = "";
+
+			QueryResults<Entity> result = this.find(identifier, "UserCredentials", "usr_username", 5);
+			if (!result.hasNext()){
+				result = this.find(identifier, "UserCredentials", "usr_email", 5);
+			}
+
+			if (!result.hasNext()){
+				return Result.error(Status.NOT_FOUND, "User "+ identifier + " doens't exist");
+			} else {
+				remove_id = result.next().getKey().getName();
+			}
 		}
 
-		String user_id = jws.getId();
 
 		//Query to lookup all users
-		String remove_id = username.trim();
 
-		Key userKey = userKeyFactory.newKey(user_id);
+		/*Key userKey = userKeyFactory.newKey(user_id);
 		Key userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
 		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 
@@ -597,7 +606,7 @@ public class UserImplementation implements Users {
 				this.cache.put(user_id, "role", userRole);
 			}
 
-			if (user_id.equals(remove_id) && userRole.getLong("role_priority") <= 0) {
+			if (user_id.equals(remove_id)) {
 
 				Key userInfoKey = datastore.newKeyFactory().setKind("UserInfo").newKey(user_id);
 
@@ -622,7 +631,7 @@ public class UserImplementation implements Users {
 
 			if (remove == null) {
 				txn.rollback();
-				LOG.fine("Username " + username + "doens't exists");
+				LOG.fine("Username " + identifier + "doens't exists");
 				return Result.error(Status.NOT_ACCEPTABLE, "");
 			}
 
@@ -643,7 +652,8 @@ public class UserImplementation implements Users {
 			if (txn.isActive()) {
 				txn.rollback();
 			}
-		}
+		}*/
+		return Result.ok();
 	}
 
 	@Override
@@ -772,16 +782,7 @@ public class UserImplementation implements Users {
 				return Result.error(Status.BAD_REQUEST, userID + " not active");
 			}*/
 
-			System.out.println(user);
-			String cripto_name = user.getString("usr_cripto");
-			CRIPTO cripto;
-			if (cripto_name == null){
-				cripto = new SHA512HEX();
-			} else {
-				cripto = this.criptoCacheManager.map(cripto_name);
-			}
-			System.out.println(cripto.name());
-			String value = cripto.execute(new_password);
+			String value = PASSWORD.digest(new_password);
 			String old_value = user.getString("usr_password");
 
 			if (old_value.equals(new_password)){
@@ -793,7 +794,6 @@ public class UserImplementation implements Users {
 					.set("usr_username", user.getString("usr_username"))
 					.set("usr_email", user.getString("usr_email"))
 					.set("usr_password", value)
-					.set("usr_cripto", cripto.name())
 					// .set("usr_confirmation", DigestUtils.sha512Hex(data.getConfirmation()))
 					.build();
 
@@ -838,26 +838,6 @@ public class UserImplementation implements Users {
 				return Result.error(Status.BAD_REQUEST, userID + " doens't exist");
 			}
 
-			/*Entity userToken = tnx.get(usrTokenKey);
-			if (userToken == null) {
-				// User isn't login
-				tnx.rollback();
-				return Result.error(Status.BAD_REQUEST, "");
-			}*/
-
-			/*if (!token.tokenID.equals(token_creation.tokenID) || curr_time > token.expirationData) {
-				tnx.rollback();
-				LOG.warning("Token invalid");
-				return Result.error(Status.NOT_FOUND, "");
-			}*/
-
-			/*String hashedPassword = user.getString("usr_password");
-			if (!hashedPassword.equals(DigestUtils.sha512Hex(token.username))) {
-				tnx.rollback();
-				LOG.warning("Wrong parameters of " + token.username);
-				return Result.error(Status.FORBIDDEN, "");
-			}*/
-
 			Entity target_user = tnx.get(target_user_key);
 			if (target_user == null) {
 				// Target user doesn't exist
@@ -899,7 +879,7 @@ public class UserImplementation implements Users {
 
 			tnx.put(target);
 			tnx.commit();
-			return Result.ok(infoData);
+			return Result.ok(infoData, "");
 		} finally {
 			if (tnx.isActive()) {
 				tnx.rollback();

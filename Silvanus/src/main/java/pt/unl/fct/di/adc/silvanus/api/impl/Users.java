@@ -1,14 +1,11 @@
 package pt.unl.fct.di.adc.silvanus.api.impl;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
-import javax.ws.rs.core.Context;
 import java.util.List;
-import java.util.Set;
 
 public interface Users {
 
@@ -25,7 +22,7 @@ public interface Users {
 
 	Result<String> refresh_token(String old_refresh_token);
 
-	Result<Void> remove(String token, String identifier);
+	Result<Void> remove(String userID, String identifier);
 	
 	Result<Void> activate(String token, String username);
 	

@@ -1,10 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.data.user.result;
 
-import org.checkerframework.checker.units.qual.N;
-import pt.unl.fct.di.adc.silvanus.data.user.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserRole;
-import pt.unl.fct.di.adc.silvanus.data.user.UserRoleData;
+import pt.unl.fct.di.adc.silvanus.implementation.user.perms.UserRole;
 
 public class UserInfoVisible {
 

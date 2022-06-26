@@ -4,7 +4,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import pt.unl.fct.di.adc.silvanus.data.user.LogoutData;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 
@@ -59,9 +59,9 @@ public interface RestUsers {
 	Response refresh_token(@CookieParam(TOKEN) String cookie);
 	
 	@DELETE
-	@Path("/remove/{" + IDENTIFIER + "}")
+	@Path("/remove")
 	@Consumes(MediaType.APPLICATION_JSON)
-	Response remove(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String username);
+	Response remove(@CookieParam(TOKEN) String cookie, @QueryParam(IDENTIFIER) @DefaultValue(" ") String username);
 	
 	@PUT
 	@Path("/activate/{" + IDENTIFIER + "}")
