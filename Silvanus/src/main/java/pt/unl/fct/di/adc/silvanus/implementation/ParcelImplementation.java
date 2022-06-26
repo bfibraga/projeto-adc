@@ -593,7 +593,7 @@ public class ParcelImplementation implements Parcel {
             );
             list.add(resultData);
         }
-        return Result.ok(list);
+        return Result.ok(list, "");
     }
 
     @Override
@@ -646,7 +646,8 @@ public class ParcelImplementation implements Parcel {
             );
             list.add(resultData);
         }
-        return Result.ok(list);    }
+        return Result.ok(list, "");
+    }
 
     @Override
     public Result<List<Entity>> getAllTerrainsInCounty(String nameOfCounty) {
@@ -666,7 +667,7 @@ public class ParcelImplementation implements Parcel {
             Entity tmp = results.next();
             list.add(tmp);
         }
-        return Result.ok(list);
+        return Result.ok(list, "");
     }
 
     @Override
@@ -688,7 +689,7 @@ public class ParcelImplementation implements Parcel {
             tmp.getList("");
             list.add(tmp);
         }
-        return Result.ok(list);
+        return Result.ok(list, "");
     }
 
     @Override
@@ -712,7 +713,7 @@ public class ParcelImplementation implements Parcel {
             list.add(tmp.getValue(ENTITY_PROPERTY_ID_OWNER).toString() +
                     "/" + tmp.getValue(ENTITY_PROPERTY_NAME_OF_TERRAIN).toString());
         }
-        return Result.ok(list);
+        return Result.ok(list, "");
     }
 
     @Override
@@ -756,7 +757,7 @@ public class ParcelImplementation implements Parcel {
 
         List<LatLng[]> result = new ArrayList<>();
         if (selectedChunk == null){
-            return Result.ok(result);
+            return Result.ok(result, "");
         }
 
         String parcelsIDs = selectedChunk.getString("parcels_id");
@@ -788,6 +789,6 @@ public class ParcelImplementation implements Parcel {
             }
         }
 
-        return Result.ok(result);
+        return Result.ok(result, "");
     }
 }

@@ -1,30 +1,19 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
 import io.jsonwebtoken.Claims;
-import pt.unl.fct.di.adc.silvanus.api.rest.RestInterface;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.user.LogoutData;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
-import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
+import pt.unl.fct.di.adc.silvanus.implementation.user.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestUsers;
-import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
-import pt.unl.fct.di.adc.silvanus.api.rest.RestInterface;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Path(RestUsers.PATH)
 public class UsersResource implements RestUsers {
@@ -158,7 +147,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response remove(String token, String username) {
+	public Response remove(String token, String identifier) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -166,13 +155,13 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		Result<Void> result = impl.remove(token, username);
+		Result<Void> result =  impl.remove(jws.getSubject(), identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-		return Response.ok().entity("User " + username + "was sucessfully removed").build();
+		return Response.ok().entity("User " + identifier + "was sucessfully removed").build();
 	}
 
 	@Override

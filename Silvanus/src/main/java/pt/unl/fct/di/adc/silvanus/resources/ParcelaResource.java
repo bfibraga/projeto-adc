@@ -6,7 +6,7 @@ import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
 import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
-import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
+import pt.unl.fct.di.adc.silvanus.implementation.user.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestParcel;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;

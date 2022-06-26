@@ -5,7 +5,7 @@ import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.NotificationImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestNotifications;
-import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
+import pt.unl.fct.di.adc.silvanus.implementation.user.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
