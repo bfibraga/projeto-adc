@@ -5,6 +5,7 @@ import pt.unl.fct.di.adc.silvanus.util.chunks.Chunk;
 import pt.unl.fct.di.adc.silvanus.util.chunks.ChunkBoard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -56,10 +57,22 @@ public class Main {
         System.out.println(madeira.isInside(-9.55,36.85));
 
         int[][] points = {
-                {0,0},
-                {12,13},
-                {17,0},
+                {10,10},
+                {15,20},
+                {20,17},
+                {14,16},
+                {12,10}
         };
+
+        int[] vec1 = new int[]{points[1][0] - points[0][0], points[1][1] - points[0][1]};
+        int[] vec2 = new int[]{points[2][0] - points[1][0], points[2][1] - points[1][1]};
+        int [] result = new int[]{vec1[0]+vec2[0], vec1[1]+vec2[1]};
+        System.out.println(Arrays.toString(result));
+        double dia1 = portugal.DiamondAngle(vec1[0], vec1[1]);
+        double dia2 = portugal.DiamondAngle(vec2[0], vec2[1]);
+        System.out.println((dia1-dia2));
+        System.out.println(portugal.DiamondAngleToDegree((dia1-dia2)));
+
 
         List<Chunk<String>> line = new ArrayList<>();
         for (int i = 0 ; i < points.length-1 ; i++) {
@@ -69,7 +82,9 @@ public class Main {
         for (Chunk<String> chunk: line) {
             chunk.addContent("Line");
         }
-        portugal.fill(3,1,"Fill");
+
+        //TODO Maybe apply Fill Area algorithm
+        //portugal.fill(12,12,"Fill");
 
         portugal.printChunks();
     }
