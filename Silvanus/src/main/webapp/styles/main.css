@@ -306,3 +306,7 @@ h1,p,label,a{
   display: none;
   list-style: none;
 }
+
+[data-app-menu-active="false"]{
+  display: none !important;
+}

@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.data.user;
+package pt.unl.fct.di.adc.silvanus.data.user.result;
 
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 

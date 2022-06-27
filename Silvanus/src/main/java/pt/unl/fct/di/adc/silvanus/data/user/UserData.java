@@ -1,7 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.data.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.cloud.storage.Acl;
+import pt.unl.fct.di.adc.silvanus.implementation.user.perms.UserRole;
 
 public class UserData {
 

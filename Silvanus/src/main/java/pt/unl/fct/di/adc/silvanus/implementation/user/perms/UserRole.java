@@ -1,12 +1,10 @@
-package pt.unl.fct.di.adc.silvanus.data.user;
-
-import pt.unl.fct.di.adc.silvanus.util.JSON;
+package pt.unl.fct.di.adc.silvanus.implementation.user.perms;
 
 public enum UserRole {
+	HELPDESK("Helpdesk", "#202020"),
 	USER("User", "#6aa84f"),
-	FUNC_CONS("Funcionario Conselho", "#6fa8dc"),
-	FUNC_DIST("Funcionario Distrito", "#c27ba0"),
-	GOV("Governo", "#e69138"),
+	BACKOFC("BackOffice", "#6fa8dc"),
+	SUPBACKOFC("SuperBackOffice", "#e69138"),
 	ADMIN("Admin", "#cc0000");
 
 	private String role_name;
