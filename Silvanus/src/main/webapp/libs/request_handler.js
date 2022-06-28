@@ -67,7 +67,7 @@ async function login(){
 		console.log(error);
 		document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
 	} finally {
-		document.getElementById("loader").classList.add("d-none");
+		loader("false");
 	}
 }
 
@@ -90,8 +90,11 @@ async function logout() {
 }
 
 async function getInfo(debug, user){
+
+	let loader = document.getElementById("loader");
+
 	try{
-		
+		badge("Role Teste", "#333333");
 		//terrainCard('1:1', 'Teste', 'Status', 'Description');
 
 		const response = await axios.get("/api/user/info");
@@ -134,7 +137,9 @@ async function getInfo(debug, user){
 		if (!debug){
 			window.location.replace(base_uri);
 		}
-	}
+	} finally{
+		loader.setAttribute("data-app-menu-active", "false");
+	}	
 }
 
 function updatePerfil(data){

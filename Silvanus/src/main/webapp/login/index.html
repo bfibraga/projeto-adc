@@ -18,10 +18,6 @@
     
 </head>
 <body id="main" class="bg-normal">
-  
-  <div id="loader" class="overlay d-flex flex-column justify-content-center align-items-center d-none">
-    <div class="lds-ring "><div></div><div></div><div></div><div></div></div>
-  </div>
   <!--
     <div id="bg-image" class="bg-image bg-light position-absolute"></div>
   -->
@@ -81,13 +77,18 @@
   
           <!-- Submit Button -->
           <div class="input-group" style="width: 20rem; margin-bottom: 1rem;">
-            <input type="button" style="width: 20rem;" onclick="login()" id="button-submit" class="btn btn-primary center-x rounded-pill" value="Login" disabled>
+            <button class="btn btn-primary rounded-pill" style="width: 20rem;" onclick="loader('true');login()" id="button-submit" type="button" disabled value="Login">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" data-app-menu-active="false"></span>
+              <span class="btn-text" data-app-menu-active="true">Login</span>
+            </button>
           </div>
+          
           <a class="" href="../register/index.html" style="font-size: 0.8rem;">Não tem conta registada?</a>
     </form>
     
   </main>
   <script src="./main.js"></script>
   <script src="../libs/input_handler.js"></script>
+  <script src="../libs/request_handler.js"></script>
 </body>
 </html>
