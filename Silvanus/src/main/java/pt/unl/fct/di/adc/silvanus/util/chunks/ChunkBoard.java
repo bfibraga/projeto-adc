@@ -8,7 +8,7 @@ public class ChunkBoard<C> {
 
     private final double[] offset;
     private final double[] boardSize;
-    private Chunk<C>[][] chunks;
+    private Chunk2<C>[][] chunk2s;
     private final double[] chunkSize;
     private final double[] size;
 
@@ -25,25 +25,25 @@ public class ChunkBoard<C> {
 
     @SuppressWarnings("unchecked")
     private void buildChunkBoard(int lines, int columns){
-        this.chunks = new Chunk[columns][lines];
+        this.chunk2s = new Chunk2[columns][lines];
         for (int y = 0; y < lines; y++) {
             for (int x = 0; x < columns; x++) {
-                this.chunks[x][y] = new Chunk<>(x,y);
+                this.chunk2s[x][y] = new Chunk2<>(x,y);
             }
         }
     }
 
-    public Chunk<C> get(int x, int y) {
-        return this.chunks[x][y];
+    public Chunk2<C> get(int x, int y) {
+        return this.chunk2s[x][y];
     }
 
-    public Chunk<C> get(double posX, double posY) {
+    public Chunk2<C> get(double posX, double posY) {
         int[] pos = worldCoordsToChunk(posX, posY);
         return this.get(pos[0],pos[1]);
     }
 
     //TODO Testing
-    public Chunk<C>[][] getArea(double[] topLeft, double[] bottomRight){
+    public Chunk2<C>[][] getArea(double[] topLeft, double[] bottomRight){
         int[] posTL = this.worldCoordsToChunk(
                 Math.min(topLeft[0], bottomRight[0]),
                 Math.max(topLeft[1], bottomRight[1]));
@@ -55,16 +55,16 @@ public class ChunkBoard<C> {
     }
 
     @SuppressWarnings("unchecked")
-    public Chunk<C>[][] getArea(int[] topLeft, int[] bottomRight){
+    public Chunk2<C>[][] getArea(int[] topLeft, int[] bottomRight){
         int areaLength = Math.abs(bottomRight[0]-topLeft[0]);
         int areaHeight = Math.abs(bottomRight[1]-topLeft[1]);
 
         System.out.println("Length: " + areaLength + "\nHeight: " + areaHeight);
-        Chunk<C>[][] result = new Chunk[areaLength][areaHeight];
+        Chunk2<C>[][] result = new Chunk2[areaLength][areaHeight];
         for (int y = 0 ; y < areaHeight ; y++){
             for (int x = 0 ; x < areaLength ; x++){
                 //TODO Check if this chunk pos is in bounds
-                result[x][y] = chunks[x+ topLeft[0]][y+ bottomRight[1]];
+                result[x][y] = chunk2s[x+ topLeft[0]][y+ bottomRight[1]];
             }
         }
 
@@ -135,7 +135,7 @@ public class ChunkBoard<C> {
         this.get(x,y).clearContent();
     }
 
-    public List<Chunk<C>> line(int x0, int y0, int x1, int y1){
+    public List<Chunk2<C>> line(int x0, int y0, int x1, int y1){
         if (Math.abs(y1-y0) < Math.abs(x1-x0)){
             if (x0 > x1){
                 return lineLow(x1,y1,x0,y0);
@@ -151,8 +151,8 @@ public class ChunkBoard<C> {
         }
     }
 
-    private List<Chunk<C>> lineHigh(int x0, int y0, int x1, int y1) {
-        List<Chunk<C>> result = new ArrayList<>();
+    private List<Chunk2<C>> lineHigh(int x0, int y0, int x1, int y1) {
+        List<Chunk2<C>> result = new ArrayList<>();
 
         int dx = x1-x0;
         int dy = y1-y0;
@@ -165,9 +165,9 @@ public class ChunkBoard<C> {
         int x = x0;
 
         for (int y = y0 ; y <= y1 ; y++){
-            Chunk<C> chunk = this.get(x,y);
-            chunk.setTag("PolygonBounds");
-            result.add(chunk);
+            Chunk2<C> chunk2 = this.get(x,y);
+            chunk2.setTag("PolygonBounds");
+            result.add(chunk2);
             if (D > 0){
                 x += xi;
                 D += 2*(dx-dy);
@@ -178,8 +178,8 @@ public class ChunkBoard<C> {
         return result;
     }
 
-    private List<Chunk<C>> lineLow(int x0, int y0, int x1, int y1) {
-        List<Chunk<C>> result = new ArrayList<>();
+    private List<Chunk2<C>> lineLow(int x0, int y0, int x1, int y1) {
+        List<Chunk2<C>> result = new ArrayList<>();
 
         int dx = x1-x0;
         int dy = y1-y0;
@@ -192,9 +192,9 @@ public class ChunkBoard<C> {
         int y = y0;
 
         for (int x = x0 ; x <= x1 ; x++){
-            Chunk<C> chunk = this.get(x,y);
-            chunk.setTag("PolygonBounds");
-            result.add(chunk);
+            Chunk2<C> chunk2 = this.get(x,y);
+            chunk2.setTag("PolygonBounds");
+            result.add(chunk2);
             if (D > 0){
                 y += yi;
                 D += 2*(dy-dx);
@@ -207,11 +207,11 @@ public class ChunkBoard<C> {
 
     @SafeVarargs
     public final void fill(int x, int y, C... content){
-        Chunk<C> chunk = this.get(x,y);
-        System.out.println(chunk.getTag());
-        if (!chunk.getTag().equals("PolygonBounds") && !chunk.getTag().equals("PolygonFill")){
-            chunk.setTag("PolygonFill");
-            chunk.addContent(content);
+        Chunk2<C> chunk2 = this.get(x,y);
+        System.out.println(chunk2.getTag());
+        if (!chunk2.getTag().equals("PolygonBounds") && !chunk2.getTag().equals("PolygonFill")){
+            chunk2.setTag("PolygonFill");
+            chunk2.addContent(content);
 
             if (isInside(x+1,y)){
                 fill(x+1,y,content);
@@ -267,9 +267,9 @@ public class ChunkBoard<C> {
     }
 
     public void printChunks(){
-        for (int y = this.chunks[0].length - 1; y >= 0 ; y--) {
-            for (int x = 0; x < this.chunks.length; x++) {
-                System.out.print(!this.chunks[x][y].getTag().equals("") ? "[X]" : "[_]");
+        for (int y = this.chunk2s[0].length - 1; y >= 0 ; y--) {
+            for (int x = 0; x < this.chunk2s.length; x++) {
+                System.out.print(!this.chunk2s[x][y].getTag().equals("") ? "[X]" : "[_]");
             }
             System.out.println();
         }

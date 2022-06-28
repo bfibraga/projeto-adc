@@ -95,6 +95,19 @@ public interface Parcel {
      */
     Result<List<String>> queryTerrainsOfUserInCounty(String idOfOwner, String nameOfConselho);
 
+    /**
+     * Genereates a
+     * @param pos
+     * @return
+     */
     Result<List<LatLng[]>> queryTerrainsInChunk(LatLng pos);
+
+    /**
+     * Generates a list of terrains that are either west, east, north or south of a coordinate (represented as a float)
+     * @param coordinate the coordinate in which to query
+     * @param relativePosition the position the terrain is in relation to the coordinate (WEST, EAST, NORTH, SOUTH)
+     * @return a list if they exist, an error otherwise
+     */
+    Result<List<TerrainResultData>> getAllTerrainsInRelationToCoordinate(float coordinate, String relativePosition);
 
 }
