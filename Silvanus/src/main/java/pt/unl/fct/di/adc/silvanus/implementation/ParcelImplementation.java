@@ -8,6 +8,7 @@ import pt.unl.fct.di.adc.silvanus.api.impl.Parcel;
 import pt.unl.fct.di.adc.silvanus.data.parcel.*;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.Chunk;
 import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.Random;
@@ -21,8 +22,8 @@ import java.util.logging.Logger;
 
 public class ParcelImplementation implements Parcel {
 
-    private final double sizeX = (RIGHT_MOST_LONGITUDE_CONTINENTE - LEFT_MOST_LONGITUDE_CONTINENTE)/NUMBER_OF_COLLUMNS_IN_CONTINENTE;
-    private final double sizeY = (TOP_MOST_LATITUDE_CONTINENTE - BOTTOM_MOST_LATITUDE_CONTINENTE)/NUMBER_OF_LINES_IN_CONTINENTE;
+    private final double sizeX = (RIGHT_MOST_LONGITUDE_CONTINENTE - LEFT_MOST_LONGITUDE_CONTINENTE) / NUMBER_OF_COLLUMNS_IN_CONTINENTE;
+    private final double sizeY = (TOP_MOST_LATITUDE_CONTINENTE - BOTTOM_MOST_LATITUDE_CONTINENTE) / NUMBER_OF_LINES_IN_CONTINENTE;
 
     private static final int NUMBER_OF_COLLUMNS_IN_CONTINENTE = 26;
     private static final int NUMBER_OF_LINES_IN_CONTINENTE = 38;
@@ -55,6 +56,11 @@ public class ParcelImplementation implements Parcel {
     public static final String ENTITY_PROPERTY_CURRENT_USE_OF_SOIL = "current_use_of_soil";
     public static final String ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL = "previous_use_of_soil";
     public static final String ENTITY_PROPERTY_CHUNKS_OF_PARCELA = "chunks_of_terrain";
+    public static final String ENTITY_PROPERTY_LEFT_MOST_POINT = "left_most_point";
+    public static final String ENTITY_PROPERTY_RIGHT_MOST_POINT = "right_most_point";
+    public static final String ENTITY_PROPERTY_TOP_MOST_POINT = "top_most_point";
+    public static final String ENTITY_PROPERTY_BOTTOM_MOST_POINT = "bottom_most_point";
+
 
     //TODO Transferir esta parte para cache
     private Map<String, Chunk> chunksIslands;
@@ -82,6 +88,7 @@ public class ParcelImplementation implements Parcel {
 
     @Override
     public Result<Void> createParcel(TerrainData terrainData) {
+        terrainData.createEdges();
         Polygon terrainAsPolygon = coordinatesToPolygon(terrainData.getParcela());
 
         List<String> result = completeMethod(terrainAsPolygon, portugalContinentalPolygon, bigBBPolygon);
@@ -122,11 +129,11 @@ public class ParcelImplementation implements Parcel {
 
             //TODO Testing
             Entity chunkEntity;
-            for (String chunk: result) {
+            for (String chunk : result) {
                 Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
                 chunkEntity = txn.get(chunkKey);
 
-                if (chunkEntity == null){
+                if (chunkEntity == null) {
                     chunkEntity = Entity.newBuilder(chunkKey)
                             .set("parcels_id", terrainID)
                             .build();
@@ -152,14 +159,18 @@ public class ParcelImplementation implements Parcel {
                     .set(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE, info.getType_of_soil_coverage())
                     .set(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL, info.getCurrent_use())
                     .set(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL, info.getPrevious_use())
-                    .set(ENTITY_PROPERTY_CHUNKS_OF_PARCELA, JSON.encode(result)).build();
+                    .set(ENTITY_PROPERTY_CHUNKS_OF_PARCELA, JSON.encode(result))
+                    .set(ENTITY_PROPERTY_LEFT_MOST_POINT, terrainData.getEdgesTerrain()[0])
+                    .set(ENTITY_PROPERTY_RIGHT_MOST_POINT, terrainData.getEdgesTerrain()[1])
+                    .set(ENTITY_PROPERTY_TOP_MOST_POINT, terrainData.getEdgesTerrain()[2])
+                    .set(ENTITY_PROPERTY_BOTTOM_MOST_POINT, terrainData.getEdgesTerrain()[3]).build();
 
             txn.put(terrainEntity, ownerTerrainEntity);
             txn.commit();
             LOG.info("Terrain was registered.");
             return Result.ok();
         } finally {
-            if (txn.isActive()){
+            if (txn.isActive()) {
                 txn.rollback();
             }
         }
@@ -297,7 +308,7 @@ public class ParcelImplementation implements Parcel {
         // - Check if the terrain is contained in the chunk - \\
 
         // Since the chunk doesn't contain the terrain it is needed to check which of the surrouding chunks intersect it  \\
-        List<String> chunksAdjacentes = generatesChunksAroundAChunk( chunkPos[0], chunkPos[1]);
+        List<String> chunksAdjacentes = generatesChunksAroundAChunk(chunkPos[0], chunkPos[1]);
         for (String tmpString : chunksAdjacentes) {
             String[] parts = tmpString.split(",");
             int latitude = Integer.parseInt(parts[0]);
@@ -742,21 +753,21 @@ public class ParcelImplementation implements Parcel {
             }
         }*/
         //TODO Testing
-        System.out.println(pos.getLat() +"," + pos.getLng());
+        System.out.println(pos.getLat() + "," + pos.getLng());
         float[] finalPos = new float[]{
                 (pos.getLng() - LEFT_MOST_LONGITUDE_CONTINENTE),
                 (pos.getLat() - TOP_MOST_LATITUDE_CONTINENTE)
         };
-        System.out.println(finalPos[0]+","+finalPos[1]);
+        System.out.println(finalPos[0] + "," + finalPos[1]);
         int[] chunkPos = ChunkManager.worldCoordToChunk(finalPos[0], finalPos[1], sizeX, sizeY);
-        String chunk = (chunkPos[0])+","+chunkPos[1];
+        String chunk = (chunkPos[0]) + "," + chunkPos[1];
 
         System.out.println(chunk);
         Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
         Entity selectedChunk = datastore.get(chunkKey);
 
         List<LatLng[]> result = new ArrayList<>();
-        if (selectedChunk == null){
+        if (selectedChunk == null) {
             return Result.ok(result, "");
         }
 
@@ -768,7 +779,7 @@ public class ParcelImplementation implements Parcel {
 
         Key selectedParcelKey;
         Key selectedParcelNotApprovedKey;
-        for (String parcelID: parcels) {
+        for (String parcelID : parcels) {
             selectedParcelKey = selectedParcelKeyFactory.newKey(parcelID);
             selectedParcelNotApprovedKey = selectedParcelNotApprovedKeyFactory.newKey(parcelID);
             Entity selectedParcel = datastore.get(selectedParcelKey);
@@ -782,7 +793,7 @@ public class ParcelImplementation implements Parcel {
                 System.out.println(Arrays.toString(points));
             }
 
-            if (selectedParcelNotApproved != null){
+            if (selectedParcelNotApproved != null) {
                 LatLng[] points = JSON.decode(selectedParcelNotApproved.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
                 result.add(points);
                 System.out.println(Arrays.toString(points));
@@ -791,4 +802,84 @@ public class ParcelImplementation implements Parcel {
 
         return Result.ok(result, "");
     }
+
+    @Override
+    public Result<List<TerrainResultData>> getAllTerrainsInRelationToCoordinate(float coordinate, String relativePosition) {
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        switch (relativePosition) {
+            case "NORTH":
+                query = Query.newEntityQueryBuilder()
+                        .setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
+                        .setFilter(StructuredQuery.PropertyFilter.gt(ENTITY_PROPERTY_TOP_MOST_POINT, coordinate))
+                        .build();
+                break;
+            case "SOUTH":
+                query = Query.newEntityQueryBuilder()
+                        .setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
+                        .setFilter(StructuredQuery.PropertyFilter.lt(ENTITY_PROPERTY_BOTTOM_MOST_POINT, coordinate))
+                        .build();
+                break;
+            case "WEST":
+                query = Query.newEntityQueryBuilder()
+                        .setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
+                        .setFilter(StructuredQuery.PropertyFilter.lt(ENTITY_PROPERTY_LEFT_MOST_POINT, coordinate))
+                        .build();
+                break;
+            case "EAST":
+                query = Query.newEntityQueryBuilder()
+                        .setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME)
+                        .setFilter(StructuredQuery.PropertyFilter.gt(ENTITY_PROPERTY_RIGHT_MOST_POINT, coordinate))
+                        .build();
+                break;
+            default:
+                return Result.error(Response.Status.BAD_REQUEST, "The relative position is not valid.");
+        }
+
+
+        results = datastore.run(query);
+
+        if (!results.hasNext())
+            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
+        List<TerrainResultData> list = new ArrayList<>();
+        while (results.hasNext()) {
+            Entity tmp = results.next();
+            Key ownerKey = datastore.newKeyFactory().setKind("TerrainOwner").newKey(tmp.getKey().getNameOrId().toString());
+            Entity owner = datastore.get(ownerKey);
+            LatLng[] points = JSON.decode(tmp.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
+
+            TerrainResultData resultData = new TerrainResultData(
+                    points,
+                    new LatLng(),
+                    Random.color(),
+                    new TerrainIdentifierData(
+                            tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_SECTION_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_NUMBER_ARTICLE_OF_TERRAIN)
+                    ),
+                    new TerrainOwner(
+                            owner.getString("owner_name"),
+                            owner.getString("owner_id"),
+                            owner.getString("owner_address"),
+                            owner.getString("owner_telephone"),
+                            owner.getString("owner_smartphone")
+                    ),
+                    new TerrainInfoData(
+                            tmp.getString(ENTITY_PROPERTY_DESCRIPTION_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
+                            tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
+                            tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
+                            new String[]{},
+                            new LatLng[]{}
+                    )
+            );
+            list.add(resultData);
+        }
+        return Result.ok(list, "");
+    }
+
+
 }

@@ -15,10 +15,17 @@ public class TerrainData {
     private TerrainOwner owner;
     private TerrainInfoData info;
 
+    private float[] edgesTerrain; //leftmost, rightmost, topmost, bottom-most point
+
+    private float leftMost;
+    private float rightMost;
+    private float topMost;
+    private float bottomMost;
+
     /*
     // --- Informacao do utilizador ou que este insere ---
     private String id_of_owner;
-    private String name_of_terrain;
+    private String name_of_terrain;}
     private String description_of_terrain;
     // --- Informacao do utilizador ou que este insere ---
 
@@ -45,15 +52,38 @@ public class TerrainData {
         this.credentials = credentials;
         this.owner = owner;
         this.info = info;
+        this.edgesTerrain = new float[4];
+        edgesTerrain[0] = Float.NEGATIVE_INFINITY; // The more a point is to the left, the more negative it is
+        edgesTerrain[1] = Float.POSITIVE_INFINITY; // The more a point is to the right, the more positive it is
+        edgesTerrain[2] = Float.POSITIVE_INFINITY; // The upper a point is, the more positive it is
+        edgesTerrain[3] = Float.NEGATIVE_INFINITY; // The lower a point is, the more negative it is
         //TODO Calculate centroid of this terrain
 
         int points = parcela.length;
         float[] center_value = new float[2];
-        for (LatLng point: parcela) {
-            center_value[0] += point.getLat()/points;
-            center_value[1] += point.getLng()/points;
+        for (LatLng point : parcela) {
+            center_value[0] += point.getLat() / points;
+            center_value[1] += point.getLng() / points;
+            System.out.println("\n\n\n(" + point.getLng() + "," + point.getLat() + ")\n\n\n");
         }
         this.center = new LatLng(center_value[0], center_value[1]);
+    }
+
+    public void createEdges() {
+        for (LatLng point : parcela) {
+            if (point.getLng() > edgesTerrain[0])
+                edgesTerrain[0] = point.getLng();
+
+            if (point.getLng() < edgesTerrain[1])
+                edgesTerrain[1] = point.getLng();
+
+            if (point.getLat() < edgesTerrain[2])
+                edgesTerrain[2] = point.getLat();
+
+            if (point.getLat() > edgesTerrain[3])
+                edgesTerrain[3] = point.getLat();
+
+        }
     }
 
     public LatLng[] getParcela() {
@@ -72,48 +102,16 @@ public class TerrainData {
         return info;
     }
 
-    /*public String getId_of_owner() {
-        return id_of_owner;
-    }
-
-    public String getName_of_terrain() {
-        return name_of_terrain;
-    }
-
-    public String getDescription_of_terrain() {
-        return description_of_terrain;
-    }
-
-    public String getConselho_of_terrain() {
-        return conselho_of_terrain;
-    }
-
-    public String getDistrito_of_terrain() {
-        return distrito_of_terrain;
-    }
-
-    public String getSection_of_terrain() {
-        return section_of_terrain;
-    }
-
-    public String getNumber_article_terrain() {
-        return number_article_terrain;
-    }
-
-    public String getType_of_soil_coverage() {
-        return type_of_soil_coverage;
-    }
-
-    public String getCurrent_use_of_soil() {
-        return current_use_of_soil;
-    }
-
-    public String getPrevious_use_of_soil() {
-        return previous_use_of_soil;
-    }*/
-
-    public String getID(){
+    public String getID() {
         return String.format("%s:%s", this.credentials.getID(), this.owner.getNif());
+    }
+
+    public LatLng getCenter() {
+        return center;
+    }
+
+    public float[] getEdgesTerrain() {
+        return edgesTerrain;
     }
 
     @Override
