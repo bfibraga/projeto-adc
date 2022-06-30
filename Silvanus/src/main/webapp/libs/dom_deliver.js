@@ -9,7 +9,6 @@ function createElement(type, class_list, parent){
     if (parent !== null){
         parent.append(elem);
     }
-    console.log("Created")
     return elem;
 }
 
@@ -46,10 +45,8 @@ function LoadXMLDoc(dname, callback){
 async function LoadHTMLDoc(dname, callback, params){
     try{
         const response = await axios.get(dname);
-        console.log(response.data);
         callback(dname, response.data, params);
     } catch(error){
-        console.log(error);
     }
   }
 
@@ -144,5 +141,30 @@ function handleTerrainPendingCard(name, xmlDoc, params){
 
     document.getElementById("usr_pending_terrain_list").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
     
+}
+
+function communityMember(username, email, avatar){
+    const elemName = "elems/community-member.html"; 
+    let params = [username, email, avatar, "list_community_members"];
+
+    LoadHTMLDoc(elemName, handleCommunityMember, params);
+}
+
+function communityResponsible(username, email, avatar){
+    const elemName = "elems/community-member.html"; 
+    let params = [username, email, avatar, "community-responsible"];
+
+    LoadHTMLDoc(elemName, handleCommunityMember, params);
+}
+
+function handleCommunityMember(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", params[0]);
+    elems[name].querySelector(".usr_email").insertAdjacentHTML("beforeend", params[1]);
+    elems[name].querySelector(".profile-img").src = params[2];
+
+    //let target = ;
+    document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
 

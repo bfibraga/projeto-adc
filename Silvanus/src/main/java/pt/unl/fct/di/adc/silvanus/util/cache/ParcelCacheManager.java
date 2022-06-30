@@ -2,9 +2,7 @@ package pt.unl.fct.di.adc.silvanus.util.cache;
 
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
 
-enum ParcelProperties {
-    ALL
-}
+
 
 /**
  * Parcel Cache manager

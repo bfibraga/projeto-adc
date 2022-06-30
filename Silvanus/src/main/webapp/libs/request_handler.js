@@ -94,8 +94,19 @@ async function getInfo(debug, user){
 	let loader = document.getElementById("loader");
 
 	try{
-		badge("Role Teste", "#333333");
-		//terrainCard('1:1', 'Teste', 'Status', 'Description');
+		/*communityResponsible("Grande", "grande@email.com", "https://cdn.discordapp.com/attachments/963781705100066836/991750011773779968/unknown.png")
+		communityMember("Teste", "teste@gmail.com", "https://media.discordapp.net/attachments/519977496117248012/982784973062942770/petpet.gif");
+		communityMember("Teste1", "teste@gmail.com", "https://media.discordapp.net/attachments/519977496117248012/982783082623029258/petpet.gif");
+		communityMember("Teste2", "teste@gmail.com", "mekie");
+		communityMember("Teste3", "teste@gmail.com", "mekie");
+		communityMember("Teste4", "teste@gmail.com", "mekie");
+		terrainCard('1:1', 'Teste', 'Status', 'Description');
+		terrainCard('1:1', 'Teste', 'Status', 'Description');
+		terrainCard('1:1', 'Teste', 'Status', 'Description');
+		terrainCard('1:1', 'Teste', 'Status', 'Description');
+		terrainCard('1:1', 'Teste', 'Status', 'Description');
+
+		terrainPendingCard("1","2","3s");*/
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
@@ -209,7 +220,7 @@ async function changing_att(){
 		const response_data = response.data;
 		perfil = response_data;
 		updatePerfil(response_data);
-
+		loader('usr_change_profile_menu','false');
 	} catch (error){
 		console.log(error);
 	} finally {
