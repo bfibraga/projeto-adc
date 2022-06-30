@@ -6,7 +6,7 @@
     --text-secundary: rgb(150,150,150);
     --bg-primary: #f8f9fa;
     --bg-secundary: rgb(210,210,210);
-    --item-primary: rgb(91, 159, 91);
+    --item-primary: rgb(141, 218, 132);
     --item-secundary: #c29661;
 
     --header-offcanvas-height: 4rem;
@@ -63,10 +63,6 @@ main{
 
 .app-nav-item a:hover{
     color: var(--item-secundary);
-}
-
-.app-nav-item:nth-last-child(0){
-    margin-top: auto;
 }
 
 .app-nav-link{
@@ -202,9 +198,9 @@ main{
     }
 
     #request-terrain-offcanvas{
-        --size : 45vh;
+        --size : 45%;
         height: var(--size) !important;
-        top: calc(100vh - var(--size) - var(--nav-bar-len));
+        top: calc(100% - var(--size) - var(--nav-bar-len));
     }
 
     .offcanvas[data-expand="false"]{
@@ -255,6 +251,10 @@ main{
         transition: scale 200ms ease-in-out;
     }
 
+    .app-nav-item:nth-last-child(2){
+        margin-top: auto;
+    }
+
     .app-nav-item{
         width: 100%;
     }
@@ -284,7 +284,7 @@ main{
     }
 
     .offcanvas-start{
-        --size : 50vh;
+        --size : 85%;
         width: var(--size) !important;
     }
 

@@ -2,6 +2,7 @@ package pt.unl.fct.di.adc.silvanus.resources;
 
 import io.jsonwebtoken.Claims;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
@@ -39,6 +40,7 @@ public class UsersResource implements RestUsers {
 		queue.add(TaskOptions.Builder.withUrl(url)
 						.param("userData", JSON.encode(data))
 				.param("secret", TOKEN.createNewJWS("silvanus:build", 1000, new HashSet<>())));*/
+
 		return Response.ok().cookie(TOKEN.cookie(result.value())).build();
 	}
 
@@ -161,7 +163,7 @@ public class UsersResource implements RestUsers {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-		return Response.ok().entity("User " + identifier + "was sucessfully removed").build();
+		return Response.ok().entity("User " + identifier + " was sucessfully removed").build();
 	}
 
 	@Override

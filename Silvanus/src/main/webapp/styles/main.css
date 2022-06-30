@@ -328,3 +328,7 @@ h1,p,label,a{
 .app-menu-text{
   margin-top: 1rem;
 }
+
+a {
+  text-decoration: none;
+}

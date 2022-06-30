@@ -9,6 +9,7 @@ let other_markers = 0;
 let points = [];
 let lines = [];
 let registed_polygon;
+let registed_route;
 let polygon_result = null;
 
 let click_listener;
@@ -44,7 +45,7 @@ function initMap()
 
     initViewmap();
     initPolygonDrawingTools();
-
+    initRouteDrawingTools();
 
     //clearListeners(map, "click");
 }
@@ -100,6 +101,35 @@ function getViewport(){
         "center":viewport_center,
         "zoom": viewport_zoom
     }
+}
+
+function initRouteDrawingTools(){
+    route_drawing_tools = new google.maps.drawing.DrawingManager({
+        drawingMode: google.maps.drawing.OverlayType.POLYLINE,
+        drawingControl: false,
+        drawingControlOptions: {
+            position: google.maps.ControlPosition.TOP_CENTER,
+            drawingModes: [
+                google.maps.drawing.OverlayType.POLYLINE,
+            ],
+        },
+        polygonOptions:{
+            editable:true,
+            fillColor: "#0000dd",
+            strokeColor: "#0000ff"
+        },
+    });
+
+    route_drawing_tools.addListener("polylinecomplete", function(polyline){
+        console.log("polygon complete: " + polyline);
+
+
+        //setRoute(null, polyline);
+    });
+
+    toggleRouteDrawingControl(false);
+
+    route_drawing_tools.setMap(null);
 }
 
 function initPolygonDrawingTools(){
@@ -165,10 +195,10 @@ function initPolygonDrawingTools(){
 
         });
 
-        setRegistedPolygon(null, polygon);
+        setRegisted(registed_polygon, null, polygon);
     });
 
-    toggleDrawingControl(false);
+    togglePolygonDrawingControl(false);
 
     polygon_drawing_tools.setMap(null);
 }
@@ -182,12 +212,19 @@ function convertPath(path_points){
     return result;
 }
 
-function setRegistedPolygon(visible, value){
+function setRegisted(register, visible, value){
     //Get last polygon and deletes old one
-    if (registed_polygon != null){
-        registed_polygon.setMap(visible);
+    if (register != null){
+        register.setMap(visible);
     }
-    registed_polygon = value;
+    register = value;
+}
+
+function setRoute(visible, value){
+    if (registed_route != null){
+        registed_route.setMap(visible);
+    }
+    registed_route = value;
 }
 
 // --- Geocoding Functions ---
@@ -300,48 +337,31 @@ function center(given_points){
     return point(center[0], center[1]);
 }
 
-function createPolygon(color){
-   /* other_markers = markers.length;
-    last_index = lines.length;
-    click_listener = map.addListener("click", (mapsMouseEvent) => {
-        const latLng = mapsMouseEvent.latLng;
-        points.push(latLng);
-        addMarker(latLng);
-        console.log(points);
-
-        if (points.length > 1){
-            //
-            const dist = distanceSquared(points[0].toJSON(), points[points.length-1].toJSON());
-            if (dist < 5.0e-7){
-                //Vaditation of the polygon
-
-                //Creation of the polygon
-                const polygon_center = center(points);
-                console.log(polygon_center);
-                setMarkers(other_markers, markers.length, null);
-                addPolygon(points, polygon_center, color);
-                points = [];
-            } else {
-                const new_line = line(points[points.length-2], points[points.length-1]);
-                addLine(new_line, color);
-            }
-        }
-    });*/
-    toggleDrawingControl(false);
+function toggleDrawing(value){
+    togglePolygonDrawingControl(value);
+    toggleRouteDrawingControl(value);
 }
 
-function toggleDrawingControl(value){
-    polygon_drawing_tools.setOptions({
+function toggleDrawingControl(tools, registed, value){
+    tools.setOptions({
         drawingControl: value
     });
     if (value){
-        polygon_drawing_tools.setMap(map);
-        setRegistedPolygon(map, registed_polygon);
+        tools.setMap(map);
+        setRegisted(registed, map, registed);
     } else {
-        polygon_drawing_tools.setMap(null);
-        setRegistedPolygon(null, registed_polygon);
+        tools.setMap(null);
+        setRegisted(registed, null, registed);
     }
 }
+
+function togglePolygonDrawingControl(value){
+    toggleDrawingControl(polygon_drawing_tools, registed_polygon, value);
+}
+
+function toggleRouteDrawingControl(value){
+    toggleDrawingControl(route_drawing_tools, registed_route, value);
+} 
 
 function clearTemporaryData(){
     setLines(last_index, lines.length, null);

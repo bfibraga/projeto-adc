@@ -56,6 +56,8 @@ public class NotificationImplementation implements Notifications {
                 return Result.error(Response.Status.FORBIDDEN, "Não e possivel enviar mais mensagens neste sentido.");
             }
 
+            this.cache.remove(data.getReceiver());
+
             Entity transaction = Entity.newBuilder(notificationKey)
                     .set(PROPERTY_ID_OF_SENDER, data.getSender())
                     .set(PROPERTY_ID_OF_RECEIVER, data.getReceiver())
@@ -115,6 +117,7 @@ public class NotificationImplementation implements Notifications {
                 LOG.severe("A notificacao pretendida nao foi encontrada. Verifique se todos os campos estao bem feitos.");
                 return Result.error(Response.Status.NOT_FOUND, "Notificacao nao encontrada.");
             }
+
             txn.delete(notificationKey);
             txn.commit();
             return Result.ok();
@@ -143,16 +146,4 @@ public class NotificationImplementation implements Notifications {
         }
         return i < MAXIMUM_NUMBER_OF_MESSAGES;
     }
-
-    public boolean userExists(String user_username) {
-        LOG.fine("Query was started.");
-        Query<Entity> query;
-        QueryResults<Entity> results;
-
-        query = Query.newEntityQueryBuilder().setKind("UserCredentials").setFilter(
-                StructuredQuery.CompositeFilter.and(StructuredQuery.PropertyFilter.eq("usr_username", user_username))).build();
-        results = datastore.run(query);
-        return results.hasNext();
-    }
-
 }
