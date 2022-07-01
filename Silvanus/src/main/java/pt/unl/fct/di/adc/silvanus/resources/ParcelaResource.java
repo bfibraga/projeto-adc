@@ -29,7 +29,7 @@ public class ParcelaResource implements RestParcel {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -187,6 +187,21 @@ public class ParcelaResource implements RestParcel {
     @Override
     public Response listTerrainsInChunk(LatLng pos) {
         Result<List<LatLng[]>> result = impl.queryTerrainsInChunk(pos);
+        if (!result.isOK())
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+        return Response.ok().entity(result.value()).build();
+    }
+
+    @Override
+    public Response listTerrainsInRelationToCoordinate(String token, float coordinate, String orientation) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+        Result<List<TerrainResultData>> result = impl.getAllTerrainsInRelationToCoordinate(coordinate, orientation);
+
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
         return Response.ok().entity(result.value()).build();

@@ -1,7 +1,8 @@
 package pt.unl.fct.di.adc.silvanus.implementation.user;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
@@ -13,18 +14,16 @@ import io.jsonwebtoken.*;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.user.perms.UserRole;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
-import pt.unl.fct.di.adc.silvanus.util.cache.ResultCacheManager;
 import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
 
 import pt.unl.fct.di.adc.silvanus.util.cripto.PASSWORD;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
-
-import java.util.HashSet;
 
 public class UserImplementation implements Users {
 
@@ -32,21 +31,20 @@ public class UserImplementation implements Users {
 	private static final Logger LOG = Logger.getLogger(UserImplementation.class.getName());
 	// Datastore
 	private Datastore datastore;
-
 	private KeyFactory userKeyFactory;
 	private KeyFactory userRoleKeyFactory;
-	private KeyFactory userPerfilFactory;
+	private KeyFactory userPerfilKeyFactory;
 	private KeyFactory userPermissionKeyFactory;
-
-
 
 	//Cache
 	private UserCacheManager<String> cache = new UserCacheManager<>();
-	private ResultCacheManager<String> resultCacheManager = new ResultCacheManager<>();
 
 	public UserImplementation(){
 		this.datastore = DatastoreOptions.getDefaultInstance().getService();
 		this.userKeyFactory = datastore.newKeyFactory().setKind("UserCredentials");
+		this.userRoleKeyFactory = datastore.newKeyFactory().setKind("UserRole");
+		this.userPerfilKeyFactory = datastore.newKeyFactory().setKind("UserPerfil");
+		this.userPermissionKeyFactory = datastore.newKeyFactory().setKind("UserPermission");
 	}
 	@Override
 	public Result<String> register(UserData data) {
@@ -75,17 +73,23 @@ public class UserImplementation implements Users {
 
 		try {
 			// Verify if user exists
-			Entity user = txn.get(userKey);
-
-			if (user != null) {
+			QueryResults<Entity> result = this.find(loginData.getUsername(), "UserCredentials", "usr_username", 1);
+			if (result.hasNext()){
 				txn.rollback();
 				LOG.fine("Username " + data.getCredentials().getUsername() + "already exists\nTry again with another fancy nickname");
 				return Result.error(Response.Status.FORBIDDEN, "Username " + data.getCredentials().getUsername() + "already exists\nTry again with another fancy nickname");
 			}
 
+			result = this.find(loginData.getEmail(), "UserCredentials", "usr_email", 1);
+			if (result.hasNext()) {
+				txn.rollback();
+				LOG.fine("Email " + data.getCredentials().getEmail() + "already exists\nTry again with another fancy email");
+				return Result.error(Response.Status.FORBIDDEN, "Username " + data.getCredentials().getUsername() + "already exists\nTry again with another fancy nickname");
+			}
+
 			// Create a new User
 			String encriptedPassword = PASSWORD.digest(loginData.getPassword());
-			user = Entity.newBuilder(userKey)
+			Entity user = Entity.newBuilder(userKey)
 					.set("usr_username", loginData.getUsername())
 					.set("usr_email", loginData.getEmail())
 					.set("usr_password", encriptedPassword)
@@ -93,7 +97,9 @@ public class UserImplementation implements Users {
 			this.cache.put(user_id, loginData);
 
 			// Role attribution
+			System.out.println(data.getRole());
 			UserRole role = UserRole.compareType(data.getRole());
+			System.out.println(role.getRoleName());
 			Entity userRole = Entity.newBuilder(userRoleKey)
 					.set("role_name", role.getRoleName())
 					.set("role_priority", role.getPriority()).build();
@@ -126,13 +132,14 @@ public class UserImplementation implements Users {
 					.build();
 
 			//TODO: First Registration information
-			String jws = TOKEN.createNewJWS(user_id, 1, new HashSet<>());
+			String jws = TOKEN.createNewJWS(user_id, 1, new ArrayList<>());
 
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
 
 			long time = System.currentTimeMillis() - now;
-			LOG.info("User register " + loginData.getUsername() + " successfully: " + time);
+
+			LOG.info("User register " + loginData.getUsername() + " successfully: " + time + " miliseconds");
 			return Result.ok(jws, "User register " + loginData.getUsername() + " successfully");
 		} finally {
 			if (txn.isActive()) {
@@ -215,7 +222,7 @@ public class UserImplementation implements Users {
 			hashedPassword = loginData.getPassword();
 
 			if (hashedPassword.equals(PASSWORD.digest(data.getPassword()))){
-				String jws = TOKEN.createNewJWS(user_id, 1, new HashSet<>());
+				String jws = TOKEN.createNewJWS(user_id, 1, new ArrayList<>());
 
 				String refresh_token = TOKEN.newRefreshToken();
 
@@ -249,7 +256,7 @@ public class UserImplementation implements Users {
 
 					int operation_level = 1;
 
-					String jws = TOKEN.createNewJWS(data.getID(), operation_level, new HashSet<>());
+					String jws = TOKEN.createNewJWS(data.getID(), operation_level, new ArrayList<>());
 
 					String refresh_token = TOKEN.newRefreshToken();
 
@@ -492,7 +499,7 @@ public class UserImplementation implements Users {
 	}
 
 	private UserInfoVisible getInfo(Entity userEntity){
-		String user_id = userEntity.getKey().getName();
+		String user_id = (String) userEntity.getKey().getNameOrId();
 
 		System.out.println(user_id);
 		Key infoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
@@ -550,7 +557,7 @@ public class UserImplementation implements Users {
 			Key remove_userKey = userKeyFactory.newKey(userID);
 			Key remove_userRoleKey = userRoleKeyFactory.newKey(userID);
 			Key remove_userPermissionKey = userPermissionKeyFactory.newKey(userID);
-			Key remove_userInfoKey = userPerfilFactory.newKey(userID);
+			Key remove_userInfoKey = userPerfilKeyFactory.newKey(userID);
 
 			Transaction txn = datastore.newTransaction();
 
@@ -561,27 +568,50 @@ public class UserImplementation implements Users {
 
 				txn.delete(remove_userKey, remove_userRoleKey, remove_userPermissionKey, remove_userInfoKey);
 				txn.commit();
+
+				return Result.ok();
 			} finally {
 				if(txn.isActive()){
 					txn.rollback();
 				}
 			}
 
-		} else {
-			String remove_id = "";
-
-			QueryResults<Entity> result = this.find(identifier, "UserCredentials", "usr_username", 5);
-			if (!result.hasNext()){
-				result = this.find(identifier, "UserCredentials", "usr_email", 5);
-			}
-
-			if (!result.hasNext()){
-				return Result.error(Status.NOT_FOUND, "User "+ identifier + " doens't exist");
-			} else {
-				remove_id = result.next().getKey().getName();
-			}
 		}
 
+		String remove_id;
+
+		QueryResults<Entity> result = this.find(identifier, "UserCredentials", "usr_username", 1);
+		if (!result.hasNext()){
+			result = this.find(identifier, "UserCredentials", "usr_email", 1);
+		}
+
+		if (!result.hasNext()){
+			return Result.error(Status.NOT_FOUND, "User "+ identifier + " doens't exist");
+		} else {
+			remove_id = result.next().getKey().getName();
+		}
+
+		Key remove_userKey = userKeyFactory.newKey(remove_id);
+		Key remove_userRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(remove_id);
+		Key remove_userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(remove_id);
+		Key remove_userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(remove_id);
+
+		Transaction txn = datastore.newTransaction();
+
+		try {
+			//Has permission to remove himself?
+
+			//Verify if this user is active
+
+			txn.delete(remove_userKey, remove_userRoleKey, remove_userPermissionKey, remove_userInfoKey);
+			txn.commit();
+
+			return Result.ok();
+		} finally {
+			if(txn.isActive()){
+				txn.rollback();
+			}
+		}
 
 		//Query to lookup all users
 
@@ -653,7 +683,6 @@ public class UserImplementation implements Users {
 				txn.rollback();
 			}
 		}*/
-		return Result.ok();
 	}
 
 	@Override

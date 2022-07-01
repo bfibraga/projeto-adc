@@ -10,6 +10,7 @@ import pt.unl.fct.di.adc.silvanus.data.user.auth.TokenParams;
 import javax.ws.rs.core.NewCookie;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,7 +43,7 @@ public class TOKEN {
      * @param operation_level - Level of the operation that can perform with this token
      * @return JWT for given user
      */
-    public static String createNewJWS(String user_id, int operation_level, Set<String> scope){
+    public static String createNewJWS(String user_id, int operation_level, List<String> scope){
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         Date expiration = new Date(nowMillis + (DEFAULT_USER_EXPIRATION)/operation_level);

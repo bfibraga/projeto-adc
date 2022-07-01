@@ -310,3 +310,25 @@ h1,p,label,a{
 [data-app-menu-active="false"]{
   display: none !important;
 }
+
+.app-menu-header{
+  transform-origin: center;
+  position: absolute;
+  height: 4rem;
+  width: 100%;
+  padding-left: 1rem;
+}
+
+.app-menu-body{
+  position: absolute;
+  top: 4rem;
+  overflow: scroll;
+}
+
+.app-menu-text{
+  margin-top: 1rem;
+}
+
+a {
+  text-decoration: none;
+}

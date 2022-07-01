@@ -21,7 +21,7 @@ public enum UserRole {
 
 	public static UserRole compareType(String type) {
 		for (UserRole r : UserRole.values()) {
-			if (r.toString().equalsIgnoreCase(type)) {
+			if (r.getRoleName().equalsIgnoreCase(type)) {
 				return r;
 			}
 		}

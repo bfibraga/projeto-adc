@@ -1,7 +1,5 @@
-package pt.unl.fct.di.adc.silvanus.data.parcel;
+package pt.unl.fct.di.adc.silvanus.data.terrain;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
 

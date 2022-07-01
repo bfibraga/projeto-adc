@@ -1,6 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.util.chunks;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.Chunk;
+import pt.unl.fct.di.adc.silvanus.data.terrain.Chunk;
 
 public class ChunkManager<C> {
 

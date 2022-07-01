@@ -17,9 +17,16 @@ public class UserData {
 	public UserData(
 			LoginData credentials,
 			String confirm_password,
+			UserInfoData info) {
+		this(credentials, confirm_password, info, "USER", new UserStateData());
+	}
+
+	public UserData(
+			LoginData credentials,
+			String confirm_password,
 			String role,
 			UserInfoData info) {
-		this(credentials, confirm_password, info, UserRole.compareType(role).getRoleName(), new UserStateData());
+		this(credentials, confirm_password, info, role, new UserStateData());
 	}
 
 	public UserData(

@@ -148,6 +148,7 @@ public interface RestParcel {
 
     /**
      * This method is used to list all the terrains in a given chunk.
+     *
      * @param pos position of the user on the map
      * @return ok if everything went correctly, an error otherwise
      */
@@ -156,4 +157,18 @@ public interface RestParcel {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     Response listTerrainsInChunk(LatLng pos);
+
+
+    /**
+     *
+     * @param token
+     * @param coordinate
+     * @param orientation
+     * @return
+     */
+    @POST
+    @Path("/list/search/coordinate/{coordinate}/orientation/{orientation}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    Response listTerrainsInRelationToCoordinate(@CookieParam(TOKEN) String token, @PathParam("coordinate") float coordinate, @PathParam("orientation") String orientation);
 }

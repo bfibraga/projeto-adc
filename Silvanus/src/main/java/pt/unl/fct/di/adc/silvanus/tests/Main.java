@@ -1,7 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.tests;
 
 import com.beust.ah.A;
-import pt.unl.fct.di.adc.silvanus.util.chunks.Chunk;
+import pt.unl.fct.di.adc.silvanus.util.chunks.Chunk2;
 import pt.unl.fct.di.adc.silvanus.util.chunks.ChunkBoard;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class Main {
 
         portugal.printChunks();
 
-        Chunk<String>[][] selectedArea = portugal.getArea(new double[]{ -9.0, 42}, new double[]{ -8, 40.0});
+        Chunk2<String>[][] selectedArea = portugal.getArea(new double[]{ -9.0, 42}, new double[]{ -8, 40.0});
         for (int y = 0; y < selectedArea[0].length ; y++){
             for (int x = 0 ; x < selectedArea.length ; x++){
                 selectedArea[x][y].addContent("(" + x + ", " + y + ")");
@@ -74,12 +74,12 @@ public class Main {
         System.out.println(portugal.DiamondAngleToDegree((dia1-dia2)));
 
 
-        List<Chunk<String>> line = new ArrayList<>();
+        List<Chunk2<String>> line = new ArrayList<>();
         for (int i = 0 ; i < points.length-1 ; i++) {
             line.addAll(portugal.line(points[i][0], points[i][1], points[i+1][0], points[i+1][1]));
         }
         line.addAll(portugal.line(points[points.length-1][0], points[points.length-1][1], points[0][0], points[0][1]));
-        for (Chunk<String> chunk: line) {
+        for (Chunk2<String> chunk: line) {
             chunk.addContent("Line");
         }
 

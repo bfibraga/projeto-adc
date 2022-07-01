@@ -1,6 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.api.impl;
 
 import pt.unl.fct.di.adc.silvanus.data.user.*;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
