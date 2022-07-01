@@ -1,8 +1,9 @@
 package pt.unl.fct.di.adc.silvanus.util.chunks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkBoard<C> {
 
@@ -135,6 +136,12 @@ public class ChunkBoard<C> {
         this.get(x,y).clearContent();
     }
 
+    public List<Chunk2<C>> line(double x0, double y0, double x1, double y1){
+        int[] pos0 = worldCoordsToChunk(x0, y0);
+        int[] pos1 = worldCoordsToChunk(x1, y1);
+        return this.line(pos0[0], pos0[1], pos1[0], pos1[1]);
+    }
+
     public List<Chunk2<C>> line(int x0, int y0, int x1, int y1){
         if (Math.abs(y1-y0) < Math.abs(x1-x0)){
             if (x0 > x1){
@@ -166,7 +173,7 @@ public class ChunkBoard<C> {
 
         for (int y = y0 ; y <= y1 ; y++){
             Chunk2<C> chunk2 = this.get(x,y);
-            chunk2.setTag("PolygonBounds");
+            chunk2.setTag("B");
             result.add(chunk2);
             if (D > 0){
                 x += xi;
@@ -193,7 +200,7 @@ public class ChunkBoard<C> {
 
         for (int x = x0 ; x <= x1 ; x++){
             Chunk2<C> chunk2 = this.get(x,y);
-            chunk2.setTag("PolygonBounds");
+            chunk2.setTag("B");
             result.add(chunk2);
             if (D > 0){
                 y += yi;
@@ -266,12 +273,105 @@ public class ChunkBoard<C> {
             (dia < 3 ? ((dia > 1) ? 2-dia : dia) : dia-4)};
     }
 
+    @SafeVarargs
+    public final void fillArea(int top, int left, int bottom, int right, C... content){
+        for (int y = bottom; y <= top; y++) {
+            int intersect = 0;
+            for (int x = left; x <= right; x++) {
+                Chunk2<C> previous = get(x-1,y);
+                Chunk2<C> current = get(x,y);
+                Chunk2<C> next = get(x+1,y);
+
+                if (current.hasContent() && !next.hasContent()){
+                    intersect++;
+                }
+
+                if (previous != null && previous.hasContent() && intersect % 2 != 0){
+                    current.addContent(content);
+                }
+            }
+        }
+    }
+
+    public void polygon(LatLng[] points){
+        List<Chunk2<C>> lines = new ArrayList<>();
+
+        int top = Integer.MIN_VALUE;
+        int bottom = Integer.MAX_VALUE;
+        int right = Integer.MIN_VALUE;
+        int left = Integer.MAX_VALUE;
+
+        for (int p = 0; p < points.length-1; p++) {
+            LatLng current = points[p];
+            LatLng next = points[p+1];
+
+            int[] currentChunkCoord = worldCoordsToChunk(current.getLng(), current.getLat());
+            System.out.println(Arrays.toString(currentChunkCoord));
+
+            top = Math.max(top, currentChunkCoord[1]);
+            bottom = Math.min(bottom, currentChunkCoord[1]);
+            right = Math.max(right, currentChunkCoord[0]);
+            left = Math.min(left, currentChunkCoord[0]);
+
+            lines.addAll(this.line(current.getLng(), current.getLat(), next.getLng(), next.getLat()));
+        }
+        //TODO Refatorizar codigo repetido
+        int[] currentChunkCoord = worldCoordsToChunk(points[points.length-1].getLng(), points[points.length-1].getLat());
+
+        top = Math.max(top, currentChunkCoord[1]);
+        bottom = Math.min(bottom, currentChunkCoord[1]);
+        right = Math.max(right, currentChunkCoord[0]);
+        left = Math.min(left, currentChunkCoord[0]);
+
+        lines.addAll(this.line(points[0].getLng(), points[0].getLat(), points[points.length-1].getLng(), points[points.length-1].getLat()));
+
+        System.out.println(top);
+        System.out.println(bottom);
+        System.out.println(right);
+        System.out.println(left);
+
+        //TODO
+        Map<Integer, int[]> intersect_lines = new HashMap<>();
+
+        for (int y = bottom; y <= top; y++) {
+            int nIntersections = 0;
+            int start = left;
+            int finish = start;
+            for (int x = left; x <= right; x++) {
+                Chunk2<C> current = get(x,y);
+                if (current.getTag().equals("B")){
+                    nIntersections++;
+                }
+
+                if (nIntersections > 0){
+                    if (nIntersections % 2 != 0){
+                        start = x;
+                    } else {
+                        finish = x;
+                        intersect_lines.put(y, new int[]{start, finish});
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    //TODO Remove this later
     public void printChunks(){
+        for (int x = 0; x < this.chunk2s.length; x++) {
+            System.out.printf(" %s ", x);
+        }
+        System.out.println();
+
         for (int y = this.chunk2s[0].length - 1; y >= 0 ; y--) {
             for (int x = 0; x < this.chunk2s.length; x++) {
-                System.out.print(!this.chunk2s[x][y].getTag().equals("") ? "[X]" : "[_]");
+                String tag = this.chunk2s[x][y].getTag();
+
+                System.out.print( tag.equals("") ? "[_]" : String.format("[%s]", tag));
+
             }
-            System.out.println();
+            System.out.println(y);
         }
     }
 }
