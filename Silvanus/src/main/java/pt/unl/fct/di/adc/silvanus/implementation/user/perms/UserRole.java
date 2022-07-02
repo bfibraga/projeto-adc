@@ -2,9 +2,9 @@ package pt.unl.fct.di.adc.silvanus.implementation.user.perms;
 
 public enum UserRole {
 	HELPDESK("Helpdesk", "#202020"),
-	USER("User", "#6aa84f"),
-	BACKOFC("BackOffice", "#6fa8dc"),
-	SUPBACKOFC("SuperBackOffice", "#e69138"),
+	ENDUSER("End-User", "#6aa84f"),
+	FUNCCONS("Func-Cons", "#6fa8dc"),
+	FUNCDIST("Func-Dist", "#e69138"),
 	ADMIN("Admin", "#cc0000");
 
 	private String role_name;
@@ -25,7 +25,7 @@ public enum UserRole {
 				return r;
 			}
 		}
-		return USER;
+		return ENDUSER;
 	}
 	
 	public String toString() {
