@@ -157,7 +157,26 @@ function communityResponsible(username, email, avatar){
     LoadHTMLDoc(elemName, handleCommunityMember, params);
 }
 
+function listUserProfile(profile){
+    const elemName = "elems/user-profile.html"; 
+    let params = [profile, "list_users_promote"];
+
+    LoadHTMLDoc(elemName, handlePromotionMember, params);
+}
+
 function handleCommunityMember(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    const profile = params[0];
+
+    elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", profile.username);
+    elems[name].querySelector(".usr_email").insertAdjacentHTML("beforeend", profile.email);
+    elems[name].querySelector(".profile-img").src = profile.avatar;
+
+    document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
+function handlePromotionMember(name, xmlDoc, params){
     elems[name] = parser.parseFromString(xmlDoc, "text/html");
 
     elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", params[0]);
@@ -167,4 +186,3 @@ function handleCommunityMember(name, xmlDoc, params){
     //let target = ;
     document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
-

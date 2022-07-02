@@ -561,7 +561,7 @@ public class UserImplementation implements Users {
 				infoEntity.getString("usr_smartphone"));
 		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
 		System.out.println(role);
-		UserRoleData roleData = new UserRoleData(role.getRoleName(), role.getRoleColor());
+		UserRoleData roleData = new UserRoleData(role.getDisplayName(), role.getRoleColor());
 		System.out.println(roleData);
 		LogoutData logoutData = lastLogout == null ?
 				new LogoutData() :
@@ -576,7 +576,7 @@ public class UserImplementation implements Users {
 				userEntity.getString("usr_email"),
 				info,
 				stateEntity.getString("usr_state"),
-				role.getRoleName(),
+				role.getDisplayName(),
 				role.getRoleColor(),
 				logoutData,
 				new LoggedInVisibleData()

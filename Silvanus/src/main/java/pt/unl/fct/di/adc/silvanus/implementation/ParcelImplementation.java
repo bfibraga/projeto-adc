@@ -837,7 +837,6 @@ public class ParcelImplementation implements Parcel {
                 return Result.error(Response.Status.BAD_REQUEST, "The relative position is not valid.");
         }
 
-
         results = datastore.run(query);
 
         if (!results.hasNext())

@@ -1,22 +1,24 @@
 package pt.unl.fct.di.adc.silvanus.implementation.user.perms;
 
 public enum UserRole {
-	HELPDESK("Helpdesk", "#202020"),
-	ENDUSER("End-User", "#6aa84f"),
-	FUNCCONS("Func-Cons", "#6fa8dc"),
-	FUNCDIST("Func-Dist", "#e69138"),
-	ADMIN("Admin", "#cc0000");
+	HELPDESK("Helpdesk", "Helpdesk", "#202020"),
+	ENDUSER("End-User", "Utilizador", "#6aa84f"),
+	FUNCCONS("Func-Cons", "Funcionario de %s", "#6fa8dc"),
+	FUNCDIST("Func-Dist", "Funcionario de %s", "#e69138"),
+	ADMIN("Admin", "Administrador", "#cd0000");
 
 	private String role_name;
+	private String display_name;
 	private String role_color;
 
-	UserRole(String role_name, String role_color){
+	UserRole(String role_name, String display_name, String role_color){
 		this.role_name = role_name;
+		this.display_name = display_name;
 		this.role_color = role_color;
 	}
 
 	UserRole(){
-		this("User", "#6aa84f");
+		this("End-User", "Utilizador", "#6aa84f");
 	}
 
 	public static UserRole compareType(String type) {
@@ -34,6 +36,10 @@ public enum UserRole {
 
 	public String getRoleName(){
 		return this.role_name;
+	}
+
+	public String getDisplayName() {
+		return display_name;
 	}
 
 	public String getRoleColor(){

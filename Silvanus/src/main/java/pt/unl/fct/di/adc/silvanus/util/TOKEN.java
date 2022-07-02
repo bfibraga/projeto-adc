@@ -57,7 +57,7 @@ public class TOKEN {
                 .setSubject(user_id)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
-                .claim("params", tokenParams)
+                .claim("scope", scope)
                 .signWith(key);
 
         //Builds the JWT and serializes it to a compact, URL-safe string
