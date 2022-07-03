@@ -37,7 +37,7 @@ public class Main {
         System.out.println(portugal.isInside(-9.55,36.85));
         System.out.println(madeira.isInside(-9.55,36.85));
 
-        LatLng[] points = new LatLng[5];
+        LatLng[] points = new LatLng[4];
 
         /*{
             "lat": 42.03,
@@ -56,13 +56,23 @@ public class Main {
             "lng": -9.42
         }*/
 
-        points[0] = new LatLng((float) 39.37902, (float) -8.85768);
-        points[1] = new LatLng((float) 39.85455, (float) -8.51985);
-        points[4] = new LatLng((float) 39.67721, (float) -8.3578);
-        points[3] = new LatLng((float) 40.13441, (float) -7.98427);
-        points[2] = new LatLng((float) 39.19581, (float) -8.04469);
+        points[0] = new LatLng((float) 42.03, (float) -9.54);
+        points[1] = new LatLng((float) 42.169, (float) -9.54);
+        points[2] = new LatLng((float) 42.169, (float) -9.42);
+        points[3] = new LatLng((float) 42.03, (float) -9.42);
 
-        portugal.polygon(points);
+
+        /*points[0] = new LatLng((float) 39.37902, (float) -8.85768);
+        points[1] = new LatLng((float) 39.85455, (float) -8.51985);
+        points[2] = new LatLng((float) 39.67721, (float) -8.3578);
+        points[3] = new LatLng((float) 40.13441, (float) -7.98427);
+        points[4] = new LatLng((float) 39.19581, (float) -8.04469);*/
+
+        List<Chunk2<String>> polygonResult = portugal.polygon(points);
+
+        for (Chunk2<String> chunk: polygonResult) {
+            chunk.setTag("P");
+        }
 
         portugal.printChunks();
     }

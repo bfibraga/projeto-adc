@@ -1,8 +1,12 @@
 package pt.unl.fct.di.adc.silvanus.util.chunks;
 
+import org.locationtech.jts.geom.Polygon;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
+import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkBoard<C> {
@@ -98,6 +102,16 @@ public class ChunkBoard<C> {
         return new int[]{x,y};
     }
 
+    private LatLng chunkToWorldCoords(int x, int y){
+
+        LatLng result = new LatLng(
+                (float) (x*chunkSize[0] + offset[0]),
+                (float) (y*chunkSize[1] + offset[1])
+        );
+        System.out.printf("(%s,%s)->%s%n", x, y,result);
+        return result;
+    }
+
     @SafeVarargs
     public final void add(int x, int y, C... content) {
         this.get(x,y).addContent(content);
@@ -173,7 +187,6 @@ public class ChunkBoard<C> {
 
         for (int y = y0 ; y <= y1 ; y++){
             Chunk2<C> chunk2 = this.get(x,y);
-            chunk2.setTag("B");
             result.add(chunk2);
             if (D > 0){
                 x += xi;
@@ -200,7 +213,6 @@ public class ChunkBoard<C> {
 
         for (int x = x0 ; x <= x1 ; x++){
             Chunk2<C> chunk2 = this.get(x,y);
-            chunk2.setTag("B");
             result.add(chunk2);
             if (D > 0){
                 y += yi;
@@ -212,89 +224,8 @@ public class ChunkBoard<C> {
         return result;
     }
 
-    @SafeVarargs
-    public final void fill(int x, int y, C... content){
-        Chunk2<C> chunk2 = this.get(x,y);
-        System.out.println(chunk2.getTag());
-        if (!chunk2.getTag().equals("PolygonBounds") && !chunk2.getTag().equals("PolygonFill")){
-            chunk2.setTag("PolygonFill");
-            chunk2.addContent(content);
-
-            if (isInside(x+1,y)){
-                fill(x+1,y,content);
-            }
-            if (isInside(x,y+1)){
-                fill(x,y+1,content);
-            }
-            if (isInside(x-1, y)){
-                fill(x-1,y,content);
-            }
-            if(isInside(x, y-1)){
-                fill(x,y-1,content);
-            }
-            /*if (isInside(x+1,y+1)){
-                fill(x+1,y+1,content);
-            }
-            if (isInside(x-1,y+1)){
-                fill(x-1,y+1,content);
-            }
-            if (isInside(x-1,y-1)){
-                fill(x-1,y-1,content);
-            }
-            if(isInside(x+1,y-1)){
-                fill(x+1,y-1,content);
-            }*/
-        }
-    }
-
-    public double DiamondAngle(double x, double y)
-    {
-        if (y >= 0)
-            return (x >= 0 ? y/(x+y) : 1-x/(-x+y));
-        else
-            return (x < 0 ? 2-y/(-x-y) : 3+x/(x-y));
-    }
-
-    public double DiamondAngleToRadians(double dia)
-    {
-        double[] P = DiamondAngleToPoint(dia);
-        return Math.atan2(P[1],P[0]);
-    }
-
-    public double DiamondAngleToDegree(double dia)
-    {
-        double rad = DiamondAngleToRadians(dia);
-        return (rad*180)/Math.PI;
-    }
-
-    public double[] DiamondAngleToPoint(double dia)
-    {
-        return new double[]{(dia < 2 ? 1-dia : dia-3),
-            (dia < 3 ? ((dia > 1) ? 2-dia : dia) : dia-4)};
-    }
-
-    @SafeVarargs
-    public final void fillArea(int top, int left, int bottom, int right, C... content){
-        for (int y = bottom; y <= top; y++) {
-            int intersect = 0;
-            for (int x = left; x <= right; x++) {
-                Chunk2<C> previous = get(x-1,y);
-                Chunk2<C> current = get(x,y);
-                Chunk2<C> next = get(x+1,y);
-
-                if (current.hasContent() && !next.hasContent()){
-                    intersect++;
-                }
-
-                if (previous != null && previous.hasContent() && intersect % 2 != 0){
-                    current.addContent(content);
-                }
-            }
-        }
-    }
-
-    public void polygon(LatLng[] points){
-        List<Chunk2<C>> lines = new ArrayList<>();
+    public List<Chunk2<C>> polygon(LatLng[] points){
+        List<Chunk2<C>> result = new ArrayList<>();
 
         int top = Integer.MIN_VALUE;
         int bottom = Integer.MAX_VALUE;
@@ -313,7 +244,7 @@ public class ChunkBoard<C> {
             right = Math.max(right, currentChunkCoord[0]);
             left = Math.min(left, currentChunkCoord[0]);
 
-            lines.addAll(this.line(current.getLng(), current.getLat(), next.getLng(), next.getLat()));
+            result.addAll(this.line(current.getLng(), current.getLat(), next.getLng(), next.getLat()));
         }
         //TODO Refatorizar codigo repetido
         int[] currentChunkCoord = worldCoordsToChunk(points[points.length-1].getLng(), points[points.length-1].getLat());
@@ -323,46 +254,40 @@ public class ChunkBoard<C> {
         right = Math.max(right, currentChunkCoord[0]);
         left = Math.min(left, currentChunkCoord[0]);
 
-        lines.addAll(this.line(points[0].getLng(), points[0].getLat(), points[points.length-1].getLng(), points[points.length-1].getLat()));
+        result.addAll(this.line(points[0].getLng(), points[0].getLat(), points[points.length-1].getLng(), points[points.length-1].getLat()));
 
         System.out.println(top);
         System.out.println(bottom);
         System.out.println(right);
         System.out.println(left);
 
-        //TODO
-        Map<Integer, int[]> intersect_lines = new HashMap<>();
 
+        Polygon terrainPolygon = PolygonUtils.polygon(points);
         for (int y = bottom; y <= top; y++) {
-            int nIntersections = 0;
-            int start = left;
-            int finish = start;
             for (int x = left; x <= right; x++) {
-                Chunk2<C> current = get(x,y);
-                if (current.getTag().equals("B")){
-                    nIntersections++;
-                }
+                LatLng currPoint = chunkToWorldCoords(x,y);
 
-                if (nIntersections > 0){
-                    if (nIntersections % 2 != 0){
-                        start = x;
-                    } else {
-                        finish = x;
-                        intersect_lines.put(y, new int[]{start, finish});
-                    }
-                }
+                Polygon chunkPolygon = PolygonUtils.box(
+                        (float) (currPoint.getLat() + (chunkSize[1])),
+                        currPoint.getLat(),
+                        currPoint.getLng(),
+                        (float) (currPoint.getLng() + (chunkSize[0])));
 
+                if (chunkPolygon.intersects(terrainPolygon)){
+                    Chunk2<C> target = get(x,y);
+                    result.add(get(x,y));
+                }
             }
         }
-
+        return result;
     }
 
     //TODO Remove this later
     public void printChunks(){
-        for (int x = 0; x < this.chunk2s.length; x++) {
+        /*for (int x = 0; x < this.chunk2s.length; x++) {
             System.out.printf(" %s ", x);
         }
-        System.out.println();
+        System.out.println();*/
 
         for (int y = this.chunk2s[0].length - 1; y >= 0 ; y--) {
             for (int x = 0; x < this.chunk2s.length; x++) {
@@ -371,7 +296,7 @@ public class ChunkBoard<C> {
                 System.out.print( tag.equals("") ? "[_]" : String.format("[%s]", tag));
 
             }
-            System.out.println(y);
+            System.out.println();
         }
     }
 }
