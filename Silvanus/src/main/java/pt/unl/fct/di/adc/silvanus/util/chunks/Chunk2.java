@@ -48,7 +48,11 @@ public class Chunk2<C> {
 
     @Override
     public String toString() {
-        return String.format("(%d, %d): %s", this.getX(), this.getY(), this.getContent());
+        return String.format("%s: %s", this.getID(), this.getContent());
+    }
+
+    public String getID(){
+        return String.format("(%d, %d)", this.getX(), this.getY());
     }
 
     @SafeVarargs

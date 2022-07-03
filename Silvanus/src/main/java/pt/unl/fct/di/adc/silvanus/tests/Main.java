@@ -4,6 +4,7 @@ import com.beust.ah.A;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.util.chunks.Chunk2;
 import pt.unl.fct.di.adc.silvanus.util.chunks.ChunkBoard;
+import pt.unl.fct.di.adc.silvanus.util.chunks.exceptions.OutOfChunkBounds;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +38,7 @@ public class Main {
         System.out.println(portugal.isInside(-9.55,36.85));
         System.out.println(madeira.isInside(-9.55,36.85));
 
-        LatLng[] points = new LatLng[4];
+        LatLng[] points = new LatLng[5];
 
         /*{
             "lat": 42.03,
@@ -55,20 +56,25 @@ public class Main {
             "lat": 42.03,
             "lng": -9.42
         }*/
-
+/*
         points[0] = new LatLng((float) 42.03, (float) -9.54);
         points[1] = new LatLng((float) 42.169, (float) -9.54);
         points[2] = new LatLng((float) 42.169, (float) -9.42);
         points[3] = new LatLng((float) 42.03, (float) -9.42);
+*/
 
-
-        /*points[0] = new LatLng((float) 39.37902, (float) -8.85768);
+        points[0] = new LatLng((float) 39.37902, (float) -8.85768);
         points[1] = new LatLng((float) 39.85455, (float) -8.51985);
         points[2] = new LatLng((float) 39.67721, (float) -8.3578);
         points[3] = new LatLng((float) 40.13441, (float) -7.98427);
-        points[4] = new LatLng((float) 39.19581, (float) -8.04469);*/
+        points[4] = new LatLng((float) 39.19581, (float) -8.04469);
 
-        List<Chunk2<String>> polygonResult = portugal.polygon(points);
+        List<Chunk2<String>> polygonResult = new ArrayList<>();
+        try {
+            polygonResult = portugal.polygon(points);
+        } catch (OutOfChunkBounds e) {
+            System.out.println(e.getMessage());
+        }
 
         for (Chunk2<String> chunk: polygonResult) {
             chunk.setTag("P");

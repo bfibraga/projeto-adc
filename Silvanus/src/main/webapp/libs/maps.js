@@ -12,6 +12,8 @@ let registed_polygon;
 let registed_route;
 let polygon_result = null;
 
+let polygons = [];
+
 let click_listener;
 
 let viewport;
@@ -74,16 +76,20 @@ function initViewmap(){
         console.log(bound_box);*/
 
         //Request to DB
-        let center = point(viewport_center.lat, viewport_center.lng);
+        console.log(viewport_center);
+        let center = point(viewport_center.lat(), viewport_center.lng());
         console.log(center);
-        //loadChunk(center);
+        loadChunk(center);
     })
 
     map.addListener("bounds_changed", function(){
         //Bounds of the map
         viewport = map.getBounds();
-        viewport_center = map.getCenter();
         viewport_zoom = map.getZoom();
+    });
+
+    map.addListener("center_changed", function(){
+        viewport_center = map.getCenter();
     });
 }
 
@@ -304,9 +310,8 @@ function addLine(coords, color){
     lines.push(_line);
 }
 
-function addPolygon(coords, _center, color){
-    const polygon = { 
-        data: new google.maps.Polygon({
+function addPolygon(coords, color){
+    const polygon = new google.maps.Polygon({
         map,
         paths: coords,
         strokeColor: color,
@@ -315,12 +320,8 @@ function addPolygon(coords, _center, color){
         fillColor: color,
         fillOpacity: 0.30,
         geodesic: true,
-        editable: true,
-      }),
-      center: _center
-    };
+      });
     
-    polygons.push(coords);
     polygons.push(polygon);
 
     //addMarker(_center);

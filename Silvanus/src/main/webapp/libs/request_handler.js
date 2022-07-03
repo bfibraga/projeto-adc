@@ -94,6 +94,7 @@ async function getInfo(debug, user){
 	let loader = document.getElementById("loader");
 
 	try{
+		
 		/*communityResponsible("Grande", "grande@email.com", "https://cdn.discordapp.com/attachments/963781705100066836/991750011773779968/unknown.png")
 		communityMember("Teste", "teste@gmail.com", "https://media.discordapp.net/attachments/519977496117248012/982784973062942770/petpet.gif");
 		communityMember("Teste1", "teste@gmail.com", "https://media.discordapp.net/attachments/519977496117248012/982783082623029258/petpet.gif");
@@ -374,10 +375,18 @@ async function getPendingTerrain(){
 
 async function loadChunk(pos){
 	try{
-		let response = await axios.post("/api/parcel/list/chunk",
+		console.log(pos);
+		let response = await axios.post("/api/parcel/list/chunk/",
 			pos
 		);
-		console.log(response.data);
+		console.log(response);
+		const response_data = response.data;
+		console.log(data.chunk);
+		const array = response_data.data;
+		array.forEach(element => {
+			console.log(element);
+			addPolygon(element.points, element.color);
+		});
 	} catch (error){
 		console.log(error);
 	} finally {

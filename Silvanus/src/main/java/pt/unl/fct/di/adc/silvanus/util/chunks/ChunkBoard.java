@@ -3,6 +3,7 @@ package pt.unl.fct.di.adc.silvanus.util.chunks;
 import org.locationtech.jts.geom.Polygon;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
+import pt.unl.fct.di.adc.silvanus.util.chunks.exceptions.OutOfChunkBounds;
 
 import java.awt.*;
 import java.util.*;
@@ -42,13 +43,13 @@ public class ChunkBoard<C> {
         return this.chunk2s[x][y];
     }
 
-    public Chunk2<C> get(double posX, double posY) {
+    public Chunk2<C> get(double posX, double posY) throws OutOfChunkBounds {
         int[] pos = worldCoordsToChunk(posX, posY);
         return this.get(pos[0],pos[1]);
     }
 
     //TODO Testing
-    public Chunk2<C>[][] getArea(double[] topLeft, double[] bottomRight){
+    public Chunk2<C>[][] getArea(double[] topLeft, double[] bottomRight) throws OutOfChunkBounds {
         int[] posTL = this.worldCoordsToChunk(
                 Math.min(topLeft[0], bottomRight[0]),
                 Math.max(topLeft[1], bottomRight[1]));
@@ -86,7 +87,7 @@ public class ChunkBoard<C> {
         return x >= 0 && x < size[0] && y >= 0 && y < size[1];
     }
 
-    private int[] worldCoordsToChunk(double posX, double posY){
+    public int[] worldCoordsToChunk(double posX, double posY) throws OutOfChunkBounds {
         /*if (!inBounds(posX,posY)) {
             return new int[]{0,0};
         }*/
@@ -96,7 +97,7 @@ public class ChunkBoard<C> {
         int y = (int) Math.floor(boardPos[1] / chunkSize[1]);
 
         if(!isInside(x,y)){
-            return new int[]{};
+            throw new OutOfChunkBounds(String.format("(%s,%s)", x, y));
         }
 
         return new int[]{x,y};
@@ -118,7 +119,7 @@ public class ChunkBoard<C> {
     }
 
     @SafeVarargs
-    public final void add(double x, double y, C... content){
+    public final void add(double x, double y, C... content) throws OutOfChunkBounds {
         this.get(x,y).addContent(content);
     }
 
@@ -128,7 +129,7 @@ public class ChunkBoard<C> {
     }
 
     @SafeVarargs
-    public final void put(double x, double y, C... content){
+    public final void put(double x, double y, C... content) throws OutOfChunkBounds {
         this.get(x,y).putContent(content);
     }
 
@@ -138,7 +139,7 @@ public class ChunkBoard<C> {
     }
 
     @SafeVarargs
-    public final void remove(double x, double y, C... content){
+    public final void remove(double x, double y, C... content) throws OutOfChunkBounds {
         this.get(x,y).removeContent(content);
     }
 
@@ -146,11 +147,11 @@ public class ChunkBoard<C> {
         this.get(x,y).clearContent();
     }
 
-    public final void clear(double x, double y){
+    public final void clear(double x, double y) throws OutOfChunkBounds {
         this.get(x,y).clearContent();
     }
 
-    public List<Chunk2<C>> line(double x0, double y0, double x1, double y1){
+    public List<Chunk2<C>> line(double x0, double y0, double x1, double y1) throws OutOfChunkBounds {
         int[] pos0 = worldCoordsToChunk(x0, y0);
         int[] pos1 = worldCoordsToChunk(x1, y1);
         return this.line(pos0[0], pos0[1], pos1[0], pos1[1]);
@@ -224,7 +225,7 @@ public class ChunkBoard<C> {
         return result;
     }
 
-    public List<Chunk2<C>> polygon(LatLng[] points){
+    public List<Chunk2<C>> polygon(LatLng[] points) throws OutOfChunkBounds {
         List<Chunk2<C>> result = new ArrayList<>();
 
         int top = Integer.MIN_VALUE;
