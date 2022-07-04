@@ -11,6 +11,7 @@ let lines = [];
 let registed_polygon;
 let registed_route;
 let polygon_result = null;
+let route_result = null;
 
 let polygons = [];
 
@@ -94,7 +95,7 @@ function initViewmap(){
 }
 
 function setCenter(latlng){
-    map.setCenter(latlng);
+    map.panTo(latlng);
 }
 
 function setZoom(zoom){
@@ -114,12 +115,12 @@ function initRouteDrawingTools(){
         drawingMode: google.maps.drawing.OverlayType.POLYLINE,
         drawingControl: false,
         drawingControlOptions: {
-            position: google.maps.ControlPosition.TOP_CENTER,
+            position: google.maps.ControlPosition.TOP_LEFT,
             drawingModes: [
                 google.maps.drawing.OverlayType.POLYLINE,
             ],
         },
-        polygonOptions:{
+        polylineOptions:{
             editable:true,
             fillColor: "#0000dd",
             strokeColor: "#0000ff"
@@ -127,10 +128,28 @@ function initRouteDrawingTools(){
     });
 
     route_drawing_tools.addListener("polylinecomplete", function(polyline){
-        console.log("polygon complete: " + polyline);
+        console.log("polyline complete")
+        //Add event listener to edit and update all coords of last polygon
+        google.maps.event.addListener(polyline.getPath(), 'set_at', function() {
+            route_result = convertPath(polyline.getPath().getArray());
+            console.log(route_result);
+        });
 
+        google.maps.event.addListener(polyline.getPath(), 'insert_at', function() {
+            route_result = convertPath(polyline.getPath().getArray());
+            console.log(route_result);
+        });
 
-        //setRoute(null, polyline);
+        google.maps.event.addListener(polyline.getPath(), 'remove_at', function() {
+            route_result = convertPath(polyline.getPath().getArray());
+            console.log(route_result);
+
+        });
+
+        route_result = convertPath(polyline.getPath().getArray())
+        console.log(route_result);
+
+        setRoute(null, polyline);
     });
 
     toggleRouteDrawingControl(false);
@@ -156,52 +175,37 @@ function initPolygonDrawingTools(){
     });
 
     polygon_drawing_tools.addListener("polygoncomplete", function(polygon){
-        console.log("polygon complete");
-
         //Add event listener to edit and update all coords of last polygon
         google.maps.event.addListener(polygon.getPath(), 'set_at', function() {
-            console.log("set_at");
             polygon_result = convertPath(polygon.getPath().getArray());
-            console.log(polygon_result);
-            console.log("Area " + area(polygon_result));
+
         });
 
         google.maps.event.addListener(polygon.getPath(), 'insert_at', function() {
-            console.log("insert_at");
             polygon_result = convertPath(polygon.getPath().getArray());
-            console.log(polygon_result);
-            console.log("Area " + area(polygon_result));
+
 
         });
 
         google.maps.event.addListener(polygon.getPath(), 'remove_at', function() {
-            console.log("remove_at");
             polygon_result = convertPath(polygon.getPath().getArray());
-            console.log(polygon_result);
-            console.log("Area " + area(polygon_result));
 
         });
-        console.log(polygon.getPath().getArray());
 
         polygon_result = convertPath(polygon.getPath().getArray());
-        console.log(polygon_result);
-        console.log("Area " + area(polygon_result));
 
         let coord = polygon_result[0].lat + "," + polygon_result[0].lng;
-        console.log(coord);
         codeAddress(coord, function(results){
-            console.log(results);
             //Get most info of geocoding result
             //TODO Alter this part
             const index = results.length-3 //results.length-3
             const formatted = results[index].address_components;
-            console.log(formatted);
             document.getElementById("townhall-terrain").value = formatted[0].long_name;
             document.getElementById("district-terrain").value = formatted[1].long_name;
 
         });
 
-        setRegisted(registed_polygon, null, polygon);
+        setPolygon(null, polygon);
     });
 
     togglePolygonDrawingControl(false);
@@ -218,12 +222,19 @@ function convertPath(path_points){
     return result;
 }
 
-function setRegisted(register, visible, value){
+function setRegisted(register_polygon, visible, value){
     //Get last polygon and deletes old one
-    if (register != null){
-        register.setMap(visible);
+    if (register_polygon != null){
+        register_polygon.setMap(visible);
     }
-    register = value;
+    register_polygon = value;
+}
+
+function setPolygon(visible, value){
+    if (registed_polygon != null){
+        registed_polygon.setMap(visible);
+    }
+    registed_polygon = value;
 }
 
 function setRoute(visible, value){
@@ -330,7 +341,7 @@ function addPolygon(coords, color){
 function center(given_points){
     let center = [0.0,0.0];
     for ( let i = 0 ; i < given_points.length ; i++){
-        const curr_point = given_points[i].toJSON();
+        const curr_point = given_points[i];
         console.log(curr_point);
         center[0] += parseFloat(curr_point.lat)/given_points.length;
         center[1] += parseFloat(curr_point.lng)/given_points.length;
@@ -347,21 +358,27 @@ function toggleDrawingControl(tools, registed, value){
     tools.setOptions({
         drawingControl: value
     });
-    if (value){
-        tools.setMap(map);
-        setRegisted(registed, map, registed);
-    } else {
-        tools.setMap(null);
-        setRegisted(registed, null, registed);
-    }
+    const visible = value ? map : null;
+    tools.setMap(visible);
+    setRegisted(registed, visible, registed);
 }
 
 function togglePolygonDrawingControl(value){
     toggleDrawingControl(polygon_drawing_tools, registed_polygon, value);
 }
 
-function toggleRouteDrawingControl(value){
-    toggleDrawingControl(route_drawing_tools, registed_route, value);
+function toggleRouteDrawingControl(value, confirmed){
+    setMenuID('route_definition_menu',String(value));
+
+    polygon_drawing_tools.setOptions({
+        drawingControl: !value
+    });
+    route_drawing_tools.setOptions({
+        drawingControl: value
+    });
+    const visible = confirmed ? map : null;
+    route_drawing_tools.setMap(visible);
+    setRoute(visible, registed_route);
 } 
 
 function clearTemporaryData(){
@@ -406,5 +423,5 @@ function setLines(low_index, high_index, value){
 }
 
 function submitPolygon(){
-	submitTerrain(polygon_result, []);
+	submitTerrain(polygon_result, route_result);
 }

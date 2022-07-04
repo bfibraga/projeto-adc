@@ -377,11 +377,11 @@ async function loadChunk(pos){
 	try{
 		let response = await axios.get("/api/parcel/list/chunk",{
 			params: pos
-			}
-		);
+		});
 		console.log(response);
 		const response_data = response.data;
 		console.log(response_data.chunk);
+
 		const array = response_data.data;
 		array.forEach(element => {
 			console.log(element);
@@ -390,7 +390,6 @@ async function loadChunk(pos){
 	} catch (error){
 		console.log(error);
 	} finally {
-		console.log("Executed successfully");
 	}
 }
 
