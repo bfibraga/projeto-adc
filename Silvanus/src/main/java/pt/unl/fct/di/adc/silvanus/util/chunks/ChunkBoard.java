@@ -39,6 +39,10 @@ public class ChunkBoard<C> {
         }
     }
 
+    public double[] getChunkSize(){
+        return chunkSize;
+    }
+
     public Chunk2<C> get(int x, int y) {
         return this.chunk2s[x][y];
     }
@@ -103,7 +107,11 @@ public class ChunkBoard<C> {
         return new int[]{x,y};
     }
 
-    private LatLng chunkToWorldCoords(int x, int y){
+    public LatLng chunkToWorldCoords(int x, int y) throws OutOfChunkBounds {
+
+        /*if(!isInside(x,y)){
+            throw new OutOfChunkBounds(String.format("(%s,%s)", x, y));
+        }*/
 
         LatLng result = new LatLng(
                 (float) (x*chunkSize[0] + offset[0]),
@@ -276,7 +284,7 @@ public class ChunkBoard<C> {
 
                 if (chunkPolygon.intersects(terrainPolygon)){
                     Chunk2<C> target = get(x,y);
-                    result.add(get(x,y));
+                    result.add(target);
                 }
             }
         }

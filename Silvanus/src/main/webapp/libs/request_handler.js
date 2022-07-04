@@ -375,13 +375,13 @@ async function getPendingTerrain(){
 
 async function loadChunk(pos){
 	try{
-		console.log(pos);
-		let response = await axios.post("/api/parcel/list/chunk/",
-			pos
+		let response = await axios.get("/api/parcel/list/chunk",{
+			params: pos
+			}
 		);
 		console.log(response);
 		const response_data = response.data;
-		console.log(data.chunk);
+		console.log(response_data.chunk);
 		const array = response_data.data;
 		array.forEach(element => {
 			console.log(element);

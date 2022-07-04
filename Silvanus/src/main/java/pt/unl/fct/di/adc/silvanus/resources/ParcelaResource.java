@@ -186,7 +186,8 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response listTerrainsInChunk(LatLng pos) {
+    public Response listTerrainsInChunk(double lat, double lng) {
+        LatLng pos = new LatLng((float) lat, (float) lng);
         Result<ChunkResultData> result = impl.queryTerrainsInChunk(pos);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();

@@ -7,23 +7,31 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ChunkResultData {
-    private int[] chunk;
+    private String chunk;
+    private LatLng top_right;
+    private LatLng bottom_left;
     private Set<PolygonDrawingData> data;
 
-    public ChunkResultData(int[] chunk, Set<PolygonDrawingData> data){
+    public ChunkResultData(String chunk, LatLng top_right, LatLng bottom_left, Set<PolygonDrawingData> data){
         this.chunk = chunk;
+        this.top_right = top_right;
+        this.bottom_left = bottom_left;
         this.data = data;
     }
 
-    public ChunkResultData(){
-        this(new int[]{0,0}, new HashSet<>());
-    }
-
-    public int[] getChunk() {
+    public String getChunk() {
         return chunk;
     }
 
     public Set<PolygonDrawingData> getData() {
         return data;
+    }
+
+    public LatLng getTop_right() {
+        return top_right;
+    }
+
+    public LatLng getBottom_left() {
+        return bottom_left;
     }
 }
