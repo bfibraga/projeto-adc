@@ -94,7 +94,7 @@ async function getInfo(debug, user){
 	let loader = document.getElementById("loader");
 
 	try{
-	
+
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
 		perfil = response_data;
@@ -384,14 +384,21 @@ async function getPendingTerrain(){
 
 async function loadChunk(pos){
 	try{
-		let response = await axios.post("/api/parcel/list/chunk",
-			pos
-		);
-		console.log(response.data);
+		let response = await axios.get("/api/parcel/list/chunk",{
+			params: pos
+		});
+		console.log(response);
+		const response_data = response.data;
+		console.log(response_data.chunk);
+
+		const array = response_data.data;
+		array.forEach(element => {
+			console.log(element);
+			addPolygon(element.points, element.color);
+		});
 	} catch (error){
 		console.log(error);
 	} finally {
-		console.log("Executed successfully");
 	}
 }
 

@@ -3,8 +3,19 @@ package pt.unl.fct.di.adc.silvanus.util;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 
 public class PolygonUtils {
+
+    public static Polygon polygon(LatLng[] points){
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Coordinate[] coordinates = new Coordinate[points.length+1];
+        for (int i = 0 ; i < points.length ; i++) {
+            coordinates[i] = new Coordinate(points[i].getLng(), points[i].getLat());
+        }
+        coordinates[points.length] = new Coordinate(points[0].getLng(), points[0].getLat());
+        return geometryFactory.createPolygon(coordinates);
+    }
 
     public static Polygon box(float top, float bottom, float left, float right ){
         GeometryFactory geometryFactory = new GeometryFactory();

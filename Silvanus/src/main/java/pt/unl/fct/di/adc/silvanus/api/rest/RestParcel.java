@@ -152,11 +152,10 @@ public interface RestParcel {
      * @param pos position of the user on the map
      * @return ok if everything went correctly, an error otherwise
      */
-    @POST
-    @Path("/list/chunk/")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @GET
+    @Path("/list/chunk")
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainsInChunk(LatLng pos);
+    Response listTerrainsInChunk(@QueryParam("lat") double lat, @QueryParam("lng") double lng);
 
 
     /**

@@ -1,8 +1,14 @@
 package pt.unl.fct.di.adc.silvanus.util.chunks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import org.locationtech.jts.geom.Polygon;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
+import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
+import pt.unl.fct.di.adc.silvanus.util.chunks.exceptions.OutOfChunkBounds;
+
+import java.awt.*;
+import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkBoard<C> {
 
@@ -33,17 +39,21 @@ public class ChunkBoard<C> {
         }
     }
 
+    public double[] getChunkSize(){
+        return chunkSize;
+    }
+
     public Chunk2<C> get(int x, int y) {
         return this.chunk2s[x][y];
     }
 
-    public Chunk2<C> get(double posX, double posY) {
+    public Chunk2<C> get(double posX, double posY) throws OutOfChunkBounds {
         int[] pos = worldCoordsToChunk(posX, posY);
         return this.get(pos[0],pos[1]);
     }
 
     //TODO Testing
-    public Chunk2<C>[][] getArea(double[] topLeft, double[] bottomRight){
+    public Chunk2<C>[][] getArea(double[] topLeft, double[] bottomRight) throws OutOfChunkBounds {
         int[] posTL = this.worldCoordsToChunk(
                 Math.min(topLeft[0], bottomRight[0]),
                 Math.max(topLeft[1], bottomRight[1]));
@@ -81,7 +91,7 @@ public class ChunkBoard<C> {
         return x >= 0 && x < size[0] && y >= 0 && y < size[1];
     }
 
-    private int[] worldCoordsToChunk(double posX, double posY){
+    public int[] worldCoordsToChunk(double posX, double posY) throws OutOfChunkBounds {
         /*if (!inBounds(posX,posY)) {
             return new int[]{0,0};
         }*/
@@ -91,10 +101,24 @@ public class ChunkBoard<C> {
         int y = (int) Math.floor(boardPos[1] / chunkSize[1]);
 
         if(!isInside(x,y)){
-            return new int[]{};
+            throw new OutOfChunkBounds(String.format("(%s,%s)", x, y));
         }
 
         return new int[]{x,y};
+    }
+
+    public LatLng chunkToWorldCoords(int x, int y) throws OutOfChunkBounds {
+
+        /*if(!isInside(x,y)){
+            throw new OutOfChunkBounds(String.format("(%s,%s)", x, y));
+        }*/
+
+        LatLng result = new LatLng(
+                (float) (x*chunkSize[0] + offset[0]),
+                (float) (y*chunkSize[1] + offset[1])
+        );
+        System.out.printf("(%s,%s)->%s%n", x, y,result);
+        return result;
     }
 
     @SafeVarargs
@@ -103,7 +127,7 @@ public class ChunkBoard<C> {
     }
 
     @SafeVarargs
-    public final void add(double x, double y, C... content){
+    public final void add(double x, double y, C... content) throws OutOfChunkBounds {
         this.get(x,y).addContent(content);
     }
 
@@ -113,7 +137,7 @@ public class ChunkBoard<C> {
     }
 
     @SafeVarargs
-    public final void put(double x, double y, C... content){
+    public final void put(double x, double y, C... content) throws OutOfChunkBounds {
         this.get(x,y).putContent(content);
     }
 
@@ -123,7 +147,7 @@ public class ChunkBoard<C> {
     }
 
     @SafeVarargs
-    public final void remove(double x, double y, C... content){
+    public final void remove(double x, double y, C... content) throws OutOfChunkBounds {
         this.get(x,y).removeContent(content);
     }
 
@@ -131,8 +155,14 @@ public class ChunkBoard<C> {
         this.get(x,y).clearContent();
     }
 
-    public final void clear(double x, double y){
+    public final void clear(double x, double y) throws OutOfChunkBounds {
         this.get(x,y).clearContent();
+    }
+
+    public List<Chunk2<C>> line(double x0, double y0, double x1, double y1) throws OutOfChunkBounds {
+        int[] pos0 = worldCoordsToChunk(x0, y0);
+        int[] pos1 = worldCoordsToChunk(x1, y1);
+        return this.line(pos0[0], pos0[1], pos1[0], pos1[1]);
     }
 
     public List<Chunk2<C>> line(int x0, int y0, int x1, int y1){
@@ -166,7 +196,6 @@ public class ChunkBoard<C> {
 
         for (int y = y0 ; y <= y1 ; y++){
             Chunk2<C> chunk2 = this.get(x,y);
-            chunk2.setTag("PolygonBounds");
             result.add(chunk2);
             if (D > 0){
                 x += xi;
@@ -193,7 +222,6 @@ public class ChunkBoard<C> {
 
         for (int x = x0 ; x <= x1 ; x++){
             Chunk2<C> chunk2 = this.get(x,y);
-            chunk2.setTag("PolygonBounds");
             result.add(chunk2);
             if (D > 0){
                 y += yi;
@@ -205,71 +233,77 @@ public class ChunkBoard<C> {
         return result;
     }
 
-    @SafeVarargs
-    public final void fill(int x, int y, C... content){
-        Chunk2<C> chunk2 = this.get(x,y);
-        System.out.println(chunk2.getTag());
-        if (!chunk2.getTag().equals("PolygonBounds") && !chunk2.getTag().equals("PolygonFill")){
-            chunk2.setTag("PolygonFill");
-            chunk2.addContent(content);
+    public List<Chunk2<C>> polygon(LatLng[] points) throws OutOfChunkBounds {
+        List<Chunk2<C>> result = new ArrayList<>();
 
-            if (isInside(x+1,y)){
-                fill(x+1,y,content);
-            }
-            if (isInside(x,y+1)){
-                fill(x,y+1,content);
-            }
-            if (isInside(x-1, y)){
-                fill(x-1,y,content);
-            }
-            if(isInside(x, y-1)){
-                fill(x,y-1,content);
-            }
-            /*if (isInside(x+1,y+1)){
-                fill(x+1,y+1,content);
-            }
-            if (isInside(x-1,y+1)){
-                fill(x-1,y+1,content);
-            }
-            if (isInside(x-1,y-1)){
-                fill(x-1,y-1,content);
-            }
-            if(isInside(x+1,y-1)){
-                fill(x+1,y-1,content);
-            }*/
+        int top = Integer.MIN_VALUE;
+        int bottom = Integer.MAX_VALUE;
+        int right = Integer.MIN_VALUE;
+        int left = Integer.MAX_VALUE;
+
+        for (int p = 0; p < points.length-1; p++) {
+            LatLng current = points[p];
+            LatLng next = points[p+1];
+
+            int[] currentChunkCoord = worldCoordsToChunk(current.getLng(), current.getLat());
+            System.out.println(Arrays.toString(currentChunkCoord));
+
+            top = Math.max(top, currentChunkCoord[1]);
+            bottom = Math.min(bottom, currentChunkCoord[1]);
+            right = Math.max(right, currentChunkCoord[0]);
+            left = Math.min(left, currentChunkCoord[0]);
+
+            result.addAll(this.line(current.getLng(), current.getLat(), next.getLng(), next.getLat()));
         }
+        //TODO Refatorizar codigo repetido
+        int[] currentChunkCoord = worldCoordsToChunk(points[points.length-1].getLng(), points[points.length-1].getLat());
+
+        top = Math.max(top, currentChunkCoord[1]);
+        bottom = Math.min(bottom, currentChunkCoord[1]);
+        right = Math.max(right, currentChunkCoord[0]);
+        left = Math.min(left, currentChunkCoord[0]);
+
+        result.addAll(this.line(points[0].getLng(), points[0].getLat(), points[points.length-1].getLng(), points[points.length-1].getLat()));
+
+        System.out.println(top);
+        System.out.println(bottom);
+        System.out.println(right);
+        System.out.println(left);
+
+
+        Polygon terrainPolygon = PolygonUtils.polygon(points);
+        for (int y = bottom; y <= top; y++) {
+            for (int x = left; x <= right; x++) {
+                LatLng currPoint = chunkToWorldCoords(x,y);
+
+                Polygon chunkPolygon = PolygonUtils.box(
+                        (float) (currPoint.getLat() + (chunkSize[1])),
+                        currPoint.getLat(),
+                        currPoint.getLng(),
+                        (float) (currPoint.getLng() + (chunkSize[0])));
+
+                if (chunkPolygon.intersects(terrainPolygon)){
+                    Chunk2<C> target = get(x,y);
+                    result.add(target);
+                }
+            }
+        }
+        return result;
     }
 
-    public double DiamondAngle(double x, double y)
-    {
-        if (y >= 0)
-            return (x >= 0 ? y/(x+y) : 1-x/(-x+y));
-        else
-            return (x < 0 ? 2-y/(-x-y) : 3+x/(x-y));
-    }
-
-    public double DiamondAngleToRadians(double dia)
-    {
-        double[] P = DiamondAngleToPoint(dia);
-        return Math.atan2(P[1],P[0]);
-    }
-
-    public double DiamondAngleToDegree(double dia)
-    {
-        double rad = DiamondAngleToRadians(dia);
-        return (rad*180)/Math.PI;
-    }
-
-    public double[] DiamondAngleToPoint(double dia)
-    {
-        return new double[]{(dia < 2 ? 1-dia : dia-3),
-            (dia < 3 ? ((dia > 1) ? 2-dia : dia) : dia-4)};
-    }
-
+    //TODO Remove this later
     public void printChunks(){
+        /*for (int x = 0; x < this.chunk2s.length; x++) {
+            System.out.printf(" %s ", x);
+        }
+        System.out.println();*/
+
         for (int y = this.chunk2s[0].length - 1; y >= 0 ; y--) {
             for (int x = 0; x < this.chunk2s.length; x++) {
-                System.out.print(!this.chunk2s[x][y].getTag().equals("") ? "[X]" : "[_]");
+                String tag = this.chunk2s[x][y].getTag();
+
+                System.out.print( tag.equals("") ? "[_]" : String.format("[%s]", tag));
+
             }
             System.out.println();
         }
