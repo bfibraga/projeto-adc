@@ -144,7 +144,7 @@ public interface RestParcel {
     @Path("/list/{idOfOwner}/county")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainsOfUserInCounty(@PathParam("idOfOwner") String idOfOwner, @QueryParam("terrain") String county);
+    Response listTerrainsOfUserInCounty(@CookieParam(TOKEN) String token, @PathParam("idOfOwner") String idOfOwner, @QueryParam("terrain") String county);
 
     /**
      * This method is used to list all the terrains in a given chunk.
@@ -155,7 +155,7 @@ public interface RestParcel {
     @GET
     @Path("/list/chunk")
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainsInChunk(@QueryParam("lat") double lat, @QueryParam("lng") double lng);
+    Response listTerrainsInChunk(@CookieParam(TOKEN) String token, @QueryParam("lat") double lat, @QueryParam("lng") double lng);
 
 
     /**
