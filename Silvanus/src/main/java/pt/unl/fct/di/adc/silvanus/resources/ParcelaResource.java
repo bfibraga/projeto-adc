@@ -14,7 +14,9 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Path("/parcel")
 public class ParcelaResource implements RestParcel {
@@ -32,6 +34,12 @@ public class ParcelaResource implements RestParcel {
 
         if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        Set<String> scope = jws.get("scope", HashSet.class);
+
+        if (!scope.contains("can_create_own_terrain")){
+            return Response.status(Response.Status.FORBIDDEN).entity("Not Enough permission to execute").build();
         }
 
         terrainData.getCredentials().setUserID(jws.getSubject());
@@ -69,6 +77,14 @@ public class ParcelaResource implements RestParcel {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
+        //Permissions to run this function
+        Set<String> scope = jws.get("scope", HashSet.class);
+
+        //TODO Alter this permmission
+        if (!scope.contains("can_create_own_terrain")){
+            return Response.status(Response.Status.FORBIDDEN).entity("Not Enough permission to execute").build();
+        }
+
         Result<Void> result = impl.approveTerrain(userID, terrainName);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -82,6 +98,13 @@ public class ParcelaResource implements RestParcel {
 
         if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        Set<String> scope = jws.get("scope", HashSet.class);
+
+        //TODO Alter this permmission
+        if (!scope.contains("can_create_own_terrain")){
+            return Response.status(Response.Status.FORBIDDEN).entity("Not Enough permission to execute").build();
         }
 
         Result<Void> result = impl.denyTerrain(userID, terrainName);
@@ -99,6 +122,13 @@ public class ParcelaResource implements RestParcel {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
+        Set<String> scope = jws.get("scope", HashSet.class);
+
+        //TODO Alter this permmission
+        if (!scope.contains("can_create_own_terrain")){
+            return Response.status(Response.Status.FORBIDDEN).entity("Not Enough permission to execute").build();
+        }
+
         Result<Void> result = impl.deleteTerrain(userID, terrainName);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -114,8 +144,13 @@ public class ParcelaResource implements RestParcel {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        //TODO Test
-        System.out.println(idOfUser);
+        Set<String> scope = jws.get("scope", HashSet.class);
+
+        //TODO Alter this permmission
+        if (!scope.contains("can_create_own_terrain")){
+            return Response.status(Response.Status.FORBIDDEN).entity("Not Enough permission to execute").build();
+        }
+
         if (idOfUser.trim().equals("")) {
             idOfUser = jws.getSubject();
         }
@@ -135,8 +170,13 @@ public class ParcelaResource implements RestParcel {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        //TODO Test
-        System.out.println(idOfUser);
+        Set<String> scope = jws.get("scope", HashSet.class);
+
+        //TODO Alter this permmission
+        if (!scope.contains("can_create_own_terrain")){
+            return Response.status(Response.Status.FORBIDDEN).entity("Not Enough permission to execute").build();
+        }
+
         if (idOfUser.trim().equals("")) {
             idOfUser = jws.getSubject();
         }
@@ -156,6 +196,13 @@ public class ParcelaResource implements RestParcel {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
+        Set<String> scope = jws.get("scope", HashSet.class);
+
+        //TODO Alter this permmission
+        if (!scope.contains("can_create_own_terrain")){
+            return Response.status(Response.Status.FORBIDDEN).entity("Not Enough permission to execute").build();
+        }
+
         Result<List<Entity>> result = impl.getAllTerrainsInCounty(nameOfCounty);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -169,6 +216,13 @@ public class ParcelaResource implements RestParcel {
 
         if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        Set<String> scope = jws.get("scope", HashSet.class);
+
+        //TODO Alter this permmission
+        if (!scope.contains("can_create_own_terrain")){
+            return Response.status(Response.Status.FORBIDDEN).entity("Not Enough permission to execute").build();
         }
 
         Result<List<Entity>> result = impl.getAllTerrainsInDistrict(nameOfDistrict);

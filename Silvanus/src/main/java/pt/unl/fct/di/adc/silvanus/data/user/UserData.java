@@ -56,7 +56,7 @@ public class UserData {
 
 	public String getRole() {
 		if (this.role == null){
-			this.role = UserRole.USER.getRoleName();
+			this.role = UserRole.ENDUSER.getRoleName();
 		}
 		return this.role;
 	}

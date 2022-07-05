@@ -99,6 +99,16 @@ function set(elem, attr, value){
     elem.setAttribute(attr, value);
 }
 
+function toggleMenuID(id){
+  const elem = document.getElementById(id);
+  toggleMenu(elem);
+}
+
+function toggleMenuClass(class_name){
+  const elem = document.querySelector(class_name);
+  toggleMenu(elem);
+}
+
 function toggleMenu(elem){
     toggle(elem, "data-app-menu-active");
 }

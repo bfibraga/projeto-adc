@@ -14,7 +14,9 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Path(RestUsers.PATH)
 public class UsersResource implements RestUsers {
@@ -106,6 +108,8 @@ public class UsersResource implements RestUsers {
 		if (jws == null){
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
+
+		Set<String> scope = jws.get("scope", HashSet.class);
 
 		Result<Void> result = impl.promote(token, username, new_role);
 

@@ -13,6 +13,7 @@ public class UserInfoVisible {
     private String role_name;
     private String role_color;
     private LogoutData logoutData;
+    private LoggedInVisibleData loggedinData;
 
     public UserInfoVisible(
             String username,
@@ -21,7 +22,8 @@ public class UserInfoVisible {
             String state,
             String role_name,
             String role_color,
-            LogoutData logoutData
+            LogoutData logoutData,
+            LoggedInVisibleData loggedInData
     ){
         this.username = username;
         this.email = email;
@@ -30,10 +32,11 @@ public class UserInfoVisible {
         this.role_name = role_name;
         this.role_color = role_color;
         this.logoutData = logoutData;
+        this.loggedinData = loggedInData;
     }
 
     public UserInfoVisible(){
-        this(NOT_DEFINED, NOT_DEFINED, new UserInfoData(), NOT_DEFINED, UserRole.USER.getRoleName(), UserRole.USER.getRoleColor(), new LogoutData());
+        this(NOT_DEFINED, NOT_DEFINED, new UserInfoData(), NOT_DEFINED, UserRole.ENDUSER.getRoleName(), UserRole.ENDUSER.getRoleColor(), new LogoutData(), new LoggedInVisibleData());
     }
 
     public String getUsername() {
@@ -62,5 +65,9 @@ public class UserInfoVisible {
 
     public LogoutData getLogoutData() {
         return logoutData;
+    }
+
+    public LoggedInVisibleData getLoggedinData() {
+        return loggedinData;
     }
 }

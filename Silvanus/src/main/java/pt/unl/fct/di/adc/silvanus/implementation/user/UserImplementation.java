@@ -8,13 +8,16 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.google.cloud.Role;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import io.jsonwebtoken.*;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
+import pt.unl.fct.di.adc.silvanus.data.user.perms.RoleCredentials;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInVisibleData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.user.perms.UserRole;
@@ -35,6 +38,7 @@ public class UserImplementation implements Users {
 	private KeyFactory userRoleKeyFactory;
 	private KeyFactory userPerfilKeyFactory;
 	private KeyFactory userPermissionKeyFactory;
+	private KeyFactory roleCredentialsKeyFactory;
 
 	//Cache
 	private UserCacheManager<String> cache = new UserCacheManager<>();
@@ -45,6 +49,7 @@ public class UserImplementation implements Users {
 		this.userRoleKeyFactory = datastore.newKeyFactory().setKind("UserRole");
 		this.userPerfilKeyFactory = datastore.newKeyFactory().setKind("UserPerfil");
 		this.userPermissionKeyFactory = datastore.newKeyFactory().setKind("UserPermission");
+		this.roleCredentialsKeyFactory = datastore.newKeyFactory().setKind("RoleCredentials");
 	}
 	@Override
 	public Result<String> register(UserData data) {
@@ -65,6 +70,7 @@ public class UserImplementation implements Users {
 		Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 		Key logoutKey = datastore.newKeyFactory().setKind("UserLastLogout").newKey(user_id);
+		Key roleCredentialsKey = roleCredentialsKeyFactory.newKey(data.getRole().toUpperCase());
 
 		//Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
 		Key userKey = userKeyFactory.newKey(user_id);
@@ -105,6 +111,10 @@ public class UserImplementation implements Users {
 					.set("role_priority", role.getPriority()).build();
 			this.cache.put(user_id, role);
 
+			Entity roleCredentialsEntity = txn.get(roleCredentialsKey);
+			RoleCredentials roleCredentials = new RoleCredentials(roleCredentialsEntity.getProperties());
+			this.cache.put(user_id, "permissions", roleCredentials);
+
 			// Info of the new user
 			UserInfoData userInfoData = data.getInfo();
 			Entity userInfo = Entity.newBuilder(userInfoKey)
@@ -132,7 +142,7 @@ public class UserImplementation implements Users {
 					.build();
 
 			//TODO: First Registration information
-			String jws = TOKEN.createNewJWS(user_id, 1, new ArrayList<>());
+			String jws = TOKEN.createNewJWS(user_id, 1, roleCredentials.getPermissions());
 
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
@@ -214,6 +224,7 @@ public class UserImplementation implements Users {
 		String user_id = data.getID();
 
 		//TODO refactor this cache part
+		RoleCredentials roleCredentials = this.cache.get(user_id, "permissions", RoleCredentials.class);
 		LoginData loginData = this.cache.getLoginData(user_id);
 
 		// Verify if the user is in cache
@@ -222,7 +233,21 @@ public class UserImplementation implements Users {
 			hashedPassword = loginData.getPassword();
 
 			if (hashedPassword.equals(PASSWORD.digest(data.getPassword()))){
-				String jws = TOKEN.createNewJWS(user_id, 1, new ArrayList<>());
+				if (roleCredentials == null){
+					Key userRoleKey = userRoleKeyFactory.newKey(loginData.getID());
+
+					Entity userRoleEntity = datastore.get(userRoleKey);
+
+					Key roleCredentialsKey = roleCredentialsKeyFactory.newKey(userRoleEntity.getString("role_name").toUpperCase());
+
+					Entity roleCredentialsEntity = datastore.get(roleCredentialsKey);
+
+					roleCredentials = new RoleCredentials(roleCredentialsEntity.getProperties());
+
+					this.cache.put(user_id, "permissions", roleCredentials);
+				}
+
+				String jws = TOKEN.createNewJWS(user_id, 0, roleCredentials.getPermissions());
 
 				String refresh_token = TOKEN.newRefreshToken();
 
@@ -246,6 +271,7 @@ public class UserImplementation implements Users {
 				String givenPassword = PASSWORD.digest(data.getPassword());
 
 				if (hashedPassword.equals(givenPassword)) {
+
 					// Correct password
 					// Return token
 					LOG.info("User " + data.getUsername() + "logged in successfully");
@@ -254,9 +280,23 @@ public class UserImplementation implements Users {
 							.setEmail(curr_result.getString("usr_email"))
 							.setPassword(givenPassword);
 
+					if (roleCredentials == null){
+						Key userRoleKey = userRoleKeyFactory.newKey(data.getID());
+
+						Entity userRoleEntity = datastore.get(userRoleKey);
+
+						Key roleCredentialsKey = roleCredentialsKeyFactory.newKey(userRoleEntity.getString("role_name").toUpperCase());
+
+						Entity roleCredentialsEntity = datastore.get(roleCredentialsKey);
+
+						roleCredentials = new RoleCredentials(roleCredentialsEntity.getProperties());
+
+						this.cache.put(user_id, "permissions", roleCredentials);
+					}
+
 					int operation_level = 1;
 
-					String jws = TOKEN.createNewJWS(data.getID(), operation_level, new ArrayList<>());
+					String jws = TOKEN.createNewJWS(data.getID(), operation_level, roleCredentials.getPermissions());
 
 					String refresh_token = TOKEN.newRefreshToken();
 
@@ -305,6 +345,7 @@ public class UserImplementation implements Users {
 
 		try{
 			Entity logoutEntity = Entity.newBuilder(logoutKey)
+					.set("time", LogoutData.fmt.format(new Date()))
 					.set("map_center_location", JSON.encode(data.getCenter()))
 					.set("map_zoom", data.getZoom())
 					.build();
@@ -456,12 +497,10 @@ public class UserImplementation implements Users {
 	public Result<List<UserInfoVisible>> getUser(String request_user, String identifier) {
 
 		//TODO Change key to remove some values when changing the values in other commands
-		String key = request_user + "." + identifier;
-		String property = "getUser:" + request_user + "." + identifier;
-		//TODO to test this set object
+		String key = identifier;
+		String property = request_user;
 		@SuppressWarnings("unchecked")
 		List<UserInfoVisible> stored = this.cache.get(key, property, List.class);
-		//List<String> result_mapper = this.resultCacheManager.get(identifier);
 
 		if (stored != null){
 			System.out.println("Result in cache");
@@ -475,6 +514,7 @@ public class UserImplementation implements Users {
 			Entity user = datastore.get(userKey);
 			UserInfoVisible info = this.getInfo(user);
 			result_set.add(info);
+			this.cache.put(key, property, result_set);
 			return Result.ok(result_set, "");
 		}
 
@@ -521,11 +561,13 @@ public class UserImplementation implements Users {
 				infoEntity.getString("usr_smartphone"));
 		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
 		System.out.println(role);
-		UserRoleData roleData = new UserRoleData(role.getRoleName(), role.getRoleColor());
+		UserRoleData roleData = new UserRoleData(role.getDisplayName(), role.getRoleColor());
 		System.out.println(roleData);
 		LogoutData logoutData = lastLogout == null ?
 				new LogoutData() :
-				new LogoutData(JSON.decode(lastLogout.getString("map_center_location"), LatLng.class),
+				new LogoutData(
+						lastLogout.getString("time"),
+						JSON.decode(lastLogout.getString("map_center_location"), LatLng.class),
 						lastLogout.getDouble("map_zoom"));
 
 		//TODO Change the way to return result
@@ -534,9 +576,10 @@ public class UserImplementation implements Users {
 				userEntity.getString("usr_email"),
 				info,
 				stateEntity.getString("usr_state"),
-				role.getRoleName(),
+				role.getDisplayName(),
 				role.getRoleColor(),
-				logoutData
+				logoutData,
+				new LoggedInVisibleData()
 		);
 
 		return result;
