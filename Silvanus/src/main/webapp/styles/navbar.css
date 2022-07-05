@@ -211,6 +211,10 @@ main{
         transform: rotate(180deg);
     }
 
+    .app-popup .position-absolute {
+        bottom: var(--nav-bar-len) !important;
+    }
+
 }
 
 /*---Large Screens---*/
@@ -288,4 +292,7 @@ main{
         width: var(--size) !important;
     }
 
+    .app-popup .position-absolute {
+        bottom: 0 !important;
+    }
 }

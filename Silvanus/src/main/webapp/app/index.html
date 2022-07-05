@@ -93,7 +93,7 @@
       </li> -->
 
       <li class="app-nav-item" onclick="toggleDrawing(false)" data-app-menu-active="true">
-        <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-placement="right" data-tooltip="Mostrar o mapa">
+        <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-tooltip="Mostrar o mapa">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
             <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
           </svg>
@@ -153,7 +153,7 @@
 
   <!-- User Properties Offcanvas -->
   <div class="offcanvas offcanvas-start bg-light rounded-3 border-0 shadow-sm" style="" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-5" id="user-properties" aria-labelledby="offcanvasScrollingLabel">
-    <div class="offcanvas-header position-relative rounded-3 light shadow-sm">
+    <div class="offcanvas-header position-relative light shadow-sm">
       <h4 class="ms-3">Perfil</h4>
       <a type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></a>
     </div>
@@ -858,7 +858,7 @@
       
   <!-- About us Offcanvas -->
   <div class="offcanvas offcanvas-bottom rounded-3 bg-light" style="z-index: 10; height: 100vh;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="about-us-offcanvas" aria-labelledby="offcanvasScrollingLabel">
-    <div class="offcanvas-header">
+    <div class="offcanvas-header light shadow-sm">
       <h4>Sobre nós</h4>
       <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
@@ -869,7 +869,7 @@
     
   <!-- List Properties Sidebar -->
   <div class="offcanvas offcanvas-start bg-light rounded-3 border-0 shadow-sm" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="list-properties" aria-labelledby="offcanvasScrollingLabel">
-    <div class="offcanvas-header">
+    <div class="offcanvas-header light shadow-sm">
       <div class="dropdown">
         <a class="dropdown-toggle btn light shadow-sm" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Ir para...</a>
         <ul class="dropdown-menu">
@@ -921,7 +921,7 @@
 
   <!-- Request Terrain Sidebar -->
   <div class="offcanvas offcanvas-end rounded-3 bg-light border-0 shadow-sm" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="request-terrain-offcanvas" aria-labelledby="offcanvasScrollingLabel" data-expand="true">
-    <div class="offcanvas-header position-relative">
+    <div class="offcanvas-header position-relative light shadow-sm">
       <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Novo Terreno</h5> 
       <button id="request-terrain-btn-close" type="button" class="btn-close text-reset" onclick="toggleDrawing(false)" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       <button id="request-terrain-btn-expand" class="position-absolute translate-middle-x start-50 btn border-0 text-reset" onclick="toggleExpandOffcanvas('request-terrain-offcanvas')">
@@ -942,12 +942,12 @@
             <input type="text" class="form-control rounded-pill" id="name-terrain">
           </div>
           <div class="mb-3">
-            <label for="townhall-terrain" class="form-label">Concelho</label>
-            <input type="text" class="form-control rounded-pill" id="townhall-terrain">
-          </div>
-          <div class="mb-3">
             <label for="district-terrain" class="form-label">Distrito</label>
             <input type="text" class="form-control rounded-pill" id="district-terrain">
+          </div>
+          <div class="mb-3">
+            <label for="townhall-terrain" class="form-label">Concelho</label>
+            <input type="text" class="form-control rounded-pill" id="townhall-terrain">
           </div>
           <div class="mb-3">
             <label for="section-terrain" class="form-label">Número de Artigo</label>
@@ -1038,7 +1038,8 @@
           </div>
           <div class="mb-3">
             <label for="define-route-terrain" class="form-label">Caminho de entrada para o terreno</label>
-            <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill" value="Definir um caminho" onclick="togglePolygonDrawingControl(false)">
+            <br>
+            <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill" data-bs-dismiss="offcanvas" aria-label="Close" value="Definir um caminho" onclick="toggleRouteDrawingControl(true,true)">
           </div>
           
         </div>
@@ -1056,6 +1057,23 @@
       </div>
       
       
+    </div>
+  </div>
+
+  <div id="route_definition_menu" class="app-popup" style="z-index: 100000;" data-app-menu-active="false">
+    <div class="position-absolute translate-middle start-50">
+      <div class="light rounded-pill p-1 shadow-sm" style="">
+        <a type="button" class="btn text-reset me-1" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Voltar" onclick="toggleRouteDrawingControl(false,true)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+          </svg>
+        </a>
+        <a type="button" class="btn text-reset ms-1" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Voltar" onclick="toggleRouteDrawingControl(false,false)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          </svg>
+        </a>
+      </div>
     </div>
   </div>
   

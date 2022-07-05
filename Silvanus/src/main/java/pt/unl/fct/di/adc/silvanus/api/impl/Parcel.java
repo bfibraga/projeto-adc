@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.cloud.datastore.Entity;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.parcel.result.ChunkResultData;
 import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
@@ -100,7 +101,7 @@ public interface Parcel {
      * @param pos
      * @return
      */
-    Result<List<LatLng[]>> queryTerrainsInChunk(LatLng pos);
+    Result<ChunkResultData> queryTerrainsInChunk(LatLng pos);
 
     /**
      * Generates a list of terrains that are either west, east, north or south of a coordinate (represented as a float)

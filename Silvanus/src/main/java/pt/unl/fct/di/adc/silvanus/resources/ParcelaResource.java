@@ -4,6 +4,7 @@ import com.google.cloud.datastore.Entity;
 import io.jsonwebtoken.Claims;
 import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.parcel.result.ChunkResultData;
 import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
 import pt.unl.fct.di.adc.silvanus.implementation.user.UserImplementation;
@@ -185,8 +186,9 @@ public class ParcelaResource implements RestParcel {
     }
 
     @Override
-    public Response listTerrainsInChunk(LatLng pos) {
-        Result<List<LatLng[]>> result = impl.queryTerrainsInChunk(pos);
+    public Response listTerrainsInChunk(double lat, double lng) {
+        LatLng pos = new LatLng((float) lat, (float) lng);
+        Result<ChunkResultData> result = impl.queryTerrainsInChunk(pos);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
         return Response.ok().entity(result.value()).build();

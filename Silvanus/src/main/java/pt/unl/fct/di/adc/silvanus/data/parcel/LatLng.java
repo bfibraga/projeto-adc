@@ -21,4 +21,9 @@ public class LatLng {
     public float getLng() {
         return lng;
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%s,%s)", this.getLat(), this.getLng());
+    }
 }

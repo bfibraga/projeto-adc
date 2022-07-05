@@ -1,20 +1,18 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
+@WebServlet(name = "FileUploadServlet", urlPatterns = { "/files" })
 public class MediaResourceServlet extends HttpServlet {
 
 	  /**
@@ -54,13 +52,15 @@ public class MediaResourceServlet extends HttpServlet {
 	        // Get the bucket and object from the URL 
 	    	String bucketName = objectPath.getName(0).toString();
 	    	String srcFilename = objectPath.getName(1).toString();
-	    	
+
 	    	// Upload to Google Cloud Storage (see Google's documentation)
 	    	Storage storage = StorageOptions.getDefaultInstance().getService();
 	        BlobId blobId = BlobId.of(bucketName, srcFilename);
-	        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(req.getContentType()).build();
+
+ 	        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(req.getContentType()).build();
 	        // The following is deprecated since it is better to upload directly to GCS from the client
 	        Blob blob = storage.create(blobInfo, req.getInputStream());
+			resp.getWriter().println("File Uploaded");
 	  }
 	
 }

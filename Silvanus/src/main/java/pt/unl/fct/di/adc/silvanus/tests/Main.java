@@ -1,11 +1,14 @@
 package pt.unl.fct.di.adc.silvanus.tests;
 
 import com.beust.ah.A;
+import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
 import pt.unl.fct.di.adc.silvanus.util.chunks.Chunk2;
 import pt.unl.fct.di.adc.silvanus.util.chunks.ChunkBoard;
+import pt.unl.fct.di.adc.silvanus.util.chunks.exceptions.OutOfChunkBounds;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Main {
@@ -30,61 +33,52 @@ public class Main {
         ChunkBoard<String> portugal = new ChunkBoard<>(38, 26, PORTUGAL_SIZE_X, PORTUGAL_SIZE_Y, LEFT_MOST_LONGITUDE_CONTINENTE, BOTTOM_MOST_LATITUDE_CONTINENTE);
         ChunkBoard<String> madeira = new ChunkBoard<>(4, 6, MADEIRA_SIZE_X, MADEIRA_SIZE_Y, LEFT_MOST_LONGITUDE_MADEIRA, BOTTOM_MOST_LATITUDE_MADEIRA);
 
-        portugal.put(0,0, "Top Left");
-        System.out.println(portugal.get(0,0));
-        System.out.println(portugal.get(-9.55, 36.85));
-
-        portugal.printChunks();
-
-        portugal.put(-9.0, 42.0, "A point");
-
-        portugal.add(-6.2, 36.9, "Another point");
-
-        portugal.printChunks();
-
-        Chunk2<String>[][] selectedArea = portugal.getArea(new double[]{ -9.0, 42}, new double[]{ -8, 40.0});
-        for (int y = 0; y < selectedArea[0].length ; y++){
-            for (int x = 0 ; x < selectedArea.length ; x++){
-                selectedArea[x][y].addContent("(" + x + ", " + y + ")");
-            }
-        }
-
-        portugal.printChunks();
-
         System.out.println(portugal.isInside(0,0));
         System.out.println(portugal.isInside(26,0));
         System.out.println(portugal.isInside(-9.55,36.85));
         System.out.println(madeira.isInside(-9.55,36.85));
 
-        int[][] points = {
-                {10,10},
-                {15,20},
-                {20,17},
-                {14,16},
-                {12,10}
-        };
+        LatLng[] points = new LatLng[5];
 
-        int[] vec1 = new int[]{points[1][0] - points[0][0], points[1][1] - points[0][1]};
-        int[] vec2 = new int[]{points[2][0] - points[1][0], points[2][1] - points[1][1]};
-        int [] result = new int[]{vec1[0]+vec2[0], vec1[1]+vec2[1]};
-        System.out.println(Arrays.toString(result));
-        double dia1 = portugal.DiamondAngle(vec1[0], vec1[1]);
-        double dia2 = portugal.DiamondAngle(vec2[0], vec2[1]);
-        System.out.println((dia1-dia2));
-        System.out.println(portugal.DiamondAngleToDegree((dia1-dia2)));
+        /*{
+            "lat": 42.03,
+            "lng": -9.55
+        },
+        {
+            "lat": 42.17,
+            "lng": -9.55
+        },
+        {
+            "lat": 42.17,
+            "lng": -9.42
+        },
+        {
+            "lat": 42.03,
+            "lng": -9.42
+        }*/
+/*
+        points[0] = new LatLng((float) 42.03, (float) -9.54);
+        points[1] = new LatLng((float) 42.169, (float) -9.54);
+        points[2] = new LatLng((float) 42.169, (float) -9.42);
+        points[3] = new LatLng((float) 42.03, (float) -9.42);
+*/
 
+        points[0] = new LatLng((float) 39.37902, (float) -8.85768);
+        points[1] = new LatLng((float) 39.85455, (float) -8.51985);
+        points[2] = new LatLng((float) 39.67721, (float) -8.3578);
+        points[3] = new LatLng((float) 40.13441, (float) -7.98427);
+        points[4] = new LatLng((float) 39.19581, (float) -8.04469);
 
-        List<Chunk2<String>> line = new ArrayList<>();
-        for (int i = 0 ; i < points.length-1 ; i++) {
-            line.addAll(portugal.line(points[i][0], points[i][1], points[i+1][0], points[i+1][1]));
+        List<Chunk2<String>> polygonResult = new ArrayList<>();
+        try {
+            polygonResult = portugal.polygon(points);
+        } catch (OutOfChunkBounds e) {
+            System.out.println(e.getMessage());
         }
-        line.addAll(portugal.line(points[points.length-1][0], points[points.length-1][1], points[0][0], points[0][1]));
-        for (Chunk2<String> chunk: line) {
-            chunk.addContent("Line");
-        }
 
-        //TODO Maybe apply Fill Area algorithm
-        //portugal.fill(12,12,"Fill");
+        for (Chunk2<String> chunk: polygonResult) {
+            chunk.setTag("P");
+        }
 
         portugal.printChunks();
     }
