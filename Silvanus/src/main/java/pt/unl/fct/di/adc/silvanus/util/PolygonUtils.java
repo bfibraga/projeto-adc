@@ -3,7 +3,7 @@ package pt.unl.fct.di.adc.silvanus.util;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 
 public class PolygonUtils {
 

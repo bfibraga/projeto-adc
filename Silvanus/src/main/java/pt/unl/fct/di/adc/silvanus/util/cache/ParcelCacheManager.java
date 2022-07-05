@@ -1,6 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.util.cache;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainData;
 
 
 

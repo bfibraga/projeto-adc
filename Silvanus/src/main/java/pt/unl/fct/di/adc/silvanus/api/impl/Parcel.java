@@ -2,10 +2,10 @@ package pt.unl.fct.di.adc.silvanus.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.cloud.datastore.Entity;
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
-import pt.unl.fct.di.adc.silvanus.data.parcel.result.ChunkResultData;
-import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.result.ChunkResultData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.result.TerrainResultData;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import java.util.List;

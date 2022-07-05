@@ -1,6 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.data.user.result;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

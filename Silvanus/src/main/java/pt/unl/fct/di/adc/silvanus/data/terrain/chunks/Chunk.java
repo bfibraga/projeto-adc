@@ -1,10 +1,10 @@
-package pt.unl.fct.di.adc.silvanus.util.chunks;
+package pt.unl.fct.di.adc.silvanus.data.terrain.chunks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Chunk2<C> {
+public class Chunk<C> {
 
     private int x;
     private int y;
@@ -12,7 +12,7 @@ public class Chunk2<C> {
     private List<C> content;
     private String tag;
 
-    public Chunk2(int x, int y){
+    public Chunk(int x, int y){
         this.x = x;
         this.y = y;
         this.content = new ArrayList<>();

@@ -2,10 +2,10 @@ package pt.unl.fct.di.adc.silvanus.resources;
 
 import com.google.cloud.datastore.Entity;
 import io.jsonwebtoken.Claims;
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
-import pt.unl.fct.di.adc.silvanus.data.parcel.result.ChunkResultData;
-import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.result.ChunkResultData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.result.TerrainResultData;
 import pt.unl.fct.di.adc.silvanus.implementation.ParcelImplementation;
 import pt.unl.fct.di.adc.silvanus.implementation.user.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestParcel;
@@ -14,9 +14,7 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Path("/parcel")
 public class ParcelaResource implements RestParcel {

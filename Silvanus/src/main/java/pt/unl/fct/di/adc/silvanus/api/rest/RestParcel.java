@@ -1,7 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.api.rest;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainData;
 
 import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.*;
 

@@ -1,9 +1,7 @@
-package pt.unl.fct.di.adc.silvanus.data.parcel.result;
+package pt.unl.fct.di.adc.silvanus.data.terrain.result;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.util.chunks.Chunk2;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class ChunkResultData {
