@@ -401,10 +401,6 @@ async function getPendingTerrain(){
 
 async function loadChunk(pos){
 	try{
-		//Verify if the content exist in the browser
-		if (hasChunk(pos)){
-			return;
-		}
 
 		//Get from server
 		let response = await axios.get("/api/parcel/list/chunk",{
@@ -413,10 +409,15 @@ async function loadChunk(pos){
 
 		const response_data = response.data;
 
+		//Verify if the content exist in the browser
+		const chunk = response_data.chunk;
+		if (hasChunk(chunk)){
+			return;
+		}
+
 		const array = response_data.data;
-		//saveChunkBounds(response_data.top_right, response.bottom_left, array);
+		saveChunk(chunk, true);
 		array.forEach(element => {
-			console.log(element);
 			addPolygon(element.points, element.color);
 		});
 

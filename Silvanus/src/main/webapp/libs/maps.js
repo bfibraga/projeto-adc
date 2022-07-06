@@ -14,6 +14,7 @@ let polygon_result = null;
 let route_result = null;
 
 let polygons = [];
+let polygons_points = [];
 
 let click_listener;
 
@@ -322,19 +323,30 @@ function addLine(coords, color){
 }
 
 function addPolygon(coords, color){
-    const polygon = new google.maps.Polygon({
-        map,
-        paths: coords,
-        strokeColor: color,
-        strokeOpacity: 0.6,
-        strokeWeight: 2,
-        fillColor: color,
-        fillOpacity: 0.30,
-        geodesic: true,
-      });
-    
-    polygons.push(polygon);
+    let exist = false;
+    polygons_points.forEach(elem => {
+        if (JSON.stringify(elem) === JSON.stringify(coords)){
+            exist = true;
+        }
+    });
 
+    if (!exist){
+        polygons_points.push(coords);
+        const polygon = new google.maps.Polygon({
+            map,
+            paths: coords,
+            strokeColor: color,
+            strokeOpacity: 0.6,
+            strokeWeight: 2,
+            fillColor: color,
+            fillOpacity: 0.30,
+            geodesic: true,
+          });
+        polygons.push(polygon);
+    }
+
+    
+    
     //addMarker(_center);
 }
 
@@ -427,18 +439,16 @@ function submitPolygon(){
 }
 
 //---- Chunk Loading Related ----
-
 let loaded_chunk = {};
-let loaded_bounds = {};
 
-function saveChunkBounds(topRight, bottomLeft, content){
-    loaded_bounds = {topRight, bottomLeft};
-    const chunk_key = "(" + bottomLeft.lat + "," + bottomLeft.lng + ")";
-
-    loaded_chunk[chunk_key] = content;
+function saveChunk(id, content){
+    loaded_chunk[id] = content;
 }
 
 //TODO Make this function work
-function hasChunk(pos){
-    return false;
+function hasChunk(id){
+    if (loaded_chunk[id] === null){
+        loaded_chunk[id] = false;
+    }
+    return loaded_chunk[id];
 }

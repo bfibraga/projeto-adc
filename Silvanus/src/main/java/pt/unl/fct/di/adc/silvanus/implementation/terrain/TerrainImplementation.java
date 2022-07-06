@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.implementation;
+package pt.unl.fct.di.adc.silvanus.implementation.terrain;
 
 import com.google.cloud.datastore.*;
 import org.locationtech.jts.geom.Coordinate;
@@ -25,7 +25,7 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class ParcelImplementation implements Parcel {
+public class TerrainImplementation implements Parcel {
 
     private final double sizeX = (RIGHT_MOST_LONGITUDE_CONTINENTE - LEFT_MOST_LONGITUDE_CONTINENTE) / NUMBER_OF_COLLUMNS_IN_CONTINENTE;
     private final double sizeY = (TOP_MOST_LATITUDE_CONTINENTE - BOTTOM_MOST_LATITUDE_CONTINENTE) / NUMBER_OF_LINES_IN_CONTINENTE;
@@ -70,7 +70,7 @@ public class ParcelImplementation implements Parcel {
     //TODO Transferir esta parte para cache
     private Map<String, IslandChunk> chunksIslands;
 
-    private static final Logger LOG = Logger.getLogger(ParcelImplementation.class.getName());
+    private static final Logger LOG = Logger.getLogger(TerrainImplementation.class.getName());
 
     private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
@@ -99,7 +99,7 @@ public class ParcelImplementation implements Parcel {
     public static final double MADEIRA_SIZE_Y = Math.abs(TOP_MOST_LATITUDE_MADEIRA - BOTTOM_MOST_LATITUDE_MADEIRA);
 
 
-    public ParcelImplementation() {
+    public TerrainImplementation() {
         this.factory = new GeometryFactory();
         chunksIslands = new HashMap();
         this.bigBBPolygon = generateChunkAsPolygon(LEFT_MOST_LONGITUDE_GLBOAL, RIGHT_MOST_LONGITUDE_CONTINENTE, TOP_MOST_LATITUDE_CONTINENTE, BOTTOM_MOST_LATITUDE_GLOBAL, factory);
