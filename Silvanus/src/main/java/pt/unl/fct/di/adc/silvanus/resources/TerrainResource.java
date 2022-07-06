@@ -60,10 +60,10 @@ public class TerrainResource implements RestParcel {
         }
 
         Result<String> result = impl.checkIfParcelHasIntersections(terrain);
-        if (result == null)
-            return Response.ok("Nao ha intersecoes.").build();
+        if (result.isOK())
+            return Response.ok().build();
         else
-            return Response.ok("Foram detetadas intersecoes com a parcela:" + result.statusMessage()).build();
+            return Response.status(result.error()).entity(result.statusMessage()).build();
     }
 
     @Override

@@ -88,4 +88,17 @@ public class CommunityResource implements RestCommunity {
         Result<String> result = Result.ok();
         return Response.ok().entity(result).build();
     }
+
+    @Override
+    public Response listMembers(String token, String name) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null){
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        Result<String> result = Result.ok();
+        return Response.ok().entity(result).build();
+    }
 }

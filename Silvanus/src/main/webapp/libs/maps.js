@@ -3,6 +3,7 @@ let geocoder;
 let polygon_drawing_tools;
 let route_drawing_tools;
 let markers = [];
+let markers_points = [];
 
 let last_index = 0;
 let other_markers = 0;
@@ -24,7 +25,8 @@ let viewport_zoom;
 let viewport_moving = false;
 
 let MAP_MODE = {
-    "LIGHT": 'c5f91d16484f03de'
+    "LIGHT": 'c5f91d16484f03de',
+    "DARK": 'e00de21e9b37f13e'
 };
 
 //TODO Change map bounds
@@ -306,7 +308,15 @@ function addMarker(coords){
         position: coords,
         map,
       });
+
+    markers_points.forEach(element => {
+        if (JSON.stringify(element) === JSON.stringify(coords)){
+            return;
+        }
+    });
+    
     markers.push(marker);
+    markers_points.push(coords);
 }
 
 function addLine(coords, color){
@@ -323,31 +333,24 @@ function addLine(coords, color){
 }
 
 function addPolygon(coords, color){
-    let exist = false;
     polygons_points.forEach(elem => {
         if (JSON.stringify(elem) === JSON.stringify(coords)){
-            exist = true;
+            return;
         }
     });
 
-    if (!exist){
-        polygons_points.push(coords);
-        const polygon = new google.maps.Polygon({
-            map,
-            paths: coords,
-            strokeColor: color,
-            strokeOpacity: 0.6,
-            strokeWeight: 2,
-            fillColor: color,
-            fillOpacity: 0.30,
-            geodesic: true,
-          });
-        polygons.push(polygon);
-    }
-
-    
-    
-    //addMarker(_center);
+    const polygon = new google.maps.Polygon({
+        map,
+        paths: coords,
+        strokeColor: color,
+        strokeOpacity: 0.6,
+        strokeWeight: 2,
+        fillColor: color,
+        fillOpacity: 0.30,
+        geodesic: true,
+    });
+    polygons.push(polygon);
+    polygons_points.push(coords);
 }
 
 function center(given_points){

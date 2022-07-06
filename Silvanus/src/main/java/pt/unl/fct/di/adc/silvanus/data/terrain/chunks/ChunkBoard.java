@@ -24,7 +24,6 @@ public class ChunkBoard<C> {
         double sizeY = height/lines;
         this.chunkSize = new double[]{ sizeX, sizeY };
         this.offset = new double[]{ offsetX, offsetY };
-        System.out.println(Arrays.toString(chunkSize));
     }
 
     @SuppressWarnings("unchecked")
@@ -67,7 +66,6 @@ public class ChunkBoard<C> {
         int areaLength = Math.abs(bottomRight[0]-topLeft[0]);
         int areaHeight = Math.abs(bottomRight[1]-topLeft[1]);
 
-        System.out.println("Length: " + areaLength + "\nHeight: " + areaHeight);
         Chunk<C>[][] result = new Chunk[areaLength][areaHeight];
         for (int y = 0 ; y < areaHeight ; y++){
             for (int x = 0 ; x < areaLength ; x++){
@@ -115,7 +113,6 @@ public class ChunkBoard<C> {
                 (float) (x*chunkSize[0] + offset[0]),
                 (float) (y*chunkSize[1] + offset[1])
         );
-        System.out.printf("(%s,%s)->%s%n", x, y,result);
         return result;
     }
 
@@ -244,7 +241,6 @@ public class ChunkBoard<C> {
             LatLng next = points[p+1];
 
             int[] currentChunkCoord = worldCoordsToChunk(current.getLng(), current.getLat());
-            System.out.println(Arrays.toString(currentChunkCoord));
 
             top = Math.max(top, currentChunkCoord[1]);
             bottom = Math.min(bottom, currentChunkCoord[1]);
@@ -262,13 +258,6 @@ public class ChunkBoard<C> {
         left = Math.min(left, currentChunkCoord[0]);
 
         result.addAll(this.line(points[0].getLng(), points[0].getLat(), points[points.length-1].getLng(), points[points.length-1].getLat()));
-
-        System.out.println(top);
-        System.out.println(bottom);
-        System.out.println(right);
-        System.out.println(left);
-
-
         Polygon terrainPolygon = PolygonUtils.polygon(points);
         for (int y = bottom; y <= top; y++) {
             for (int x = left; x <= right; x++) {

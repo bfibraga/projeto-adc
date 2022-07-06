@@ -208,6 +208,7 @@ function handlePromotionMember(name, xmlDoc, params){
 const menuHandler = {
     "menu03": handleMenu03,
     "menu02": handleMenu02,
+    "menu01": handleMenu01
 }
 
 function menu(menu_id){
@@ -227,5 +228,9 @@ function handleMenu02(name, xmlDoc, params){
     elems[name] = parser.parseFromString(xmlDoc, "text/html");
 
     document.getElementById("community-app-nav-item").insertAdjacentHTML("afterend", elems[name].body.innerHTML);
+}
+
+function handleMenu01(name, xmlDoc, params){
+
 }
 

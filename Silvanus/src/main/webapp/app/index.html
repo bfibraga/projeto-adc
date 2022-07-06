@@ -624,9 +624,13 @@
             </div>
             <div class="col-12">
               <div class="light rounded-3 p-3 m-1 shadow-sm ">
-                <h4 class="ms-3">Terrenos Partilhados</h4>
-                <div class="d-flex flex-row justify-content-center">
-                  <input type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill" value="Registar novo terreno" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade"> 
+                <div class="row flex-row">
+                  <div class="col">
+                    <h4 class="mb-3 me-3">Terrenos Partilhados</h4>
+                  </div>
+                  <div class="col justify-content-end">
+                    <input type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill" value="Registar novo terreno" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade"> 
+                  </div>
                 </div>
               </div>
             </div>
@@ -879,35 +883,61 @@
       <a type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></a>
     </div>
     <div class="offcanvas-body ">
-      <div class="row" id="usr_terrain_menu">
+      <div class="row">
         <div class="col-md-6 col-sm-12">
-          <div id="usr_list_terrain_scollspy" class="row light rounded-3 m-1 p-3 shadow-sm">
-            <h5 class="mb-3">Lista de Terrenos</h5>
-            <div class="d-flex flex-row justify-content-center align-items-center">
-              <div class="row" id="usr_terrain_count" data-app-value=0>
+          <div class="row flex-column" id="usr_terrain_menu">
+            <div class="col-12">
+              <div id="usr_list_terrain_scollspy" class="row light rounded-3 m-1 p-3 shadow-sm">
+                <h5 class="mb-3">Lista de Terrenos</h5>
+                <div class="d-flex flex-row justify-content-center align-items-center">
+                  <div class="row" id="usr_terrain_count" data-app-value=0>
+                  </div>
+                </div>
+                
+    
               </div>
             </div>
-            
-
+            <div class="col-12">
+              
+            </div>
           </div>
         </div>
         <div class="col-md-6 col-sm-12">
-          <div id="usr_pending_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm" data-app-value=0>
-            <h5 class="mb-3">Pedidos Pendentes</h5>
-            
-            <div class="row d-flex flex-row justify-content-center" id="usr_pending_terrain_list">
-            </div>
+          <div class="row flex-column">
+            <div class="col-12">
+              <div id="usr_pending_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm" data-app-value=0>
 
-            <!-- No Properties? -->
-            <div id="no_pending_requests">
-              <p class="text-center"></p>
-            </div>
-            
-            <!-- Add New Property Button --> 
-            <div class="d-flex flex-row justify-content-center">
-              <input type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill" value="Registar novo terreno" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade"> 
+                <div class="row flex-row vw-100">
+                  <div class="col">
+                    <h5 class="mb-3">Pedidos Pendentes</h5>
+                  </div>
+                  <div class="col align-items-end">
+                    <input type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill" value="Registar novo terreno" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade"> 
+                  </div>
+                </div>
+                
+                <div class="row d-flex flex-row justify-content-center" id="usr_pending_terrain_list">
+                </div>
+    
+                <!-- No Properties? -->
+                <div id="no_pending_requests">
+                  <p class="text-center"></p>
+                </div>
+                
+                <!-- Add New Property Button --> 
+                <div class="d-flex flex-row justify-content-center">
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="row" >
+        <div class="col-md-6 col-sm-12">
+          
+        </div>
+        <div class="col-md-6 col-sm-12">
+          
         </div>
 
 

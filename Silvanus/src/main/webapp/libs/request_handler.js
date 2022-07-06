@@ -95,7 +95,7 @@ async function getInfo(debug, user){
 
 	try{
 
-		//menu("menu02");
+		//menu("menu03");
 		//terrainCard(1, "Teste 2", "Teste 3", "Teste 4");
 		//terrainPendingCard("Teste 2", "Teste 3", "Teste 4");
 
@@ -419,6 +419,7 @@ async function loadChunk(pos){
 		saveChunk(chunk, true);
 		array.forEach(element => {
 			addPolygon(element.points, element.color);
+			addMarker(element.center);
 		});
 
 	} catch (error){
@@ -431,6 +432,11 @@ function loadTerrainInfo(id){
 	const terrain = terrain_list[parseInt(id)];
 	console.log(terrain);
 	if (terrain === null) return;
+
+	const center = terrain.center;
+	const new_center = point(center.lat, center.lng - 5e-4);
+	setCenter(new_center);
+	//setZoom(10);
 
 	document.getElementById("terrain_name").innerHTML = terrain.credentials.name;
 	document.getElementById("terrain_townhall").innerHTML = terrain.credentials.townhall;

@@ -221,6 +221,9 @@ main{
         bottom: var(--nav-bar-len) !important;
     }
 
+    #usr_list_notification{
+        max-width: fit-content;
+    }
 }
 
 /*---Large Screens---*/
@@ -294,7 +297,7 @@ main{
     }
 
     #terrain-properties{
-        --size : 60vh;
+        --size : 60%;
         width: var(--size) !important;
     }
 

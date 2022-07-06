@@ -20,9 +20,9 @@ public interface RestCommunity {
     Response create(@CookieParam(RestInterface.TOKEN) String token, CommunityData data);
 
     @DELETE
-    @Path("/delete")
+    @Path("/delete/{community_name}")
     @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
-    Response delete(@CookieParam(RestInterface.TOKEN) String token,  @QueryParam("name") @DefaultValue(" ") String name);
+    Response delete(@CookieParam(RestInterface.TOKEN) String token, @PathParam("community_name") String name);
 
     @PUT
     @Path("/join/{community_name}")
@@ -33,4 +33,9 @@ public interface RestCommunity {
     @Path("/exit/{community_name}")
     @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
     Response exit(@CookieParam(RestInterface.TOKEN) String token, @QueryParam(RestInterface.IDENTIFIER) @DefaultValue(" ") String identifier, @PathParam("community_name") String name);
+
+    @GET
+    @Path("/members/{community_name}")
+    @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
+    Response listMembers(@CookieParam(RestInterface.TOKEN) String token, @PathParam("community_name") String name);
 }
