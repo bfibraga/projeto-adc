@@ -95,7 +95,9 @@ async function getInfo(debug, user){
 
 	try{
 
+		//menu("menu02");
 		//terrainCard(1, "Teste 2", "Teste 3", "Teste 4");
+		//terrainPendingCard("Teste 2", "Teste 3", "Teste 4");
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
@@ -126,10 +128,12 @@ async function getInfo(debug, user){
 				}
 		});*/
 		
+		loadMenus(response_data.loggedinData.menus);
+
 		Promise.all([
 			getOwnTerrain(),
 			getPendingTerrain(),
-			listNotification()
+			listNotification(),
 		]);
 
 	} catch (error){
@@ -177,6 +181,15 @@ function updatePerfil(data){
 	document.getElementById("usr_smartphone_input").value = String(data.smartphone);
 	document.getElementById("usr_address_input").value = String(data.address);
 }
+
+function loadMenus(menus){
+	if (menus !== null && menus.length > 0){
+		menus.forEach(element => {
+			menu(element);
+		});
+	} 
+}	
+	
 
 async function activate(identifier){
 	try{
@@ -401,7 +414,7 @@ async function loadChunk(pos){
 		const response_data = response.data;
 
 		const array = response_data.data;
-		saveChunkBounds(response_data.top_right, response.bottom_left, array);
+		//saveChunkBounds(response_data.top_right, response.bottom_left, array);
 		array.forEach(element => {
 			console.log(element);
 			addPolygon(element.points, element.color);
@@ -419,12 +432,22 @@ function loadTerrainInfo(id){
 	if (terrain === null) return;
 
 	document.getElementById("terrain_name").innerHTML = terrain.credentials.name;
-	document.getElementById("terrain_description").innerHTML = terrain.info.description;
-	/*document.getElementById("terrain_townhall").innerHTML = terrain.info.townhall;
-	document.getElementById("terrain_district").innerHTML = terrain.info.district;
-	document.getElementById("terrain_number_section").innerHTML = terrain.info.section;
-	document.getElementById("terrain_number_article").innerHTML = terrain.info.number_article;*/
+	document.getElementById("terrain_townhall").innerHTML = terrain.credentials.townhall;
+	document.getElementById("terrain_district").innerHTML = terrain.credentials.district;
+	document.getElementById("terrain_number_section").innerHTML = terrain.credentials.section;
+	document.getElementById("terrain_number_article").innerHTML = terrain.credentials.number_article;
 	//document.getElementById("terrain_documents_validation").insertAdjacentHTML("beforeend", terrain.info.district);
+
+	document.getElementById("terrain_description").innerHTML = terrain.info.description;
+	document.getElementById("terrain_type").innerHTML = terrain.info.type_of_soil_coverage;
+	document.getElementById("terrain_current_use").innerHTML = terrain.info.current_use;
+	document.getElementById("terrain_previous_use").innerHTML = terrain.info.previous_use;
+
+	document.getElementById("owner_fullname").innerHTML = terrain.owner.name;
+	document.getElementById("owner_id").innerHTML = terrain.owner.nif;
+	document.getElementById("owner_telephone").innerHTML = terrain.owner.telephone;
+	document.getElementById("owner_smartphone").innerHTML = terrain.owner.smartphone;
+	document.getElementById("owner_address").innerHTML = terrain.owner.address;
 
 }
 

@@ -335,9 +335,5 @@ a {
 
 .btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
   background-color: #90ca87 !important;
-  outline: none !important;
-}
-
-.btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
-  outline: none !important;
+  border: none !important; /*Author: António Duarte 58278*/
 }

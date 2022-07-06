@@ -205,3 +205,27 @@ function handlePromotionMember(name, xmlDoc, params){
     document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
 
+const menuHandler = {
+    "menu03": handleMenu03,
+    "menu02": handleMenu02,
+}
+
+function menu(menu_id){
+    const elemName = "elems/menus/" + menu_id + ".html"; 
+    let params = [];
+
+    LoadHTMLDoc(elemName, menuHandler[menu_id], params);
+}
+
+function handleMenu03(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    document.getElementById("usr_terrain_menu").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
+function handleMenu02(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    document.getElementById("community-app-nav-item").insertAdjacentHTML("afterend", elems[name].body.innerHTML);
+}
+

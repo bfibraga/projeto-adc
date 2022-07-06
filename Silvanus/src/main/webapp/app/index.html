@@ -57,7 +57,7 @@
         </a>
       </li>
 
-      <li class="app-nav-item" onclick="toggleDrawing(false)">
+      <li id="community-app-nav-item" class="app-nav-item" onclick="toggleDrawing(false)">
         <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#community">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
             <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
@@ -66,17 +66,6 @@
           </svg>
           <span class="app-link-text">
             Comunidade
-          </span>
-        </a>
-      </li>
-
-      <li class="app-nav-item" onclick="toggleDrawing(false)">
-        <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#stats">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z"/>
-          </svg>
-          <span class="app-link-text">
-            Estatísticas
           </span>
         </a>
       </li>
@@ -890,7 +879,7 @@
       <a type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></a>
     </div>
     <div class="offcanvas-body ">
-      <div class="row">
+      <div class="row" id="usr_terrain_menu">
         <div class="col-md-6 col-sm-12">
           <div id="usr_list_terrain_scollspy" class="row light rounded-3 m-1 p-3 shadow-sm">
             <h5 class="mb-3">Lista de Terrenos</h5>
@@ -902,7 +891,7 @@
 
           </div>
         </div>
-        <div class="col-md-6 ">
+        <div class="col-md-6 col-sm-12">
           <div id="usr_pending_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm" data-app-value=0>
             <h5 class="mb-3">Pedidos Pendentes</h5>
             
@@ -918,11 +907,10 @@
             <div class="d-flex flex-row justify-content-center">
               <input type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill" value="Registar novo terreno" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade"> 
             </div>
-
-            
-
           </div>
         </div>
+
+
       </div>
     </div>
   </div>
@@ -1100,15 +1088,15 @@
               <div class="col-12">
                 <div class="light p-3 mb-3 rounded-3 shadow-sm">
                   <h5 class="mb-3">Informação</h5>
-                  <p>Concelho</p>
+                  <h6>Concelho</h6>
                   <p class="border-bottom" id="terrain_townhall">-</p>
-                  <p>Distrito</p>
+                  <h6>Distrito</h6>
                   <p class="border-bottom" id="terrain_district">-</p>
-                  <p>Número de Artigo</p>
+                  <h6>Número de Artigo</h6>
                   <p class="border-bottom" id="terrain_number_article">-</p>
-                  <p>Número de Secção</p>
+                  <h6>Número de Secção</h6>
                   <p class="border-bottom" id="terrain_number_section">-</p>
-                  <p>Documentos de Validação</p>
+                  <h6>Documentos de Validação</h6>
                   <select id="terrain_documents_validation" class="form-select" size="5">
                   </select>
                 </div>
@@ -1116,13 +1104,13 @@
               <div class="col-12">
                 <div class="light p-3 mb-3 rounded-3 shadow-sm">
                   <h5 class="mb-3">Informação Adicional</h5>
-                  <p>Descrição</p>
+                  <h6>Descrição</h6>
                   <p class="border rounded-3 p-3" id="terrain_description">-</p>
-                  <p>Cobertura de Solo</p>
+                  <h6>Cobertura de Solo</h6>
                   <p class="border-bottom" id="terrain_type">-</p>
-                  <p>Uso atual</p>
+                  <h6>Uso atual</h6>
                   <p class="border-bottom" id="terrain_current_use">-</p>
-                  <p>Uso anterior</p>
+                  <h6>Uso anterior</h6>
                   <p class="border-bottom" id="terrain_previous_use">-</p>
                 </div>
               </div>
@@ -1192,38 +1180,6 @@
 
         <!-- Toast Handler-->
           
-      </div>
-    </div>
-  </div>
-
-  <!-- Verification Terrain Sidebar -->
-  <div class="offcanvas offcanvas-start rounded-3" style="z-index: -10; left: 4rem;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="verification-terrain-offcanvas" aria-labelledby="offcanvasScrollingLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Lista de Verificações</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <div class="row">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Special title treatment</h5>
-              <span class="badge rounded-pill bg-danger pb-1">Não aprovado</span>
-              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-12">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Special title treatment</h5>
-              <span class="badge rounded-pill bg-warning pb-1">Pendente</span>
-              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-              <a href="#" class="btn btn-success">Aprovar</a>
-              <a href="#" class="btn btn-danger">Não Aprovar</a>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>

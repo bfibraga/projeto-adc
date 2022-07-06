@@ -1,10 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.data.user.auth;
 
-import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
-
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class TokenParams {

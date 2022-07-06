@@ -357,11 +357,8 @@ public class ParcelImplementation implements Parcel {
         }*/
 
         //TODO Figure it out the right offset to do
-        System.out.println();
-        System.out.println((firstCoordinate.getX() - LEFT_MOST_LONGITUDE_CONTINENTE) + "," + (firstCoordinate.getY() - TOP_MOST_LATITUDE_CONTINENTE));
         int[] chunkPos = this.portugal.worldCoordsToChunk(firstCoordinate.getX(), firstCoordinate.getY());
 
-        System.out.println(Arrays.toString(chunkPos));
         // - Find out in which chunk the first coordinate is - \\
 
         List<String> list = new ArrayList<>(); // List that contains the chunks that intersect the terrain
@@ -839,6 +836,7 @@ public class ParcelImplementation implements Parcel {
             topRight = new LatLng((float) (bottomLeft.getLat() + chunkSize[0]), (float) (bottomLeft.getLng() + chunkSize[1]));
         } catch (OutOfChunkBounds ignored) {
         }
+
         try {
             chunkCoords = portugal.worldCoordsToChunk(pos.getLng(), pos.getLat());
             chunkSize = portugal.getChunkSize();
@@ -848,7 +846,6 @@ public class ParcelImplementation implements Parcel {
             return Result.error(Response.Status.BAD_REQUEST, "Position " + pos + " out of bounds");
         }
         String chunk = String.format("(%s, %s)", chunkCoords[0], chunkCoords[1]);
-        System.out.println(chunk);
         Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
         Entity selectedChunk = datastore.get(chunkKey);
 
@@ -860,7 +857,6 @@ public class ParcelImplementation implements Parcel {
 
         ChunkResultData resultData = this.chunkCacheManager.get(chunk, "data", ChunkResultData.class);
         if (resultData == null) {
-            System.out.println("Not hitting Cache");
             String parcelsIDs = selectedChunk.getString("parcels_id");
             String[] parcels = parcelsIDs.split("/");
 
@@ -889,8 +885,6 @@ public class ParcelImplementation implements Parcel {
             }
             resultData = new ChunkResultData(chunk, topRight, bottomLeft, result);
             chunkCacheManager.put(chunk, "data", resultData);
-        } else {
-            System.out.println("Hitting Cache");
         }
 
         return Result.ok(resultData, "");

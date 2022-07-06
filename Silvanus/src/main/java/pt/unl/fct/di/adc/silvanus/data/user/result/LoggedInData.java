@@ -11,12 +11,12 @@ public class LoggedInData {
     private LoggedInVisibleData visible;
 
 
-    public LoggedInData(String token, List<MenuData> menus, Date date){
+    public LoggedInData(String token, List<String> menus, Date date){
         this.token = token;
         this.visible = new LoggedInVisibleData(menus, date);
     }
 
-    public LoggedInData(String token, List<MenuData> menus, long time){
+    public LoggedInData(String token, List<String> menus, long time){
         this.token = token;
         this.visible = new LoggedInVisibleData(menus, time);
     }
