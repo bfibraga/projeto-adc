@@ -50,6 +50,14 @@ async function LoadHTMLDoc(dname, callback, params){
     }
   }
 
+function addEvent(el, type, handler) {
+    
+    el.attachEvent ?
+      el.attachEvent('on' + type, handler) :
+      el.addEventListener(type, handler);
+    console.log("Event created")
+  }
+
 //------
 
 function notification(sender, avatar, content){
@@ -104,17 +112,27 @@ function handleTerrainCard(name, xmlDoc, params){
     let count = target.getAttribute("data-app-value");
     target.setAttribute("data-app-value", String(parseInt(count)+1));
 
-    elems[name].querySelector(".card").setAttribute("data-app-terrain-id", params[0]);
+    elems[name].querySelector(".col").setAttribute("data-app-terrain-id", params[0]);
 
-    elems[name].querySelector(".card").addEventListener("click", function (){
-        loadTerrainInfo(params[0]);
-    });
+    //elems[name].querySelector(".card")
+
+    addEvent(target, 'click', function (event) {
+        console.log(event.target);
+        let parent = event.target.parentElement;
+        while (parent.getAttribute("data-app-terrain-id") === null){
+            parent = parent.parentElement;
+        }
+        console.log(parent);
+        console.log(parent.getAttribute("data-app-terrain-id"));
+        if (parent.getAttribute("data-app-terrain-id") === params[0]){
+            console.log('Button Clicked');
+            loadTerrainInfo(params[0]);
+        }
+      });
 
     elems[name].querySelector(".card__title").insertAdjacentHTML("beforeend", params[1]);
     elems[name].querySelector(".card__status").insertAdjacentHTML("beforeend", params[2]);
     elems[name].querySelector(".card__description").insertAdjacentHTML("beforeend", params[3]);
-
-
 
     target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
     
@@ -186,3 +204,4 @@ function handlePromotionMember(name, xmlDoc, params){
     //let target = ;
     document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
+

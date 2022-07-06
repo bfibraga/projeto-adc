@@ -1,20 +1,18 @@
-package pt.unl.fct.di.adc.silvanus.util.chunks;
+package pt.unl.fct.di.adc.silvanus.data.terrain.chunks;
 
 import org.locationtech.jts.geom.Polygon;
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
-import pt.unl.fct.di.adc.silvanus.util.chunks.exceptions.OutOfChunkBounds;
+import pt.unl.fct.di.adc.silvanus.data.terrain.chunks.exceptions.OutOfChunkBounds;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkBoard<C> {
 
     private final double[] offset;
     private final double[] boardSize;
-    private Chunk2<C>[][] chunk2s;
+    private Chunk<C>[][] chunks;
     private final double[] chunkSize;
     private final double[] size;
 
@@ -31,10 +29,10 @@ public class ChunkBoard<C> {
 
     @SuppressWarnings("unchecked")
     private void buildChunkBoard(int lines, int columns){
-        this.chunk2s = new Chunk2[columns][lines];
+        this.chunks = new Chunk[columns][lines];
         for (int y = 0; y < lines; y++) {
             for (int x = 0; x < columns; x++) {
-                this.chunk2s[x][y] = new Chunk2<>(x,y);
+                this.chunks[x][y] = new Chunk<>(x,y);
             }
         }
     }
@@ -43,17 +41,17 @@ public class ChunkBoard<C> {
         return chunkSize;
     }
 
-    public Chunk2<C> get(int x, int y) {
-        return this.chunk2s[x][y];
+    public Chunk<C> get(int x, int y) {
+        return this.chunks[x][y];
     }
 
-    public Chunk2<C> get(double posX, double posY) throws OutOfChunkBounds {
+    public Chunk<C> get(double posX, double posY) throws OutOfChunkBounds {
         int[] pos = worldCoordsToChunk(posX, posY);
         return this.get(pos[0],pos[1]);
     }
 
     //TODO Testing
-    public Chunk2<C>[][] getArea(double[] topLeft, double[] bottomRight) throws OutOfChunkBounds {
+    public Chunk<C>[][] getArea(double[] topLeft, double[] bottomRight) throws OutOfChunkBounds {
         int[] posTL = this.worldCoordsToChunk(
                 Math.min(topLeft[0], bottomRight[0]),
                 Math.max(topLeft[1], bottomRight[1]));
@@ -65,16 +63,16 @@ public class ChunkBoard<C> {
     }
 
     @SuppressWarnings("unchecked")
-    public Chunk2<C>[][] getArea(int[] topLeft, int[] bottomRight){
+    public Chunk<C>[][] getArea(int[] topLeft, int[] bottomRight){
         int areaLength = Math.abs(bottomRight[0]-topLeft[0]);
         int areaHeight = Math.abs(bottomRight[1]-topLeft[1]);
 
         System.out.println("Length: " + areaLength + "\nHeight: " + areaHeight);
-        Chunk2<C>[][] result = new Chunk2[areaLength][areaHeight];
+        Chunk<C>[][] result = new Chunk[areaLength][areaHeight];
         for (int y = 0 ; y < areaHeight ; y++){
             for (int x = 0 ; x < areaLength ; x++){
                 //TODO Check if this chunk pos is in bounds
-                result[x][y] = chunk2s[x+ topLeft[0]][y+ bottomRight[1]];
+                result[x][y] = chunks[x+ topLeft[0]][y+ bottomRight[1]];
             }
         }
 
@@ -159,13 +157,13 @@ public class ChunkBoard<C> {
         this.get(x,y).clearContent();
     }
 
-    public List<Chunk2<C>> line(double x0, double y0, double x1, double y1) throws OutOfChunkBounds {
+    public List<Chunk<C>> line(double x0, double y0, double x1, double y1) throws OutOfChunkBounds {
         int[] pos0 = worldCoordsToChunk(x0, y0);
         int[] pos1 = worldCoordsToChunk(x1, y1);
         return this.line(pos0[0], pos0[1], pos1[0], pos1[1]);
     }
 
-    public List<Chunk2<C>> line(int x0, int y0, int x1, int y1){
+    public List<Chunk<C>> line(int x0, int y0, int x1, int y1){
         if (Math.abs(y1-y0) < Math.abs(x1-x0)){
             if (x0 > x1){
                 return lineLow(x1,y1,x0,y0);
@@ -181,8 +179,8 @@ public class ChunkBoard<C> {
         }
     }
 
-    private List<Chunk2<C>> lineHigh(int x0, int y0, int x1, int y1) {
-        List<Chunk2<C>> result = new ArrayList<>();
+    private List<Chunk<C>> lineHigh(int x0, int y0, int x1, int y1) {
+        List<Chunk<C>> result = new ArrayList<>();
 
         int dx = x1-x0;
         int dy = y1-y0;
@@ -195,8 +193,8 @@ public class ChunkBoard<C> {
         int x = x0;
 
         for (int y = y0 ; y <= y1 ; y++){
-            Chunk2<C> chunk2 = this.get(x,y);
-            result.add(chunk2);
+            Chunk<C> chunk = this.get(x,y);
+            result.add(chunk);
             if (D > 0){
                 x += xi;
                 D += 2*(dx-dy);
@@ -207,8 +205,8 @@ public class ChunkBoard<C> {
         return result;
     }
 
-    private List<Chunk2<C>> lineLow(int x0, int y0, int x1, int y1) {
-        List<Chunk2<C>> result = new ArrayList<>();
+    private List<Chunk<C>> lineLow(int x0, int y0, int x1, int y1) {
+        List<Chunk<C>> result = new ArrayList<>();
 
         int dx = x1-x0;
         int dy = y1-y0;
@@ -221,8 +219,8 @@ public class ChunkBoard<C> {
         int y = y0;
 
         for (int x = x0 ; x <= x1 ; x++){
-            Chunk2<C> chunk2 = this.get(x,y);
-            result.add(chunk2);
+            Chunk<C> chunk = this.get(x,y);
+            result.add(chunk);
             if (D > 0){
                 y += yi;
                 D += 2*(dy-dx);
@@ -233,8 +231,8 @@ public class ChunkBoard<C> {
         return result;
     }
 
-    public List<Chunk2<C>> polygon(LatLng[] points) throws OutOfChunkBounds {
-        List<Chunk2<C>> result = new ArrayList<>();
+    public List<Chunk<C>> polygon(LatLng[] points) throws OutOfChunkBounds {
+        List<Chunk<C>> result = new ArrayList<>();
 
         int top = Integer.MIN_VALUE;
         int bottom = Integer.MAX_VALUE;
@@ -283,7 +281,7 @@ public class ChunkBoard<C> {
                         (float) (currPoint.getLng() + (chunkSize[0])));
 
                 if (chunkPolygon.intersects(terrainPolygon)){
-                    Chunk2<C> target = get(x,y);
+                    Chunk<C> target = get(x,y);
                     result.add(target);
                 }
             }
@@ -298,9 +296,9 @@ public class ChunkBoard<C> {
         }
         System.out.println();*/
 
-        for (int y = this.chunk2s[0].length - 1; y >= 0 ; y--) {
-            for (int x = 0; x < this.chunk2s.length; x++) {
-                String tag = this.chunk2s[x][y].getTag();
+        for (int y = this.chunks[0].length - 1; y >= 0 ; y--) {
+            for (int x = 0; x < this.chunks.length; x++) {
+                String tag = this.chunks[x][y].getTag();
 
                 System.out.print( tag.equals("") ? "[_]" : String.format("[%s]", tag));
 

@@ -1,6 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.api.rest;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainData;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

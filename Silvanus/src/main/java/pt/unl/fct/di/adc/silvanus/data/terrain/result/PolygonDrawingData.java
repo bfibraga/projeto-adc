@@ -1,7 +1,6 @@
-package pt.unl.fct.di.adc.silvanus.data.parcel.result;
+package pt.unl.fct.di.adc.silvanus.data.terrain.result;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.util.Random;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 
 public class PolygonDrawingData {
     private LatLng[] points;

@@ -1,6 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.data.parcel;
-
-import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
+package pt.unl.fct.di.adc.silvanus.data.terrain;
 
 public class TerrainOwner {
     private String name;

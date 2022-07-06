@@ -1,22 +1,18 @@
 package pt.unl.fct.di.adc.silvanus.implementation.user;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.google.cloud.Role;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import io.jsonwebtoken.*;
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
 import pt.unl.fct.di.adc.silvanus.data.user.perms.RoleCredentials;
-import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInVisibleData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;

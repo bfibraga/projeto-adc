@@ -95,6 +95,8 @@ async function getInfo(debug, user){
 
 	try{
 
+		//terrainCard(1, "Teste 2", "Teste 3", "Teste 4");
+
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
 		perfil = response_data;
@@ -115,14 +117,14 @@ async function getInfo(debug, user){
 		//Avatar
 		//TODO Alter this avatar url
 		let avatar_url = "https://storage.cloud.google.com/projeto-adc.appspot.com/placeholder/user.png?authuser=2";
-		document.querySelectorAll('.avatar-wrapper')
+		/*document.querySelectorAll('.avatar-wrapper')
 			.forEach(function(elem) {
 				const value = elem.getAttribute("data-user");
 				if (value.value === user){
 					elem.firstElementChild.src = avatar_url;
 					console.log(elem.firstElementChild.src);
 				}
-		});
+		});*/
 		
 		Promise.all([
 			getOwnTerrain(),
@@ -340,9 +342,11 @@ async function getOwnTerrain(){
 	try{
 		let response = await axios.post("/api/parcel/list");
 		terrain_list = response.data;
-		if (terrain_list != null || terrain_list !== []){
+		console.log(terrain_list);
+		if (terrain_list != null || terrain_list.length > 0){
 			for (let i = 0; i < terrain_list.length; i++) {
 				const element = terrain_list[i];
+				console.log(element);
 				//const id = element.credentials.id;
 				//terrain_list[i] = element;
 
@@ -365,7 +369,7 @@ async function getPendingTerrain(){
 		let response = await axios.post("/api/parcel/list/pending");
 		const data = response.data;
 		console.log(data);
-		if (data != null || data != []) {
+		if (data !== null || data.length > 0) {
 			data.forEach(element => {
 				console.log(element);
 				const status = String(element.credentials.townhall) + " " + String(element.credentials.district);
@@ -384,18 +388,25 @@ async function getPendingTerrain(){
 
 async function loadChunk(pos){
 	try{
+		//Verify if the content exist in the browser
+		if (hasChunk(pos)){
+			return;
+		}
+
+		//Get from server
 		let response = await axios.get("/api/parcel/list/chunk",{
 			params: pos
 		});
-		console.log(response);
+
 		const response_data = response.data;
-		console.log(response_data.chunk);
 
 		const array = response_data.data;
+		saveChunkBounds(response_data.top_right, response.bottom_left, array);
 		array.forEach(element => {
 			console.log(element);
 			addPolygon(element.points, element.color);
 		});
+
 	} catch (error){
 		console.log(error);
 	} finally {
@@ -405,14 +416,40 @@ async function loadChunk(pos){
 function loadTerrainInfo(id){
 	const terrain = terrain_list[parseInt(id)];
 	console.log(terrain);
-	if (terrain == null) return;
+	if (terrain === null) return;
 
-	document.getElementById("terrain_name").innerHTML += terrain.credentials.name;
-	document.getElementById("terrain_description").innerHTML += terrain.info.description;
-	document.getElementById("terrain_townhall").innerHTML += terrain.info.townhall;
-	document.getElementById("terrain_district").innerHTML += terrain.info.district;
-	document.getElementById("terrain_number_section").innerHTML += terrain.info.section;
-	document.getElementById("terrain_number_article").innerHTML += terrain.info.number_article;
+	document.getElementById("terrain_name").innerHTML = terrain.credentials.name;
+	document.getElementById("terrain_description").innerHTML = terrain.info.description;
+	/*document.getElementById("terrain_townhall").innerHTML = terrain.info.townhall;
+	document.getElementById("terrain_district").innerHTML = terrain.info.district;
+	document.getElementById("terrain_number_section").innerHTML = terrain.info.section;
+	document.getElementById("terrain_number_article").innerHTML = terrain.info.number_article;*/
 	//document.getElementById("terrain_documents_validation").insertAdjacentHTML("beforeend", terrain.info.district);
 
+}
+
+
+async function getRCM(day, dico, target_id){
+	try{
+		day = (Math.max(Math.min(day,1),0));
+		const response = await axios.get("https://api.ipma.pt/open-data/forecast/meteorology/rcm/rcm-d" + day + ".json");
+		const response_data = response.data;
+
+		document.getElementById(target_id).innerHTML = response_data.local[dico]["data"]["rcm"]
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getBroadcast(day, target_id){
+	try{
+		day = (Math.max(Math.min(day,2),0));
+ 		const response = await axios.get("https://api.ipma.pt/open-data/forecast/meteorology/cities/daily/hp-daily-forecast-day" + day + ".json");
+		const response_data = response.data;
+
+		console.log(response_data)
+		//document.getElementById(target_id).innerHTML = response_data.local["0101"]["data"]["rcm"]
+	} catch (error){
+		console.log(error);
+	} 
 }

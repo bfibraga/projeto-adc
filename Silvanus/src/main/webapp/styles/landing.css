@@ -1,27 +1,57 @@
-body {
-  aspect-ratio: 16/9;
-  background-image: url("../media/imgs/natureza1.jpg");
-  width: 100%;
-  height: 100%;
+html, body {
+  background-color: #8CED65;
+  background-image: url("../media/imgs/landing4.svg");
   background-repeat: no-repeat;
-  background-position: 70%;
   background-size: cover;
+  position:fixed;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
 }
 
-.aboutApp {
-  width: 100%;
-  height: 700px;
-  background-color: rgba(255,255,255,0.8);
+/*---Small Screens---*/
+@media only screen and (max-width: 768px) {
+
+.mobileApp {
+  direction: rtl;
+  overflow-x: clip;
+  overflow-y: clip;
+
+  width: 790px;
+
+
+  transform-origin: 70% 45%;
+  transform: translate(0, 95vh) rotate(90deg);
+
+}
+  
+.mobileApp:hover, .mobileApp:active {
+  transform: translate(0, 60vh) rotate(90deg); 
+  transition: 1s;
 }
 
-.aboutUs {
-  width: 100%;
-  height: 300px;
-  background-color: rgba(138,154,91,0.9);
+
+
 }
 
-.finalBar {
-  width: 100%;
-  height: 100px;
-  background-color: rgba(74,93,35,1);
+/*---Big Screens---*/
+@media only screen and (min-width: 768px) {
+
+ .mobileApp {
+    direction: rtl;
+    overflow-y: clip;
+    overflow-x: clip;
+
+    width: 790px;
+
+    transform-origin: 70% 45%;
+    transform: translate(90vh, 0vh);
+  }
+
+  .mobileApp:hover {
+    transform: translate(35vh, 0vh);
+    transition: 1s;
+  }
+
 }

@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.data.parcel;
+package pt.unl.fct.di.adc.silvanus.data.terrain;
 
 public class TerrainIdentifierData {
     private String userID;

@@ -5,22 +5,20 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 import pt.unl.fct.di.adc.silvanus.api.impl.Parcel;
-import pt.unl.fct.di.adc.silvanus.data.parcel.*;
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.data.parcel.result.ChunkResultData;
-import pt.unl.fct.di.adc.silvanus.data.parcel.result.PolygonDrawingData;
-import pt.unl.fct.di.adc.silvanus.data.parcel.result.TerrainResultData;
-import pt.unl.fct.di.adc.silvanus.data.terrain.Chunk;
-import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
+import pt.unl.fct.di.adc.silvanus.data.terrain.*;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.chunks.IslandChunk;
+import pt.unl.fct.di.adc.silvanus.data.terrain.result.ChunkResultData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.result.PolygonDrawingData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.result.TerrainResultData;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
 import pt.unl.fct.di.adc.silvanus.util.Random;
 import pt.unl.fct.di.adc.silvanus.util.cache.ChunkCacheManager;
 import pt.unl.fct.di.adc.silvanus.util.cache.ParcelCacheManager;
-import pt.unl.fct.di.adc.silvanus.util.chunks.Chunk2;
-import pt.unl.fct.di.adc.silvanus.util.chunks.ChunkBoard;
-import pt.unl.fct.di.adc.silvanus.util.chunks.ChunkManager;
-import pt.unl.fct.di.adc.silvanus.util.chunks.exceptions.OutOfChunkBounds;
+import pt.unl.fct.di.adc.silvanus.data.terrain.chunks.Chunk;
+import pt.unl.fct.di.adc.silvanus.data.terrain.chunks.ChunkBoard;
+import pt.unl.fct.di.adc.silvanus.data.terrain.chunks.exceptions.OutOfChunkBounds;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.core.Response;
@@ -70,7 +68,7 @@ public class ParcelImplementation implements Parcel {
 
 
     //TODO Transferir esta parte para cache
-    private Map<String, Chunk> chunksIslands;
+    private Map<String, IslandChunk> chunksIslands;
 
     private static final Logger LOG = Logger.getLogger(ParcelImplementation.class.getName());
 
@@ -109,7 +107,7 @@ public class ParcelImplementation implements Parcel {
 
         portugal = new ChunkBoard<>(38, 26, PORTUGAL_SIZE_X, PORTUGAL_SIZE_Y, LEFT_MOST_LONGITUDE_CONTINENTE, BOTTOM_MOST_LATITUDE_CONTINENTE);
         madeira = new ChunkBoard<>(4, 6, MADEIRA_SIZE_X, MADEIRA_SIZE_Y, LEFT_MOST_LONGITUDE_MADEIRA, BOTTOM_MOST_LATITUDE_MADEIRA);
-        chunkCacheManager = new ChunkCacheManager<>(1000*60*60*24);
+        chunkCacheManager = new ChunkCacheManager<>(1000 * 60 * 60 * 24);
 
     }
 
@@ -127,9 +125,9 @@ public class ParcelImplementation implements Parcel {
             return Result.error(Response.Status.NOT_ACCEPTABLE, "Terrain is not well created.");
         }*/
 
-        List<Chunk2<String>> chunks = locateChunks(terrainData.getParcela());
+        List<Chunk<String>> chunks = locateChunks(terrainData.getParcela());
 
-        if (chunks.isEmpty()){
+        if (chunks.isEmpty()) {
             LOG.severe("Terrain is not well created.");
             return Result.error(Response.Status.NOT_ACCEPTABLE, "Terrain is not well created.");
         }
@@ -182,7 +180,7 @@ public class ParcelImplementation implements Parcel {
                 }
                 txn.put(chunkEntity);
             }*/
-            for (Chunk2<String> chunk: chunks){
+            for (Chunk<String> chunk : chunks) {
                 String chunkID = chunk.getID();
                 Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunkID);
                 chunkEntity = txn.get(chunkKey);
@@ -231,8 +229,8 @@ public class ParcelImplementation implements Parcel {
         }
     }
 
-    private List<Chunk2<String>> locateChunks(LatLng[] points){
-        List<Chunk2<String>> result = new ArrayList<>();
+    private List<Chunk<String>> locateChunks(LatLng[] points) {
+        List<Chunk<String>> result = new ArrayList<>();
         try {
             result.addAll(madeira.polygon(points));
         } catch (OutOfChunkBounds ignored) {
@@ -255,7 +253,7 @@ public class ParcelImplementation implements Parcel {
      * @param bibBB               the Bounding Box that contains all the other bounding boxes
      * @return a list that contains all the chunks where the terrain lies, null otherwise
      */
-    private List<String> completeMethod(Polygon terrain, Polygon portugalContinental, Polygon bibBB) {
+    private List<String> completeMethod(Polygon terrain, Polygon portugalContinental, Polygon bibBB) throws OutOfChunkBounds {
 
         // Checks if the terrain is inside Big Bounding Box
         if (!bibBB.contains(terrain)) return null;
@@ -307,7 +305,7 @@ public class ParcelImplementation implements Parcel {
      * the identifier of the island otherwise
      */
     private String isTerrainInsideIsland(Polygon terrain) {
-        for (Map.Entry<String, Chunk> entry : chunksIslands.entrySet()) {
+        for (Map.Entry<String, IslandChunk> entry : chunksIslands.entrySet()) {
             if (entry.getValue().getChunkAsPolygon().intersects(terrain)) {
                 if (entry.getValue().getChunkAsPolygon().contains(terrain))
                     return entry.getKey();
@@ -330,7 +328,7 @@ public class ParcelImplementation implements Parcel {
      * @param portugal the Bounding Box of Portugal continental
      * @return a list with all the chunks the terrain intersects, null otherwise (there was an error)
      */
-    private List<String> terrainIsInsidePortugalContinental(Polygon terrain, Polygon portugal) {
+    private List<String> terrainIsInsidePortugalContinental(Polygon terrain, Polygon portugal) throws OutOfChunkBounds {
         if (!portugal.contains(terrain)) return null;
 
         // Find out in which chunk the first coordinate is \\
@@ -361,9 +359,7 @@ public class ParcelImplementation implements Parcel {
         //TODO Figure it out the right offset to do
         System.out.println();
         System.out.println((firstCoordinate.getX() - LEFT_MOST_LONGITUDE_CONTINENTE) + "," + (firstCoordinate.getY() - TOP_MOST_LATITUDE_CONTINENTE));
-        int[] chunkPos = ChunkManager.worldCoordToChunk(
-                (firstCoordinate.getX() - LEFT_MOST_LONGITUDE_CONTINENTE),
-                (firstCoordinate.getY() - TOP_MOST_LATITUDE_CONTINENTE), sizeX, sizeY);
+        int[] chunkPos = this.portugal.worldCoordsToChunk(firstCoordinate.getX(), firstCoordinate.getY());
 
         System.out.println(Arrays.toString(chunkPos));
         // - Find out in which chunk the first coordinate is - \\
@@ -443,17 +439,17 @@ public class ParcelImplementation implements Parcel {
     private void fillMapOfIlands() {
         chunksIslands.clear();
         // Açores
-        chunksIslands.put("São Miguel (Açores)", new Chunk("São Miguel (Açores)", -25.90f, -25.10f, 37.95f, 37.65f));
-        chunksIslands.put("Santa Maria (Açores)", new Chunk("Santa Maria (Açores)", -25.20f, -25.00f, 37.02f, 36.92f));
-        chunksIslands.put("Terceira (Açores)", new Chunk("Terceira (Açores)", -27.39f, -27.30f, 38.82f, 36.81f));
-        chunksIslands.put("Graciosa (Açores)", new Chunk("Graciosa (Açores)", -28.08f, -27.93f, 39.10f, 39.00f));
-        chunksIslands.put("São Jorge (Açores)", new Chunk("São Jorge (Açores)", -28.32f, -27.70f, 38.76f, 38.52f));
-        chunksIslands.put("Pico (Açores)", new Chunk("Pico (Açores)", -28.55f, -28.02f, 38.57f, 38.38f));
-        chunksIslands.put("Flores (Açores)", new Chunk("Flores (Açores)", -31.28f, -31.12f, 39.53f, 39.36f));
-        chunksIslands.put("Corvo (Açores)", new Chunk("Corvo (Açores)", -31.13f, -31.08f, 39.73f, 39.66f));
+        chunksIslands.put("São Miguel (Açores)", new IslandChunk("São Miguel (Açores)", -25.90f, -25.10f, 37.95f, 37.65f));
+        chunksIslands.put("Santa Maria (Açores)", new IslandChunk("Santa Maria (Açores)", -25.20f, -25.00f, 37.02f, 36.92f));
+        chunksIslands.put("Terceira (Açores)", new IslandChunk("Terceira (Açores)", -27.39f, -27.30f, 38.82f, 36.81f));
+        chunksIslands.put("Graciosa (Açores)", new IslandChunk("Graciosa (Açores)", -28.08f, -27.93f, 39.10f, 39.00f));
+        chunksIslands.put("São Jorge (Açores)", new IslandChunk("São Jorge (Açores)", -28.32f, -27.70f, 38.76f, 38.52f));
+        chunksIslands.put("Pico (Açores)", new IslandChunk("Pico (Açores)", -28.55f, -28.02f, 38.57f, 38.38f));
+        chunksIslands.put("Flores (Açores)", new IslandChunk("Flores (Açores)", -31.28f, -31.12f, 39.53f, 39.36f));
+        chunksIslands.put("Corvo (Açores)", new IslandChunk("Corvo (Açores)", -31.13f, -31.08f, 39.73f, 39.66f));
         // Madeira
-        chunksIslands.put("Porto Santo (Madeira)", new Chunk("Porto Santo (Madeira)", -16.42f, -16.27f, 33.11f, 32.99f));
-        chunksIslands.put("Madeira", new Chunk("Madeira (Madeira)", -17.27f, -16.64f, 32.88f, 32.62f));
+        chunksIslands.put("Porto Santo (Madeira)", new IslandChunk("Porto Santo (Madeira)", -16.42f, -16.27f, 33.11f, 32.99f));
+        chunksIslands.put("Madeira", new IslandChunk("Madeira (Madeira)", -17.27f, -16.64f, 32.88f, 32.62f));
     }
 
     /**
@@ -863,7 +859,7 @@ public class ParcelImplementation implements Parcel {
         }
 
         ChunkResultData resultData = this.chunkCacheManager.get(chunk, "data", ChunkResultData.class);
-        if (resultData == null){
+        if (resultData == null) {
             System.out.println("Not hitting Cache");
             String parcelsIDs = selectedChunk.getString("parcels_id");
             String[] parcels = parcelsIDs.split("/");

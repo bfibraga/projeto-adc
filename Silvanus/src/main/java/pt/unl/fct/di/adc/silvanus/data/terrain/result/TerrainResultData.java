@@ -1,9 +1,9 @@
-package pt.unl.fct.di.adc.silvanus.data.parcel.result;
+package pt.unl.fct.di.adc.silvanus.data.terrain.result;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainIdentifierData;
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainInfoData;
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainOwner;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainIdentifierData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainInfoData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainOwner;
 
 public class TerrainResultData {
     //TODO Add more attributes to give to response

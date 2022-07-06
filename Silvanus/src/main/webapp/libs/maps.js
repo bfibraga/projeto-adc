@@ -368,7 +368,7 @@ function togglePolygonDrawingControl(value){
 }
 
 function toggleRouteDrawingControl(value, confirmed){
-    setMenuID('route_definition_menu',String(value));
+    //setMenuID('route_definition_menu',String(value));
 
     polygon_drawing_tools.setOptions({
         drawingControl: !value
@@ -424,4 +424,21 @@ function setLines(low_index, high_index, value){
 
 function submitPolygon(){
 	submitTerrain(polygon_result, route_result);
+}
+
+//---- Chunk Loading Related ----
+
+let loaded_chunk = {};
+let loaded_bounds = {};
+
+function saveChunkBounds(topRight, bottomLeft, content){
+    loaded_bounds = {topRight, bottomLeft};
+    const chunk_key = "(" + bottomLeft.lat + "," + bottomLeft.lng + ")";
+
+    loaded_chunk[chunk_key] = content;
+}
+
+//TODO Make this function work
+function hasChunk(pos){
+    return false;
 }

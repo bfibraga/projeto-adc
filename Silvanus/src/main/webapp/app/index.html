@@ -534,9 +534,6 @@
           </div>
         </div>
         <h3 id="usr_username">Username
-          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
-            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
-          </a>
         </h3>
         <h5 id="usr_email" class="">Email</h5>
         <div id="usr_roles_change_password">
@@ -577,7 +574,7 @@
                     <img id="usr_avatar_perfil_credentials" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
                   </div>
                 </div>
-                <h4 class="ms-3 mb-3 text-center">Nome da Comunidade</h4>
+                <h4 class=" mb-3 text-center">Nome da Comunidade</h4>
                 
                 <h6>Responsável pela comunidade:</h6>
                 <div id="community-responsible">
@@ -611,7 +608,7 @@
                   </a>
                 </div>
                 
-                <h4 class="ms-3">Lista de Membros</h4>
+                <h4 class="">Lista de Membros</h4>
                 <ul id="list_community_members" class="list-group ms-2" style="width: 100%;">
                 </ul>
               </div>
@@ -718,9 +715,6 @@
           </div>
         </div>
         <h3 id="usr_username">Username
-          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
-            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
-          </a>
         </h3>
         <h5 id="usr_email" class="">Email</h5>
         <div id="usr_roles_change_password">
@@ -836,9 +830,6 @@
           </div>
         </div>
         <h3 id="usr_username">Username
-          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
-            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
-          </a>
         </h3>
         <h5 id="usr_email" class="">Email</h5>
         <div id="usr_roles_change_password">
@@ -1097,39 +1088,106 @@
   <!-- Terrain Properties Sidebar -->
   <div class="terrain-list">
     <div class="offcanvas offcanvas-start rounded-3" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="terrain-properties" aria-labelledby="offcanvasScrollingLabel">
-      <div class="offcanvas-header">
+      <div class="offcanvas-header light shadow-sm">
         <h4 id="terrain_name">Nome Terreno</h4>
+        
         <button type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
-      <div class="offcanvas-body">
-        <p id="terrain_description">Descrição:</p>
-        <p id="terrain_townhall">Conselho:</p>
-        <p id="terrain_district">Distrito:</p>
-        <p id="terrain_number_section">Secção:</p>
-        <p id="terrain_number_article">Numero de Artigo:</p>
-        <p id="terrain_documents_validation">Documentos de Validação</p>
-  
-        <!-- <p>Other info of this terrain: Risco Incendio, Humidade, etc</p> -->
-    
-        <div class="row d-flex flex-column justify-content-center ">
-          <div class="col">
-            <div class="rounded-3 p-3 mb-3 border rounded">
-              <h5 class="mb-3">Área Total</h5>
-              <div class="p-3">
-                <canvas id="terrain_total_area_chart" width="800" height="800"></canvas>
+      <div class="offcanvas-body bg-light">
+        <div class="row">
+          <div class="col-md-6 col-sm-12">
+            <div class="row flex-column">
+              <div class="col-12">
+                <div class="light p-3 mb-3 rounded-3 shadow-sm">
+                  <h5 class="mb-3">Informação</h5>
+                  <p>Concelho</p>
+                  <p class="border-bottom" id="terrain_townhall">-</p>
+                  <p>Distrito</p>
+                  <p class="border-bottom" id="terrain_district">-</p>
+                  <p>Número de Artigo</p>
+                  <p class="border-bottom" id="terrain_number_article">-</p>
+                  <p>Número de Secção</p>
+                  <p class="border-bottom" id="terrain_number_section">-</p>
+                  <p>Documentos de Validação</p>
+                  <select id="terrain_documents_validation" class="form-select" size="5">
+                  </select>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="light p-3 mb-3 rounded-3 shadow-sm">
+                  <h5 class="mb-3">Informação Adicional</h5>
+                  <p>Descrição</p>
+                  <p class="border rounded-3 p-3" id="terrain_description">-</p>
+                  <p>Cobertura de Solo</p>
+                  <p class="border-bottom" id="terrain_type">-</p>
+                  <p>Uso atual</p>
+                  <p class="border-bottom" id="terrain_current_use">-</p>
+                  <p>Uso anterior</p>
+                  <p class="border-bottom" id="terrain_previous_use">-</p>
+                </div>
               </div>
             </div>
-
+            
           </div>
-          <!--<div class="col">
-            <div class="rounded-3 p-3 mb-3 border rounded">
-              <h5 class="mb-3">Número de Terrenos por Região</h5>
-              <div class="p-3">
-                <canvas id="terrain_nmr_per_region_chart" width="800" height="800"></canvas>
+          <div class="col-md-6 col-sm-12">
+            <div class="row">
+              <div class="col-12">
+                <div class="light mb-3 p-3 rounded-3 shadow-sm">
+                  <div class="d-flex flex-row mb-3 align-items-center">
+                    <h5 class="me-3">Foto do terreno</h5>
+                    <a type="button" class="btn text-reset me-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-map" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.502.502 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103zM10 1.91l-4-.8v12.98l4 .8V1.91zm1 12.98 4-.8V1.11l-4 .8v12.98zm-6-.8V1.11l-4 .8v12.98l4-.8z"/>
+                      </svg>
+                    </a>
+                  </div>
+                  
+                  <div class="avatar-wrapper rounded-3" style="width: 100%;">
+                    <img class="rounded-3" src="../media/imgs/natureza1.jpg" alt="Foto do terreno">
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="row flex-row">
+                  <div class="col-4">
+                    <div class="bg-info bg-opacity-10 rounded-3 p-3 shadow-sm w-100 h-75">
+                      <p class="text-center">Temperatura Mínima</p>
+                      <p class="display-6 text-center pb-3">0</p>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="bg-danger bg-opacity-10 rounded-3 p-3 shadow-sm w-100 h-75">
+                      <p class="text-center">Temperatura Máxima</p>
+                      <p id="terrain_min_temp" class="display-6 text-center pb-3">0</p>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="bg-danger bg-opacity-25 rounded-3 p-3 shadow-sm w-100 h-75">
+                      <p class="text-center">Risco Incêndio</p>
+                      <p id="terrain_rcm" class="display-6 text-center pb-3">0</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="light p-3 mb-3 rounded-3 shadow-sm">
+                  <h5 class="mb-3">Proprietário</h5>
+                  <h6>Nome Completo</h6>
+                  <p id="owner_fullname" class="border-bottom">-</p>
+                  <h6>NIF</h6>
+                  <p id="owner_id" class="border-bottom">-</p>
+                  <h6>Número de telefone</h6>
+                  <p id="owner_telephone" class="border-bottom">-</p>
+                  <h6>Número de smartphone</h6>
+                  <p id="owner_smartphone" class="border-bottom">-</p>
+                  <h6>Morada</h6>
+                  <p id="owner_address" class="border-bottom">-</p>
+                </div>
               </div>
             </div>
-
-          </div>-->
+            
+          </div>
         </div>
 
         <!-- Toast Handler-->
