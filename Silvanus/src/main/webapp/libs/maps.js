@@ -304,19 +304,22 @@ function area(points){
 }
 
 function addMarker(coords){
-    const marker = new google.maps.Marker({
-        position: coords,
-        map,
-      });
+    let exist = false;
+    for (let marker_index = 0; marker_index < markers_points.length && !exist; marker_index++) {
+        const element = markers_points[marker_index];
+        exist = JSON.stringify(element) === JSON.stringify(coords);
 
-    markers_points.forEach(element => {
-        if (JSON.stringify(element) === JSON.stringify(coords)){
-            return;
-        }
-    });
+    }
     
-    markers.push(marker);
-    markers_points.push(coords);
+    if (!exist){
+        const marker = new google.maps.Marker({
+            position: coords,
+            map,
+        });
+    
+        markers.push(marker);
+        markers_points.push(coords);
+    }
 }
 
 function addLine(coords, color){
@@ -333,24 +336,41 @@ function addLine(coords, color){
 }
 
 function addPolygon(coords, color){
-    polygons_points.forEach(elem => {
-        if (JSON.stringify(elem) === JSON.stringify(coords)){
-            return;
-        }
-    });
+    let exist = false;
 
-    const polygon = new google.maps.Polygon({
-        map,
-        paths: coords,
-        strokeColor: color,
-        strokeOpacity: 0.6,
-        strokeWeight: 2,
-        fillColor: color,
-        fillOpacity: 0.30,
-        geodesic: true,
-    });
-    polygons.push(polygon);
-    polygons_points.push(coords);
+    for (let i = 0; i < polygons_points.length && !exist; i++) {
+        const element = polygons_points[i];
+        exist = JSON.stringify(element) === JSON.stringify(coords);
+    }
+
+    if(!exist){
+        const polygon = new google.maps.Polygon({
+            map,
+            paths: coords,
+            strokeColor: color,
+            strokeOpacity: 0.6,
+            strokeWeight: 2,
+            fillColor: color,
+            fillOpacity: 0.30,
+            geodesic: true,
+        });
+
+        google.maps.event.addListener(polygon, 'click', function(event) {
+            console.log("Clicked on Polygon");
+        })
+
+        polygons.push(polygon);
+        polygons_points.push(coords);
+    }
+}
+
+function addCluster(){
+    cluster(markers);
+}
+
+function cluster(marker_list){
+    // Add a marker clusterer to manage the markers.
+  new MarkerClusterer({ marker_list, map });
 }
 
 function center(given_points){

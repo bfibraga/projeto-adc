@@ -200,7 +200,6 @@ function handleListUser(name, xmlDoc, params){
     const target = document.getElementById(params[1]);
 
     const profile = params[0];
-
     
     const key = parseInt(target.getAttribute("data-app-value"));
 
@@ -240,10 +239,44 @@ function handleListUser(name, xmlDoc, params){
     elems[name].querySelector(".usr_active_radio").checked = profile.state === "ACTIVE" ? true : false;
     console.log(elems[name].querySelector(".usr_active_radio").checked);
 
+    console.log(profile.loggedinData.menus.includes("menu04"));
+    if (profile.loggedinData.menus.includes("menu04")){
+        elems[name].querySelector(".usr_active_radio").setAttribute("data-app-menu-active", "true");
+    }
+
+    if (profile.loggedinData.menus.includes("menu05")){
+        elems[name].querySelector(".usr_role_unchanged").setAttribute("data-app-menu-active", "false");
+        elems[name].querySelector(".usr_role").setAttribute("data-app-menu-active", "true");
+    }
+
+    elems[name].querySelector(".usr_role_unchanged").insertAdjacentHTML("beforeend", profile.role_name);
+
+    const available_roles = listInferiorRoles(profile.role_name);
+    const usr_role_elem = elems[name].querySelector(".usr_role");
+
+    console.log(available_roles);
+    available_roles.forEach(role => {
+        usr_role_elem.insertAdjacentHTML("beforeend", "<option>" + role + "</option>")
+    });
+
     elems[name].querySelector(".usr_n_terrains").insertAdjacentHTML("beforeend", 0);
 
     //let target = ;
     target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
+function listInferiorRoles(role_name){
+    let result = [];
+    const parts = role_name.split(" ");
+    switch (parts[0]){
+        case "Administrador":
+            result.push("Administrador");
+        case "Funcionario":
+            result.push("Funcionario");
+        case "Utilizador":
+            result.push("Utilizador");
+    }
+    return result;
 }
 
 const menuHandler = {

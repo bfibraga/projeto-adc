@@ -554,7 +554,8 @@ public class UserImplementation implements Users {
 				infoEntity.getString("usr_NIF"),
 				infoEntity.getString("usr_address"),
 				infoEntity.getString("usr_telephone"),
-				infoEntity.getString("usr_smartphone"));
+				infoEntity.getString("usr_smartphone"),
+				"");
 		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
 		System.out.println(role);
 		UserRoleData roleData = new UserRoleData(role.getDisplayName(), role.getRoleColor());
@@ -575,7 +576,7 @@ public class UserImplementation implements Users {
 				role.getDisplayName(),
 				role.getRoleColor(),
 				logoutData,
-				new LoggedInVisibleData()
+				new LoggedInVisibleData(Arrays.asList(role.getMenus()))
 		);
 
 		return result;
@@ -644,7 +645,7 @@ public class UserImplementation implements Users {
 
 			txn.delete(remove_userKey, remove_userRoleKey, remove_userPermissionKey, remove_userInfoKey);
 			txn.commit();
-
+			this.cache.remove(remove_id);
 			return Result.ok();
 		} finally {
 			if(txn.isActive()){
@@ -933,9 +934,6 @@ public class UserImplementation implements Users {
 					.replaceTelephone(target.getString("usr_telephone"))
 					.replaceSmartphone(target.getString("usr_smartphone"));
 
-			this.cache.remove(userID);
-			System.out.println(infoData);
-
 			target = Entity.newBuilder(target_usrKey_info)
 					.set("usr_visibility", infoData.getVisibility())
 					.set("usr_name", infoData.getName())
@@ -944,6 +942,9 @@ public class UserImplementation implements Users {
 					.set("usr_address", infoData.getAddress())
 					.set("usr_NIF", infoData.getNif())
 					.build();
+
+			this.cache.remove(userID);
+			System.out.println(infoData);
 
 			tnx.put(target);
 			tnx.commit();

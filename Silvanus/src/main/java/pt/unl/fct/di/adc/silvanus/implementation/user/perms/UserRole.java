@@ -3,9 +3,21 @@ package pt.unl.fct.di.adc.silvanus.implementation.user.perms;
 public enum UserRole {
 	HELPDESK("Helpdesk", "Helpdesk", "#202020"),
 	ENDUSER("End-User", "Utilizador", "#6aa84f"),
-	FUNCCONS("Func-Cons", "Funcionario de %s", "#6fa8dc", "menu02", "menu03"),
-	FUNCDIST("Func-Dist", "Funcionario de %s", "#e69138",  "menu02", "menu03"),
-	ADMIN("Admin", "Administrador", "#cd0000",  "menu02", "menu03");
+	FUNCCONS("Func-Cons", "Funcionario de %s", "#6fa8dc",
+			"menu02",
+			"menu03",
+			"menu04",
+			"menu05"),
+	FUNCDIST("Func-Dist", "Funcionario de %s", "#e69138",
+			"menu02",
+			"menu03",
+			"menu04",
+			"menu05"),
+	ADMIN("Admin", "Administrador", "#cd0000",
+			"menu02",
+			"menu03",
+			"menu04",
+			"menu05");
 
 	private String role_name;
 	private String display_name;

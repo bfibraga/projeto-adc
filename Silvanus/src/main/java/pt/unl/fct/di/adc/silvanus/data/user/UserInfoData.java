@@ -9,11 +9,13 @@ public class UserInfoData {
     private String telephone;
     private String smartphone;
 
+    private String avatar;
+
     public UserInfoData(){
-        this("", "", "", "", "", "");
+        this("", "", "", "", "", "", "");
     }
 
-    public UserInfoData(String name, String visibility, String nif, String address, String telephone, String smartphone){
+    public UserInfoData(String name, String visibility, String nif, String address, String telephone, String smartphone, String avatar){
         this.name = name;
         this.visibility = visibility.toUpperCase();
         this.nif = nif;
@@ -98,6 +100,15 @@ public class UserInfoData {
 
     public UserInfoData replaceSmartphone(String smartphone) {
         return !validField(this.getSmartphone()) && validField(smartphone) ? this.setSmartphone(smartphone) : this ;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public UserInfoData setAvatar(String avatar) {
+        this.avatar = avatar;
+        return this;
     }
 
     /**
