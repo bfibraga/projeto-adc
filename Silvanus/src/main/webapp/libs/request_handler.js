@@ -94,6 +94,7 @@ async function getInfo(debug, user){
 	let loader = document.getElementById("loader");
 
 	try{
+		
 
 		//menu("menu03");
 		//terrainCard(1, "Teste 2", "Teste 3", "Teste 4");
@@ -151,14 +152,112 @@ async function get(){
 	spinner.setAttribute("data-app-menu-active", "true");
 
 	try{
-		const value = document.getElementById("promote_input").value;
+		listUserProfile(
+			{
+				"username": "teste_funccons",
+				"email": "teste_funccons@gmail.com",
+				"info": {
+					"name": "Func-Cons",
+					"visibility": "PUBLIC",
+					"nif": "914123-Z123",
+					"address": "Rua de Func-Cons",
+					"telephone": "124123",
+					"smartphone": "+351 913151232",
+					"avatar": null
+				},
+				"state": "ACTIVE",
+				"role_name": "Funcionario de %s",
+				"role_color": "#6fa8dc",
+				"logoutData": {
+					"center": {
+						"lat": 38.650295,
+						"lng": -9.20802
+					},
+					"zoom": 14
+				},
+				"loggedinData": {
+					"time": "2022-07-07 11:25:27",
+					"menus": [
+						"menu02",
+						"menu03"
+					]
+				}
+			}
+		)
+		listUserProfile(
+			{
+				"username": "teste_funccons",
+				"email": "teste_funccons@gmail.com",
+				"info": {
+					"name": "Func-Cons",
+					"visibility": "PUBLIC",
+					"nif": "914123-Z123",
+					"address": "Rua de Func-Cons",
+					"telephone": "124123",
+					"smartphone": "+351 913151232",
+					"avatar": null
+				},
+				"state": "INACTIVE",
+				"role_name": "Funcionario de %s",
+				"role_color": "#6fa8dc",
+				"logoutData": {
+					"center": {
+						"lat": 38.650295,
+						"lng": -9.20802
+					},
+					"zoom": 14
+				},
+				"loggedinData": {
+					"time": "2022-07-07 11:25:27",
+					"menus": [
+						"menu02",
+						"menu03"
+					]
+				}
+			}
+		)
+		listUserProfile(
+			{
+				"username": "teste_funccons",
+				"email": "teste_funccons@gmail.com",
+				"info": {
+					"name": "Func-Cons",
+					"visibility": "PUBLIC",
+					"nif": "914123-Z123",
+					"address": "Rua de Func-Cons",
+					"telephone": "124123",
+					"smartphone": "+351 913151232",
+					"avatar": null
+				},
+				"state": "INACTIVE",
+				"role_name": "Funcionario de %s",
+				"role_color": "#6fa8dc",
+				"logoutData": {
+					"center": {
+						"lat": 38.650295,
+						"lng": -9.20802
+					},
+					"zoom": 14
+				},
+				"loggedinData": {
+					"time": "2022-07-07 11:25:27",
+					"menus": [
+						"menu02",
+						"menu03"
+					]
+				}
+			}
+		)
+
+		const value = String(document.getElementById("search_list_user_input").value);
 		const response = await axios.get("/api/user/info?identifier="+value);
-		const response_data = response.data[0];
+		const response_data = response.data;
 		console.log(response_data);
+		document.getElementById("list_search_users").replaceChildren();
+
 		response_data.forEach(elem => {
 			listUserProfile(elem);
 		});
-
 	} catch (error){
 		console.log(error);
 		

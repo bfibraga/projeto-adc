@@ -156,4 +156,12 @@ function typeTerrain(id, menu_id){
   }
 }
 
+document.getElementById("search_list_user_input")
+.addEventListener("keydown", function(event){
+  switch (event.key){
+      case "Enter":
+          get();
+          break;
+  }
+});
 

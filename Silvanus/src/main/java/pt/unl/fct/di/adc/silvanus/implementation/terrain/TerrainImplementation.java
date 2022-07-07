@@ -854,41 +854,44 @@ public class TerrainImplementation implements Parcel {
         String chunk = String.format("(%s, %s)", chunkCoords[0], chunkCoords[1]);
         ChunkResultData resultData = this.chunkCacheManager.get(chunk, "data", ChunkResultData.class);
 
-        Set<PolygonDrawingData> result = new HashSet<>();
         if (resultData != null) {
-            ChunkResultData data = new ChunkResultData(chunk, topRight, bottomLeft, result);
-            return Result.ok(data, "");
+            return Result.ok(resultData, "");
         }
 
+        Set<PolygonDrawingData> result = new HashSet<>();
         Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
         Entity selectedChunk = datastore.get(chunkKey);
+        if (selectedChunk != null){
+            String parcelsIDs = selectedChunk.getString("parcels_id");
+            String[] parcels = parcelsIDs.split("/");
 
-        String parcelsIDs = selectedChunk.getString("parcels_id");
-        String[] parcels = parcelsIDs.split("/");
+            KeyFactory selectedParcelKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME);
+            KeyFactory selectedParcelNotApprovedKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME);
 
-        KeyFactory selectedParcelKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME);
-        KeyFactory selectedParcelNotApprovedKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME);
+            Key selectedParcelKey;
+            Key selectedParcelNotApprovedKey;
+            for (String parcelID : parcels) {
+                selectedParcelKey = selectedParcelKeyFactory.newKey(parcelID);
+                Entity selectedParcel = datastore.get(selectedParcelKey);
 
-        Key selectedParcelKey;
-        Key selectedParcelNotApprovedKey;
-        for (String parcelID : parcels) {
-            selectedParcelKey = selectedParcelKeyFactory.newKey(parcelID);
-            selectedParcelNotApprovedKey = selectedParcelNotApprovedKeyFactory.newKey(parcelID);
-            Entity selectedParcel = datastore.get(selectedParcelKey);
-            Entity selectedParcelNotApproved = datastore.get(selectedParcelNotApprovedKey);
+                if (selectedParcel != null) {
+                    LatLng[] points = JSON.decode(selectedParcel.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
+                    PolygonDrawingData data = new PolygonDrawingData(points, Random.color(), true);
+                    result.add(data);
+                    //continue;
+                }
 
-            if (selectedParcel != null) {
-                LatLng[] points = JSON.decode(selectedParcel.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
-                PolygonDrawingData data = new PolygonDrawingData(points, Random.color(), true);
-                result.add(data);
-            }
+                selectedParcelNotApprovedKey = selectedParcelNotApprovedKeyFactory.newKey(parcelID);
+                Entity selectedParcelNotApproved = datastore.get(selectedParcelNotApprovedKey);
 
-            if (selectedParcelNotApproved != null) {
-                LatLng[] points = JSON.decode(selectedParcelNotApproved.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
-                PolygonDrawingData data = new PolygonDrawingData(points, Random.color(), false);
-                result.add(data);
+                if (selectedParcelNotApproved != null) {
+                    LatLng[] points = JSON.decode(selectedParcelNotApproved.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
+                    PolygonDrawingData data = new PolygonDrawingData(points, Random.color(), false);
+                    result.add(data);
+                }
             }
         }
+
         resultData = new ChunkResultData(chunk, topRight, bottomLeft, result);
         chunkCacheManager.put(chunk, "data", resultData);
 
