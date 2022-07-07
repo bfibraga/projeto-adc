@@ -203,6 +203,12 @@ main{
         top: calc(100% - var(--size) - var(--nav-bar-len));
     }
 
+    #terrain-properties{
+        --size : 45%;
+        height: var(--size) !important;
+        top: calc(100% - var(--size) - var(--nav-bar-len));
+    }
+
     .offcanvas[data-expand="false"]{
         top: calc(100% - var(--nav-bar-len) - var(--header-offcanvas-height)) !important;
     }
@@ -215,6 +221,9 @@ main{
         bottom: var(--nav-bar-len) !important;
     }
 
+    #usr_list_notification{
+        max-width: fit-content;
+    }
 }
 
 /*---Large Screens---*/
@@ -285,6 +294,11 @@ main{
 
     #request-terrain-btn-expand{
         display: none;
+    }
+
+    #terrain-properties{
+        --size : 60%;
+        width: var(--size) !important;
     }
 
     .offcanvas-start{

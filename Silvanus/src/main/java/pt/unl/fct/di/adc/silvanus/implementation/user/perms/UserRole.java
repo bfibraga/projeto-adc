@@ -3,18 +3,20 @@ package pt.unl.fct.di.adc.silvanus.implementation.user.perms;
 public enum UserRole {
 	HELPDESK("Helpdesk", "Helpdesk", "#202020"),
 	ENDUSER("End-User", "Utilizador", "#6aa84f"),
-	FUNCCONS("Func-Cons", "Funcionario de %s", "#6fa8dc"),
-	FUNCDIST("Func-Dist", "Funcionario de %s", "#e69138"),
-	ADMIN("Admin", "Administrador", "#cd0000");
+	FUNCCONS("Func-Cons", "Funcionario de %s", "#6fa8dc", "menu02", "menu03"),
+	FUNCDIST("Func-Dist", "Funcionario de %s", "#e69138",  "menu02", "menu03"),
+	ADMIN("Admin", "Administrador", "#cd0000",  "menu02", "menu03");
 
 	private String role_name;
 	private String display_name;
 	private String role_color;
+	private String[] menus;
 
-	UserRole(String role_name, String display_name, String role_color){
+	UserRole(String role_name, String display_name, String role_color, String... menus){
 		this.role_name = role_name;
 		this.display_name = display_name;
 		this.role_color = role_color;
+		this.menus = menus;
 	}
 
 	UserRole(){
@@ -48,5 +50,9 @@ public enum UserRole {
 	
 	public int getPriority() {
 		return this.ordinal();
+	}
+
+	public String[] getMenus() {
+		return menus;
 	}
 }

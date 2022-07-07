@@ -1,10 +1,8 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
 import com.google.cloud.datastore.*;
-import com.google.gson.Gson;
 import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
 import pt.unl.fct.di.adc.silvanus.resources.NotificationResource;
-import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
 import pt.unl.fct.di.adc.silvanus.api.impl.Notifications;
 import pt.unl.fct.di.adc.silvanus.util.cache.CacheManager;
 import pt.unl.fct.di.adc.silvanus.util.cache.NotificationCacheManager;
@@ -13,8 +11,6 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.core.Response;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Logger;
 
 public class NotificationImplementation implements Notifications {

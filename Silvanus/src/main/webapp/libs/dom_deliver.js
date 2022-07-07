@@ -175,13 +175,6 @@ function communityResponsible(username, email, avatar){
     LoadHTMLDoc(elemName, handleCommunityMember, params);
 }
 
-function listUserProfile(profile){
-    const elemName = "elems/user-profile.html"; 
-    let params = [profile, "list_users_promote"];
-
-    LoadHTMLDoc(elemName, handlePromotionMember, params);
-}
-
 function handleCommunityMember(name, xmlDoc, params){
     elems[name] = parser.parseFromString(xmlDoc, "text/html");
 
@@ -194,14 +187,91 @@ function handleCommunityMember(name, xmlDoc, params){
     document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
 
-function handlePromotionMember(name, xmlDoc, params){
+function listUserProfile(profile){
+    const elemName = "elems/user_profile.html"; 
+    let params = [profile, "list_search_users"];
+
+    LoadHTMLDoc(elemName, handleListUser, params);
+}
+
+function handleListUser(name, xmlDoc, params){
     elems[name] = parser.parseFromString(xmlDoc, "text/html");
 
-    elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", params[0]);
-    elems[name].querySelector(".usr_email").insertAdjacentHTML("beforeend", params[1]);
-    elems[name].querySelector(".profile-img").src = params[2];
+    const target = document.getElementById(params[1]);
+
+    const profile = params[0];
+
+    
+    const key = parseInt(target.getAttribute("data-app-value"));
+
+    elems[name].querySelector(".toggle-info").setAttribute("data-user", key);
+    elems[name].querySelector(".user-info").setAttribute("data-user", key);
+
+    addEvent(target, 'click', function (event) {
+        let parent = event.target;
+        while (!parent.classList.contains("list-group-item")){
+            parent = parent.parentElement;
+        }
+
+        if (event.target.classList.contains("toggle-info") ||
+        event.target.classList.contains("bi-arrows-expand")){
+            const array = parent.querySelectorAll(".user-info");
+            array.forEach(element => {
+                if (element.getAttribute("data-user") === String(key)){
+                    toggleMenu(element);
+                }
+            });
+        }
+      });
+
+    target.setAttribute("data-app-value", String(key+1));
+
+    elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", profile.username);
+    elems[name].querySelector(".usr_email").insertAdjacentHTML("beforeend", profile.email);
+
+    elems[name].querySelector(".usr_fullname").insertAdjacentHTML("beforeend", profile.info.name);
+    elems[name].querySelector(".usr_id").insertAdjacentHTML("beforeend", profile.info.nif);
+    elems[name].querySelector(".usr_telephone").insertAdjacentHTML("beforeend", profile.info.telephone);
+    elems[name].querySelector(".usr_smartphone").insertAdjacentHTML("beforeend", profile.info.smartphone);
+    elems[name].querySelector(".usr_address").insertAdjacentHTML("beforeend", profile.info.address);
+
+    elems[name].querySelector(".usr_active").insertAdjacentHTML("beforeend", profile.state);
+    console.log(profile.state === "ACTIVE");
+    elems[name].querySelector(".usr_active_radio").checked = profile.state === "ACTIVE" ? true : false;
+    console.log(elems[name].querySelector(".usr_active_radio").checked);
+
+    elems[name].querySelector(".usr_n_terrains").insertAdjacentHTML("beforeend", 0);
 
     //let target = ;
-    document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+    target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
+const menuHandler = {
+    "menu03": handleMenu03,
+    "menu02": handleMenu02,
+    "menu01": handleMenu01
+}
+
+function menu(menu_id){
+    const elemName = "elems/menus/" + menu_id + ".html"; 
+    let params = [];
+
+    LoadHTMLDoc(elemName, menuHandler[menu_id], params);
+}
+
+function handleMenu03(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    document.getElementById("usr_terrain_menu").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
+function handleMenu02(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    document.getElementById("community-app-nav-item").insertAdjacentHTML("afterend", elems[name].body.innerHTML);
+}
+
+function handleMenu01(name, xmlDoc, params){
+
 }
 

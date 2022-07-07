@@ -94,8 +94,11 @@ async function getInfo(debug, user){
 	let loader = document.getElementById("loader");
 
 	try{
+		
 
+		//menu("menu03");
 		//terrainCard(1, "Teste 2", "Teste 3", "Teste 4");
+		//terrainPendingCard("Teste 2", "Teste 3", "Teste 4");
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
@@ -126,10 +129,12 @@ async function getInfo(debug, user){
 				}
 		});*/
 		
+		loadMenus(response_data.loggedinData.menus);
+
 		Promise.all([
 			getOwnTerrain(),
 			getPendingTerrain(),
-			listNotification()
+			listNotification(),
 		]);
 
 	} catch (error){
@@ -147,14 +152,112 @@ async function get(){
 	spinner.setAttribute("data-app-menu-active", "true");
 
 	try{
-		const value = document.getElementById("promote_input").value;
+		listUserProfile(
+			{
+				"username": "teste_funccons",
+				"email": "teste_funccons@gmail.com",
+				"info": {
+					"name": "Func-Cons",
+					"visibility": "PUBLIC",
+					"nif": "914123-Z123",
+					"address": "Rua de Func-Cons",
+					"telephone": "124123",
+					"smartphone": "+351 913151232",
+					"avatar": null
+				},
+				"state": "ACTIVE",
+				"role_name": "Funcionario de %s",
+				"role_color": "#6fa8dc",
+				"logoutData": {
+					"center": {
+						"lat": 38.650295,
+						"lng": -9.20802
+					},
+					"zoom": 14
+				},
+				"loggedinData": {
+					"time": "2022-07-07 11:25:27",
+					"menus": [
+						"menu02",
+						"menu03"
+					]
+				}
+			}
+		)
+		listUserProfile(
+			{
+				"username": "teste_funccons",
+				"email": "teste_funccons@gmail.com",
+				"info": {
+					"name": "Func-Cons",
+					"visibility": "PUBLIC",
+					"nif": "914123-Z123",
+					"address": "Rua de Func-Cons",
+					"telephone": "124123",
+					"smartphone": "+351 913151232",
+					"avatar": null
+				},
+				"state": "INACTIVE",
+				"role_name": "Funcionario de %s",
+				"role_color": "#6fa8dc",
+				"logoutData": {
+					"center": {
+						"lat": 38.650295,
+						"lng": -9.20802
+					},
+					"zoom": 14
+				},
+				"loggedinData": {
+					"time": "2022-07-07 11:25:27",
+					"menus": [
+						"menu02",
+						"menu03"
+					]
+				}
+			}
+		)
+		listUserProfile(
+			{
+				"username": "teste_funccons",
+				"email": "teste_funccons@gmail.com",
+				"info": {
+					"name": "Func-Cons",
+					"visibility": "PUBLIC",
+					"nif": "914123-Z123",
+					"address": "Rua de Func-Cons",
+					"telephone": "124123",
+					"smartphone": "+351 913151232",
+					"avatar": null
+				},
+				"state": "INACTIVE",
+				"role_name": "Funcionario de %s",
+				"role_color": "#6fa8dc",
+				"logoutData": {
+					"center": {
+						"lat": 38.650295,
+						"lng": -9.20802
+					},
+					"zoom": 14
+				},
+				"loggedinData": {
+					"time": "2022-07-07 11:25:27",
+					"menus": [
+						"menu02",
+						"menu03"
+					]
+				}
+			}
+		)
+
+		const value = String(document.getElementById("search_list_user_input").value);
 		const response = await axios.get("/api/user/info?identifier="+value);
-		const response_data = response.data[0];
+		const response_data = response.data;
 		console.log(response_data);
+		document.getElementById("list_search_users").replaceChildren();
+
 		response_data.forEach(elem => {
 			listUserProfile(elem);
 		});
-
 	} catch (error){
 		console.log(error);
 		
@@ -177,6 +280,15 @@ function updatePerfil(data){
 	document.getElementById("usr_smartphone_input").value = String(data.smartphone);
 	document.getElementById("usr_address_input").value = String(data.address);
 }
+
+function loadMenus(menus){
+	if (menus !== null && menus.length > 0){
+		menus.forEach(element => {
+			menu(element);
+		});
+	} 
+}	
+	
 
 async function activate(identifier){
 	try{
@@ -388,10 +500,6 @@ async function getPendingTerrain(){
 
 async function loadChunk(pos){
 	try{
-		//Verify if the content exist in the browser
-		if (hasChunk(pos)){
-			return;
-		}
 
 		//Get from server
 		let response = await axios.get("/api/parcel/list/chunk",{
@@ -400,11 +508,17 @@ async function loadChunk(pos){
 
 		const response_data = response.data;
 
+		//Verify if the content exist in the browser
+		const chunk = response_data.chunk;
+		if (hasChunk(chunk)){
+			return;
+		}
+
 		const array = response_data.data;
-		saveChunkBounds(response_data.top_right, response.bottom_left, array);
+		saveChunk(chunk, true);
 		array.forEach(element => {
-			console.log(element);
 			addPolygon(element.points, element.color);
+			addMarker(element.center);
 		});
 
 	} catch (error){
@@ -418,13 +532,28 @@ function loadTerrainInfo(id){
 	console.log(terrain);
 	if (terrain === null) return;
 
+	const center = terrain.center;
+	const new_center = point(center.lat, center.lng - 5e-4);
+	setCenter(new_center);
+	//setZoom(10);
+
 	document.getElementById("terrain_name").innerHTML = terrain.credentials.name;
-	document.getElementById("terrain_description").innerHTML = terrain.info.description;
-	/*document.getElementById("terrain_townhall").innerHTML = terrain.info.townhall;
-	document.getElementById("terrain_district").innerHTML = terrain.info.district;
-	document.getElementById("terrain_number_section").innerHTML = terrain.info.section;
-	document.getElementById("terrain_number_article").innerHTML = terrain.info.number_article;*/
+	document.getElementById("terrain_townhall").innerHTML = terrain.credentials.townhall;
+	document.getElementById("terrain_district").innerHTML = terrain.credentials.district;
+	document.getElementById("terrain_number_section").innerHTML = terrain.credentials.section;
+	document.getElementById("terrain_number_article").innerHTML = terrain.credentials.number_article;
 	//document.getElementById("terrain_documents_validation").insertAdjacentHTML("beforeend", terrain.info.district);
+
+	document.getElementById("terrain_description").innerHTML = terrain.info.description;
+	document.getElementById("terrain_type").innerHTML = terrain.info.type_of_soil_coverage;
+	document.getElementById("terrain_current_use").innerHTML = terrain.info.current_use;
+	document.getElementById("terrain_previous_use").innerHTML = terrain.info.previous_use;
+
+	document.getElementById("owner_fullname").innerHTML = terrain.owner.name;
+	document.getElementById("owner_id").innerHTML = terrain.owner.nif;
+	document.getElementById("owner_telephone").innerHTML = terrain.owner.telephone;
+	document.getElementById("owner_smartphone").innerHTML = terrain.owner.smartphone;
+	document.getElementById("owner_address").innerHTML = terrain.owner.address;
 
 }
 

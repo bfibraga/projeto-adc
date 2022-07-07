@@ -1,7 +1,8 @@
-package pt.unl.fct.di.adc.silvanus.implementation;
+package pt.unl.fct.di.adc.silvanus.implementation.terrain;
 
 import com.google.cloud.datastore.*;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 import pt.unl.fct.di.adc.silvanus.api.impl.Parcel;
@@ -25,7 +26,7 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class ParcelImplementation implements Parcel {
+public class TerrainImplementation implements Parcel {
 
     private final double sizeX = (RIGHT_MOST_LONGITUDE_CONTINENTE - LEFT_MOST_LONGITUDE_CONTINENTE) / NUMBER_OF_COLLUMNS_IN_CONTINENTE;
     private final double sizeY = (TOP_MOST_LATITUDE_CONTINENTE - BOTTOM_MOST_LATITUDE_CONTINENTE) / NUMBER_OF_LINES_IN_CONTINENTE;
@@ -70,7 +71,7 @@ public class ParcelImplementation implements Parcel {
     //TODO Transferir esta parte para cache
     private Map<String, IslandChunk> chunksIslands;
 
-    private static final Logger LOG = Logger.getLogger(ParcelImplementation.class.getName());
+    private static final Logger LOG = Logger.getLogger(TerrainImplementation.class.getName());
 
     private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 
@@ -99,7 +100,7 @@ public class ParcelImplementation implements Parcel {
     public static final double MADEIRA_SIZE_Y = Math.abs(TOP_MOST_LATITUDE_MADEIRA - BOTTOM_MOST_LATITUDE_MADEIRA);
 
 
-    public ParcelImplementation() {
+    public TerrainImplementation() {
         this.factory = new GeometryFactory();
         chunksIslands = new HashMap();
         this.bigBBPolygon = generateChunkAsPolygon(LEFT_MOST_LONGITUDE_GLBOAL, RIGHT_MOST_LONGITUDE_CONTINENTE, TOP_MOST_LATITUDE_CONTINENTE, BOTTOM_MOST_LATITUDE_GLOBAL, factory);
@@ -357,11 +358,8 @@ public class ParcelImplementation implements Parcel {
         }*/
 
         //TODO Figure it out the right offset to do
-        System.out.println();
-        System.out.println((firstCoordinate.getX() - LEFT_MOST_LONGITUDE_CONTINENTE) + "," + (firstCoordinate.getY() - TOP_MOST_LATITUDE_CONTINENTE));
         int[] chunkPos = this.portugal.worldCoordsToChunk(firstCoordinate.getX(), firstCoordinate.getY());
 
-        System.out.println(Arrays.toString(chunkPos));
         // - Find out in which chunk the first coordinate is - \\
 
         List<String> list = new ArrayList<>(); // List that contains the chunks that intersect the terrain
@@ -474,13 +472,50 @@ public class ParcelImplementation implements Parcel {
 
     @Override
     public Result<String> checkIfParcelHasIntersections(LatLng[] terrain) {
-        Polygon terrainAsPolygon = coordinatesToPolygon(terrain);
+        List<Chunk<String>> chunks = new ArrayList<>();
+        try {
+            chunks = madeira.polygon(terrain);
+        } catch (OutOfChunkBounds ignored) {
+        }
+
+        try {
+            chunks = portugal.polygon(terrain);
+        } catch (OutOfChunkBounds e) {
+            return Result.error(Response.Status.BAD_REQUEST, e.getMessage());
+        }
+
+        Polygon polygon = PolygonUtils.polygon(terrain);
+        for (Chunk<String> chunk : chunks) {
+            String chunkID = chunk.getID();
+
+            ChunkResultData chunkResultData = this.chunkCacheManager.get(chunkID, "data", ChunkResultData.class);
+
+            if (chunkResultData == null){
+                chunkResultData = queryTerrainsInChunk(chunk.getX(), chunk.getY()).value();
+            }
+
+            System.out.println(chunkResultData.getChunk());
+            Set<PolygonDrawingData> polygonDrawingData = chunkResultData.getData();
+            for (PolygonDrawingData data: polygonDrawingData) {
+                Polygon selected = PolygonUtils.polygon(data.getPoints());
+                Geometry intersection = selected.intersection(polygon.getBoundary());
+
+                System.out.println(Arrays.toString(intersection.getCoordinates()));
+                if (intersection != null && intersection.getDimension() > 1){
+                    return Result.ok(intersection.toText(), "Intersecta com um terreno existente");
+                }
+            }
+
+        }
+        return Result.ok();
+
+        /*Polygon terrainAsPolygon = coordinatesToPolygon(terrain);
         LOG.fine("Query was started.");
         Result<String> res;
         res = querieTableThatContainsParcels(terrainAsPolygon, PARCELAS_TO_BE_APPROVED_TABLE_NAME);
         if (res != null)
             return res;
-        return querieTableThatContainsParcels(terrainAsPolygon, PARCELAS_THAT_ARE_APPROVED_TABLE_NAME);
+        return querieTableThatContainsParcels(terrainAsPolygon, PARCELAS_THAT_ARE_APPROVED_TABLE_NAME);*/
     }
 
     /**
@@ -644,7 +679,7 @@ public class ParcelImplementation implements Parcel {
 
             TerrainResultData resultData = new TerrainResultData(
                     points,
-                    new LatLng(),
+                    PolygonUtils.centroid(points),
                     Random.color(),
                     new TerrainIdentifierData(
                             tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
@@ -697,7 +732,7 @@ public class ParcelImplementation implements Parcel {
 
             TerrainResultData resultData = new TerrainResultData(
                     points,
-                    new LatLng(),
+                    PolygonUtils.centroid(points),
                     Random.color(),
                     new TerrainIdentifierData(
                             tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
@@ -796,38 +831,6 @@ public class ParcelImplementation implements Parcel {
 
     @Override
     public Result<ChunkResultData> queryTerrainsInChunk(LatLng pos) {
-        /*Query<Entity> query;
-        QueryResults<Entity> results;
-
-        query = Query.newEntityQueryBuilder().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME).build();
-        results = datastore.run(query);
-
-        if (!results.hasNext())
-            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
-
-        List<LatLng[]> list = new ArrayList<>();
-
-        Gson g = new Gson();
-
-        while (results.hasNext()) {
-            Entity tmp = results.next();
-            LOG.severe("\n\n\n\n BANANA \n\n\n\n");
-            List<Value<?>> chunkList = tmp.getList(ENTITY_PROPERTY_CHUNKS_OF_PARCELA);
-            LOG.severe(chunkList.toString() + " BANANA \n\n\n");
-            if (chunkList.contains(chunk)) {
-                LatLng[] coordinates = g.fromJson(String.valueOf(tmp.getValue(ENTITY_PROPERTY_COORDINATES)), (Type) LatLng.class);
-                list.add(coordinates);
-            }
-        }*/
-        //TODO Testing
-        /*System.out.println(pos.getLat() + "," + pos.getLng());
-        float[] finalPos = new float[]{
-                (pos.getLng() - LEFT_MOST_LONGITUDE_CONTINENTE),
-                (pos.getLat() - TOP_MOST_LATITUDE_CONTINENTE)
-        };
-        System.out.println(finalPos[0] + "," + finalPos[1]);
-        int[] chunkPos = ChunkManager.worldCoordToChunk(finalPos[0], finalPos[1], sizeX, sizeY);
-        String chunk = (chunkPos[0]) + "," + chunkPos[1];*/
         double[] chunkSize = new double[2];
         int[] chunkCoords = new int[2];
         LatLng topRight = new LatLng();
@@ -839,6 +842,7 @@ public class ParcelImplementation implements Parcel {
             topRight = new LatLng((float) (bottomLeft.getLat() + chunkSize[0]), (float) (bottomLeft.getLng() + chunkSize[1]));
         } catch (OutOfChunkBounds ignored) {
         }
+
         try {
             chunkCoords = portugal.worldCoordsToChunk(pos.getLng(), pos.getLat());
             chunkSize = portugal.getChunkSize();
@@ -848,19 +852,16 @@ public class ParcelImplementation implements Parcel {
             return Result.error(Response.Status.BAD_REQUEST, "Position " + pos + " out of bounds");
         }
         String chunk = String.format("(%s, %s)", chunkCoords[0], chunkCoords[1]);
-        System.out.println(chunk);
-        Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
-        Entity selectedChunk = datastore.get(chunkKey);
+        ChunkResultData resultData = this.chunkCacheManager.get(chunk, "data", ChunkResultData.class);
 
-        Set<PolygonDrawingData> result = new HashSet<>();
-        if (selectedChunk == null) {
-            ChunkResultData data = new ChunkResultData(chunk, topRight, bottomLeft, result);
-            return Result.ok(data, "");
+        if (resultData != null) {
+            return Result.ok(resultData, "");
         }
 
-        ChunkResultData resultData = this.chunkCacheManager.get(chunk, "data", ChunkResultData.class);
-        if (resultData == null) {
-            System.out.println("Not hitting Cache");
+        Set<PolygonDrawingData> result = new HashSet<>();
+        Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
+        Entity selectedChunk = datastore.get(chunkKey);
+        if (selectedChunk != null){
             String parcelsIDs = selectedChunk.getString("parcels_id");
             String[] parcels = parcelsIDs.split("/");
 
@@ -871,15 +872,17 @@ public class ParcelImplementation implements Parcel {
             Key selectedParcelNotApprovedKey;
             for (String parcelID : parcels) {
                 selectedParcelKey = selectedParcelKeyFactory.newKey(parcelID);
-                selectedParcelNotApprovedKey = selectedParcelNotApprovedKeyFactory.newKey(parcelID);
                 Entity selectedParcel = datastore.get(selectedParcelKey);
-                Entity selectedParcelNotApproved = datastore.get(selectedParcelNotApprovedKey);
 
                 if (selectedParcel != null) {
                     LatLng[] points = JSON.decode(selectedParcel.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
                     PolygonDrawingData data = new PolygonDrawingData(points, Random.color(), true);
                     result.add(data);
+                    //continue;
                 }
+
+                selectedParcelNotApprovedKey = selectedParcelNotApprovedKeyFactory.newKey(parcelID);
+                Entity selectedParcelNotApproved = datastore.get(selectedParcelNotApprovedKey);
 
                 if (selectedParcelNotApproved != null) {
                     LatLng[] points = JSON.decode(selectedParcelNotApproved.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
@@ -887,11 +890,73 @@ public class ParcelImplementation implements Parcel {
                     result.add(data);
                 }
             }
-            resultData = new ChunkResultData(chunk, topRight, bottomLeft, result);
-            chunkCacheManager.put(chunk, "data", resultData);
-        } else {
-            System.out.println("Hitting Cache");
         }
+
+        resultData = new ChunkResultData(chunk, topRight, bottomLeft, result);
+        chunkCacheManager.put(chunk, "data", resultData);
+
+        return Result.ok(resultData, "");
+    }
+
+    public Result<ChunkResultData> queryTerrainsInChunk(int chunkX, int chunkY) {
+        double[] chunkSize = new double[2];
+        int[] chunkCoords = new int[]{chunkX,chunkY};
+        LatLng topRight = new LatLng();
+        LatLng bottomLeft;
+        try {
+            chunkSize = madeira.getChunkSize();
+            bottomLeft = madeira.chunkToWorldCoords(chunkCoords[0], chunkCoords[1]);
+            topRight = new LatLng((float) (bottomLeft.getLat() + chunkSize[0]), (float) (bottomLeft.getLng() + chunkSize[1]));
+        } catch (OutOfChunkBounds ignored) {
+        }
+
+        try {
+            chunkSize = portugal.getChunkSize();
+            bottomLeft = portugal.chunkToWorldCoords(chunkCoords[0], chunkCoords[1]);
+            topRight = new LatLng((float) (bottomLeft.getLat() + chunkSize[0]), (float) (bottomLeft.getLng() + chunkSize[1]));
+        } catch (OutOfChunkBounds e) {
+            return Result.error(Response.Status.BAD_REQUEST, "Position " + Arrays.toString(chunkCoords) + " out of bounds");
+        }
+        String chunk = String.format("(%s, %s)", chunkCoords[0], chunkCoords[1]);
+        ChunkResultData resultData = this.chunkCacheManager.get(chunk, "data", ChunkResultData.class);
+
+        Set<PolygonDrawingData> result = new HashSet<>();
+        if (resultData != null) {
+            ChunkResultData data = new ChunkResultData(chunk, topRight, bottomLeft, result);
+            return Result.ok(data, "");
+        }
+
+        Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
+        Entity selectedChunk = datastore.get(chunkKey);
+
+        String parcelsIDs = selectedChunk.getString("parcels_id");
+        String[] parcels = parcelsIDs.split("/");
+
+        KeyFactory selectedParcelKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME);
+        KeyFactory selectedParcelNotApprovedKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME);
+
+        Key selectedParcelKey;
+        Key selectedParcelNotApprovedKey;
+        for (String parcelID : parcels) {
+            selectedParcelKey = selectedParcelKeyFactory.newKey(parcelID);
+            selectedParcelNotApprovedKey = selectedParcelNotApprovedKeyFactory.newKey(parcelID);
+            Entity selectedParcel = datastore.get(selectedParcelKey);
+            Entity selectedParcelNotApproved = datastore.get(selectedParcelNotApprovedKey);
+
+            if (selectedParcel != null) {
+                LatLng[] points = JSON.decode(selectedParcel.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
+                PolygonDrawingData data = new PolygonDrawingData(points, Random.color(), true);
+                result.add(data);
+            }
+
+            if (selectedParcelNotApproved != null) {
+                LatLng[] points = JSON.decode(selectedParcelNotApproved.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
+                PolygonDrawingData data = new PolygonDrawingData(points, Random.color(), false);
+                result.add(data);
+            }
+        }
+        resultData = new ChunkResultData(chunk, topRight, bottomLeft, result);
+        chunkCacheManager.put(chunk, "data", resultData);
 
         return Result.ok(resultData, "");
     }

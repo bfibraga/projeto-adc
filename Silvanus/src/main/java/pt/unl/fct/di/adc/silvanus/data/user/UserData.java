@@ -18,7 +18,7 @@ public class UserData {
 			LoginData credentials,
 			String confirm_password,
 			UserInfoData info) {
-		this(credentials, confirm_password, info, "USER", new UserStateData());
+		this(credentials, confirm_password, info, "End-User", new UserStateData());
 	}
 
 	public UserData(
