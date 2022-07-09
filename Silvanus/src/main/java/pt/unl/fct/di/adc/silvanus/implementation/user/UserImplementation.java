@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response.Status;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import io.jsonwebtoken.*;
+import org.apache.commons.codec.BinaryDecoder;
 import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
@@ -758,7 +759,7 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> activate(String responsible, String identifier, String code) {
+	public Result<Void> activate(String responsible, String identifier, String code, boolean value) {
 
 		if (identifier.trim().equals("")){
 			return Result.error(Status.BAD_REQUEST, "Invalid parameter " + identifier);
@@ -794,8 +795,9 @@ public class UserImplementation implements Users {
 			if (confirm == null || confirm.equals(code)){
 				Set<String> confirmed = JSON.decode(userPermissionEntity.getString("list_usr_validation"), Set.class);
 				confirmed.add(responsible);
+				String final_value = value ? "ACTIVE" : "INACTIVE";
 				userPermissionEntity = Entity.newBuilder(userPermissionEntity)
-						.set("usr_state", "ACTIVE")
+						.set("usr_state", final_value)
 						.set("list_usr_validation", JSON.encode(confirmed))
 						.set("confirm_code", code)
 						.build();
@@ -889,6 +891,54 @@ public class UserImplementation implements Users {
 				tnx.rollback();
 			}
 		}*/
+	}
+
+	@Override
+	public Result<String> newActivationCode(String identifier) {
+
+		if (identifier.trim().equals("")){
+			return Result.error(Status.FORBIDDEN, "Invalid identifier " + identifier);
+		}
+
+		String code = "";
+
+		QueryResults<Entity> result = this.find(identifier, "UserCredentials", "usr_username", 1);
+		if (!result.hasNext()){
+			result = this.find(identifier, "UserCredentials", "usr_email", 1);
+		}
+
+		String activate_id = "";
+
+		if (!result.hasNext()){
+			return Result.error(Status.NOT_FOUND, "User "+ identifier + " doens't exist");
+		} else {
+			activate_id = result.next().getKey().getName();
+		}
+
+		Key userKey = userPermissionKeyFactory.newKey(activate_id);
+		Transaction txn = datastore.newTransaction();
+		try{
+			code = this.newCode(txn, userKey);
+			txn.commit();
+		} finally {
+			if (txn.isActive()){
+				txn.rollback();
+			}
+		}
+
+		return Result.ok(code, "New activation code for " + identifier);
+	}
+
+	private String newCode(Transaction txn, Key userPermissionKey){
+		Entity userPermissionEntity = txn.get(userPermissionKey);
+		String code = Random.code();
+		userPermissionEntity = Entity.newBuilder(userPermissionKey)
+				.set("usr_state", userPermissionEntity.getString("usr_state"))
+				.set("list_usr_validation", userPermissionEntity.getString("list_usr_validation"))
+				.set("confirm_code", code)
+				.build();
+		txn.put(userPermissionEntity);
+		return code;
 	}
 
 	@Override

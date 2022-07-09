@@ -75,12 +75,14 @@ async function login(){
 
 		window.location.replace(base_uri.concat("/app"));
 	} catch (error){
-		console.log(error);
 		const status = error.response.status;
 		if (status === 409){
 			window.location.replace(base_uri.concat("/verification"));
 		}
-		document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
+
+		if (status === 403){
+			document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
+		}
 	} finally {
 		loader("false");
 	}
@@ -89,13 +91,11 @@ async function login(){
 async function logout() {
 	try{
 		const viewport = getViewport();
-		console.log(viewport);
 		const response = await axios.post("/api/user/logout",
 			{
 				"center": viewport.center,
 				"zoom": viewport.zoom
 			});
-		console.log(response);
 		window.location.replace(base_uri);
 	} catch (error){
 		console.log(error);
@@ -130,7 +130,7 @@ async function getInfo(debug, user){
 		badge(response_data.role_name,response_data.role_color);
 		updatePerfil(response_data.info);
 
-		let lastLogout = response_data.logoutData;
+		const lastLogout = response_data.logoutData;
 		setCenter(lastLogout.center);
 		setZoom(lastLogout.zoom);
 
@@ -161,7 +161,7 @@ async function getInfo(debug, user){
 		}
 	} finally{
 		loader.setAttribute("data-app-menu-active", "false");
-	}	
+	}
 }
 
 async function get(){

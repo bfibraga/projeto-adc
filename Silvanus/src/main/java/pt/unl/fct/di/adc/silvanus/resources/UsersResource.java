@@ -173,7 +173,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response activate(String token, String identifier, String code) {
+	public Response activate(String token, String identifier, String code, boolean value) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -181,13 +181,24 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		Result<Void> result = impl.activate(jws.getSubject(), identifier, code);
+		Result<Void> result = impl.activate(jws.getSubject(), identifier, code, value);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
 		return Response.ok().entity("User was sucessfully activated").build();
+	}
+
+	@Override
+	public Response newCode(String identifier) {
+		Result<String> result = impl.newActivationCode(identifier);
+
+		if (!result.isOK()){
+			return Response.status(result.error()).entity(result.statusMessage()).build();
+		}
+
+		return Response.ok().entity(result.value()).build();
 	}
 
 	@Override

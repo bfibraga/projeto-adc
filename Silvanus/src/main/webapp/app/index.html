@@ -397,6 +397,12 @@
                 <p class="display-6 text-center">0</p>
               </div>
             </div>
+            <div class="col-4">
+              <div class="bg-primary bg-opacity-25 rounded-3 p-3 m-1 shadow-sm">
+                <h5 class="text-center">Pedidos Enviados</h5>
+                <p class="display-6 text-center">0</p>
+              </div>
+            </div>
             <div class="col-12">
               <div class="light rounded-3 p-3 m-1 shadow-sm ">
                 <div class="row flex-row">
@@ -404,7 +410,14 @@
                     <h4 class="mb-3 me-3">Terrenos Partilhados</h4>
                   </div>
                   <div class="col justify-content-end">
-                    <input type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill" value="Registar novo terreno" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade"> 
+                    <div class="d-flex flex-fill justify-content-end align-items-center">
+                      <a href="#" type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-circle text-white d-flex align-items-center" style="width: 2.8rem; height: 2.8rem; border: none !important;" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-send-plus-fill" viewBox="0 0 16 16">
+                          <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47L15.964.686Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                          <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm-3.5-2a.5.5 0 0 0-.5.5v1h-1a.5.5 0 0 0 0 1h1v1a.5.5 0 0 0 1 0v-1h1a.5.5 0 0 0 0-1h-1v-1a.5.5 0 0 0-.5-.5Z"/>
+                        </svg>
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -743,36 +756,49 @@
           </div>
         </div>
         
+        <div id="terrain_owners">
+          <div class="light p-3 mb-3 rounded-3 shadow-sm">
+            <h5 class="mb-3">Proprietário</h5>
+            <div class="d-flex flex-column justify-content-center mb-3">
+              <div class="form-check m-1">
+                <input class="form-check-input" type="radio" name="acc_terrain" id="this_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'false')" checked>
+                <label class="form-check-label" for="this_acc_terrain_option">
+                  Esta conta
+                </label>
+              </div>
+              <div class="form-check m-1">
+                <input class="form-check-input" type="radio" name="acc_terrain" id="other_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'true')">
+                <label class="form-check-label" for="other_acc_terrain_option">
+                  Outra conta/pessoa
+                </label>
+              </div>
+            </div>
+            <div id="other_acc_terrain_checked" data-app-menu-active="false">
+              <label for="other_acc_fullname_input" class="form-label">Nome Completo</label>
+              <input id="other_acc_fullname_input" class="form-control rounded-pill mb-3" value=""></input>
+              <label for="other_acc_id_input" class="form-label">NIF</label>
+              <input id="other_acc_id_input" class="form-control rounded-pill mb-3" value=""></input>
+              <label for="other_acc_telephone_input" class="form-label">Número de telefone</label>
+              <input id="other_acc_telephone_input" class="form-control rounded-pill mb-3" value=""></input>
+              <label for="other_acc_smartphone_input" class="form-label">Número de smartphone</label>
+              <input id="other_acc_smartphone_input" class="form-control rounded-pill mb-3" value=""></input>
+              <label for="other_acc_address_input" class="form-label">Morada</label>
+              <input id="other_acc_address_input" class="form-control rounded-pill" value=""></input>
+              <br>
+            </div>
+            
+          </div>
+  
+        </div>
         <div class="light p-3 mb-3 rounded-3 shadow-sm">
-          <h5 class="mb-3">Proprietário</h5>
-          <div class="d-flex flex-column justify-content-center mb-3">
-            <div class="form-check m-1">
-              <input class="form-check-input" type="radio" name="acc_terrain" id="this_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'false')" checked>
-              <label class="form-check-label" for="this_acc_terrain_option">
-                Esta conta
-              </label>
-            </div>
-            <div class="form-check m-1">
-              <input class="form-check-input" type="radio" name="acc_terrain" id="other_acc_terrain_option" onclick="setMenuID('other_acc_terrain_checked', 'true')">
-              <label class="form-check-label" for="other_acc_terrain_option">
-                Outra conta/pessoa
-              </label>
-            </div>
+          <div class="d-flex flex-row justify-content-center align-items-center">
+            <a href="#" type="button" class="text-reset">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-plus-fill" viewBox="0 0 16 16">
+                <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
+              </svg>
+            </a>
           </div>
-          <div id="other_acc_terrain_checked" data-app-menu-active="false">
-            <label for="other_acc_fullname_input" class="form-label">Nome Completo</label>
-            <input id="other_acc_fullname_input" class="form-control rounded-pill mb-3" value=""></input>
-            <label for="other_acc_id_input" class="form-label">NIF</label>
-            <input id="other_acc_id_input" class="form-control rounded-pill mb-3" value=""></input>
-            <label for="other_acc_telephone_input" class="form-label">Número de telefone</label>
-            <input id="other_acc_telephone_input" class="form-control rounded-pill mb-3" value=""></input>
-            <label for="other_acc_smartphone_input" class="form-label">Número de smartphone</label>
-            <input id="other_acc_smartphone_input" class="form-control rounded-pill mb-3" value=""></input>
-            <label for="other_acc_address_input" class="form-label">Morada</label>
-            <input id="other_acc_address_input" class="form-control rounded-pill" value=""></input>
-            <br>
-          </div>
-          
         </div>
 
         <div class="light p-3 mb-3 rounded-3 shadow-sm">
@@ -800,7 +826,7 @@
           <div class="mb-3">
             <label for="define-route-terrain" class="form-label">Caminho de entrada para o terreno</label>
             <br>
-            <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill text-light" data-bs-dismiss="offcanvas" aria-label="Close" value="Definir um caminho" onclick="initRoute()">
+            <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill text-light" onclick="initRoute()">
           </div>
           
         </div>
@@ -824,12 +850,12 @@
   <div id="route_definition_menu" class="app-popup" style="z-index: 100000;" data-app-menu-active="false">
     <div class="position-absolute translate-middle start-50">
       <div class="light rounded-pill p-1 shadow-sm" style="">
-        <a type="button" class="btn text-reset me-1" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Voltar" onclick="toggleRouteDrawingControl(false,true)">
+        <a type="button" class="btn text-reset me-1" onclick="terminateRoute(true)">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
             <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
           </svg>
         </a>
-        <a type="button" class="btn text-reset ms-1" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Voltar" onclick="toggleRouteDrawingControl(false,false)">
+        <a type="button" class="btn text-reset ms-1" onclick="terminateRoute(false)">
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
             <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
           </svg>

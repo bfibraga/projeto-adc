@@ -25,7 +25,9 @@ public interface Users {
 
 	Result<Void> remove(String userID, String identifier);
 	
-	Result<Void> activate(String responsible, String identifier, String code);
+	Result<Void> activate(String responsible, String identifier, String code, boolean value);
+
+	Result<String> newActivationCode(String identifier);
 	
 	Result<Void> changePassword(String token, String new_password);
 	

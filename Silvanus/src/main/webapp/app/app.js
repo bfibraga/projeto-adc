@@ -157,14 +157,27 @@ function typeTerrain(id, menu_id){
 }
 
 function initRoute(){
+  const btn = document.getElementById("define-route-terrain");
+  setMenu(btn, "true");
   let request_terrain_offcanvas_elem = document.getElementById('request-terrain-offcanvas');
   let request_terrain_offcanvas = new bootstrap.Offcanvas(request_terrain_offcanvas_elem)
   request_terrain_offcanvas.hide;
+
   toggleRouteDrawingControl(true,true);
 }
 
+function terminateRoute(confirmed){
+  const btn = document.getElementById("define-route-terrain");
+  setMenu(btn, "true");
+  let request_terrain_offcanvas_elem = document.getElementById('request-terrain-offcanvas');
+  let request_terrain_offcanvas = new bootstrap.Offcanvas(request_terrain_offcanvas_elem)
+  request_terrain_offcanvas.show;
+
+  toggleRouteDrawingControl(false, confirmed);
+}
+
 function toggleOffcanvas(value){
-  
+
 }
 
 document.getElementById("search_list_user_input")
