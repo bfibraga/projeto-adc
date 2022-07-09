@@ -67,7 +67,7 @@ public interface RestUsers {
 	@Path("/activate/{" + IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response activate(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier);
+	Response activate(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier, @QueryParam("code") @DefaultValue(" ") String code);
 	
 	@PUT
 	@Path("/change/password")

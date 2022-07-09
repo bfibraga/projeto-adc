@@ -13,7 +13,7 @@ public interface Users {
 	Result<String> register(UserData data);
 	Result<String> build(UserData data);
 	
-	Result<String> login(LoginData data);
+	Result<LoggedInData> login(LoginData data);
 	
 	Result<Void> logout(String token, LogoutData data);
 	
@@ -25,7 +25,7 @@ public interface Users {
 
 	Result<Void> remove(String userID, String identifier);
 	
-	Result<Void> activate(String token, String username);
+	Result<Void> activate(String responsible, String identifier, String code);
 	
 	Result<Void> changePassword(String token, String new_password);
 	

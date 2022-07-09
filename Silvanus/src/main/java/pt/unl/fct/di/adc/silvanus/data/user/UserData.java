@@ -12,7 +12,9 @@ public class UserData {
 	private String role;
 	private UserStateData state;
 
-	public UserData() {}
+	public UserData() {
+		this(new LoginData(), "", new UserInfoData());
+	}
 
 	public UserData(
 			LoginData credentials,
@@ -51,6 +53,9 @@ public class UserData {
 	}
 
 	public UserInfoData getInfo() {
+		if (this.info == null){
+			this.info = new UserInfoData();
+		}
 		return this.info;
 	}
 
@@ -73,19 +78,19 @@ public class UserData {
 		return data.getID();
 	}
 
-	private boolean validField(String keyword) {
-		return keyword !=null && !keyword.trim().equals("");
-	}
-
 	public boolean validation() {
-		LoginData data = this.getCredentials();
-		boolean valid =
-				validField(data.getUsername())
-						&& validField(data.getEmail())
-						&& validField(data.getPassword())
-						&& data.getPassword().equals(confirm_password);
+		LoginData loginData = this.getCredentials();
+		UserInfoData infoData = this.getInfo();
+		UserStateData stateData = this.getUserStateData();
 
-		return valid;
+		boolean loginValid = loginData.validation()
+				&& loginData.getPassword().equals(confirm_password);
+
+		boolean infoValid = infoData.validation();
+
+		boolean stateValid = stateData.validation();
+
+		return loginValid && infoValid && stateValid;
 	}
 
 	@Override

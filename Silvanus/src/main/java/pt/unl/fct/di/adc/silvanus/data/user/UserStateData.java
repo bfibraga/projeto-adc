@@ -18,6 +18,11 @@ public class UserStateData {
         Collections.addAll(this.confirmed, confirmed_user);
     }
 
+    public UserStateData(String set, Set<String> confirmed_user){
+        this.set = set.toUpperCase();
+        this.confirmed = confirmed_user;
+    }
+
     public String getSet(){
         return this.set;
     }
@@ -40,10 +45,10 @@ public class UserStateData {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder(String.format("UserStateData:\n\tSet:%s\n\tConfirmed:[\n", this.getSet()));
-        for (String user:confirmed) {
-            result.append("-").append(user).append("\n");
-        }
-        return result.append("\n]").toString();
+        return String.format("UserStateData:\n\tSet:%s\n\tConfirmed:%s", this.getSet(), this.getConfirmed_user());
+    }
+
+    public boolean isActive(){
+        return this.getSet().equals("ACTIVE");
     }
 }

@@ -108,7 +108,7 @@ public class TerrainImplementation implements Parcel {
 
         portugal = new ChunkBoard<>(38, 26, PORTUGAL_SIZE_X, PORTUGAL_SIZE_Y, LEFT_MOST_LONGITUDE_CONTINENTE, BOTTOM_MOST_LATITUDE_CONTINENTE);
         madeira = new ChunkBoard<>(4, 6, MADEIRA_SIZE_X, MADEIRA_SIZE_Y, LEFT_MOST_LONGITUDE_MADEIRA, BOTTOM_MOST_LATITUDE_MADEIRA);
-        chunkCacheManager = new ChunkCacheManager<>(1000 * 60 * 60 * 24);
+        chunkCacheManager = new ChunkCacheManager<>(1000 * 60 * 60 * 24 * 2);
 
     }
 

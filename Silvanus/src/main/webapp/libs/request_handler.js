@@ -16,15 +16,13 @@ async function register(){
 	try{
 		let u_username = String(document.getElementById("usr_identifier").value);
 		let u_email = String(document.getElementById("usr_email").value);
-		let u_name = String(document.getElementById("usr_firstname").value + " " + document.getElementById("usr_lastname").value);
+		let u_name = String(document.getElementById("usr_fullname").value);
 		let u_password = String(document.getElementById("usr_password").value);
 		let u_confirm = String(document.getElementById("usr_confirm").value);
 
-		//let u_role = "USER";
-		//let u_state = "ACTIVE";
 		let u_visibility = "PUBLIC";
 		let u_telephone = checkUndefined(String(document.getElementById("usr_telephone").value));
-		let u_smartphone = "911";
+		let u_smartphone = "";
 		let u_nif = String(document.getElementById("usr_id").value);
 		let u_address = String(document.getElementById("usr_adress").value);
 
@@ -46,13 +44,24 @@ async function register(){
 					"smartphone": u_smartphone
 				}
 			});
-		window.location.replace(base_uri + "/app");
+		window.location.replace(base_uri + "/verification");
 	} catch (error){
+
+		const error_elems = document.getElementsByClassName("error-msg");
+
+		for (let i = 0; i < error_elems.length; i++) {
+			const element = error_elems.item(i);
+			element.insertAdjacentHTML("beforeend", error.data);
+		}
 
 		console.log(error);
 	
 	} finally {
 	}
+}
+
+async function activate(){
+
 }
 
 async function login(){
@@ -61,8 +70,12 @@ async function login(){
 		let u_password = checkUndefined(String(document.getElementById("usr_password").value));
 
 		const response = await axios.post("/api/user/login/" + u_identifier + "?password=" + u_password);
-		console.log(response);
-		window.location.replace(base_uri.concat("/app"));
+
+		const response_data = response.data;
+
+		let uri = response_data.set === "ACTIVE" ? base_uri.concat("/app") : base_uri.concat("/verification");
+
+		window.location.replace(uri);
 	} catch (error){
 		console.log(error);
 		document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
@@ -129,7 +142,7 @@ async function getInfo(debug, user){
 		
 		loadMenus(response_data.loggedinData.menus);
 
-		Promise.all([
+		await Promise.all([
 			getOwnTerrain(),
 			getPendingTerrain(),
 			listNotification(),
@@ -355,8 +368,10 @@ async function getOwnTerrain(){
 	try{
 		let response = await axios.post("/api/parcel/list");
 		terrain_list = response.data;
-		console.log(terrain_list);
-		if (terrain_list != null || terrain_list.length > 0){
+
+		const terrain_counter_elem = document.getElementsByClassName("nmr_terrain");
+
+		if (terrain_list != null && terrain_list.length > 0){
 			for (let i = 0; i < terrain_list.length; i++) {
 				const element = terrain_list[i];
 				console.log(element);
@@ -365,6 +380,12 @@ async function getOwnTerrain(){
 
 				const status = String(element.credentials.townhall) + " " + String(element.credentials.district);
 				terrainCard(String(i), element.credentials.name, status, element.info.description);
+			}
+			for (let i = 0; i < terrain_counter_elem.length; i++) {
+				const element = terrain_counter_elem.item(i);
+				let counter = parseInt(element.innerHTML);
+				counter += terrain_list.length;
+				element.innerHTML = counter;
 			}
 		}
 		

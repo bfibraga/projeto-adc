@@ -1,6 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.data.community;
 
 import pt.unl.fct.di.adc.silvanus.api.impl.Community;
+import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
 
 import java.util.Arrays;
 
@@ -16,7 +17,7 @@ public class CommunityData {
     }
 
     public CommunityData(){
-        this("","",new String[]{});
+        this("","", new String[]{});
     }
 
     public String getName() {
@@ -31,8 +32,21 @@ public class CommunityData {
         return members;
     }
 
+    public String getID(){
+        return String.format("%s", this.getName().hashCode());
+    }
+
     @Override
     public String toString() {
         return String.format("CommunityData:\n\tName:%s\n\tResponsible:%s\n\tMembers:%s\n", this.getName(), this.getResponsible(), Arrays.toString(this.getMembers()));
+    }
+
+    private boolean validField(String keyword) {
+        return keyword !=null && !keyword.trim().equals("");
+    }
+
+    public boolean validation() {
+        return validField(this.getName()) &&
+                validField(this.getResponsible());
     }
 }

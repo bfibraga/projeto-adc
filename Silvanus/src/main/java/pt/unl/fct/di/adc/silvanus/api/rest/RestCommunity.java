@@ -8,6 +8,8 @@ import javax.ws.rs.core.Response;
 
 public interface RestCommunity {
 
+    String PATH = "/community";
+
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
@@ -35,7 +37,7 @@ public interface RestCommunity {
     Response exit(@CookieParam(RestInterface.TOKEN) String token, @QueryParam(RestInterface.IDENTIFIER) @DefaultValue(" ") String identifier, @PathParam("community_name") String name);
 
     @GET
-    @Path("/members/{community_name}")
+    @Path("/{community_name}/members")
     @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
     Response listMembers(@CookieParam(RestInterface.TOKEN) String token, @PathParam("community_name") String name);
 }

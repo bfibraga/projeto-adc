@@ -12,7 +12,7 @@ public class UserInfoData {
     private String avatar;
 
     public UserInfoData(){
-        this("", "", "", "", "", "", "");
+        this("", "PUBLIC", "", "", "", "", "");
     }
 
     public UserInfoData(String name, String visibility, String nif, String address, String telephone, String smartphone, String avatar){
@@ -117,7 +117,7 @@ public class UserInfoData {
      * @return if the keyword is valid or not
      */
     private boolean validField(String keyword) {
-        return keyword != null && !keyword.trim().equals("");
+        return keyword != null;
     }
 
     /**
