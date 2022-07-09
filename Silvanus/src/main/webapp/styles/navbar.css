@@ -288,7 +288,7 @@ main{
     }
 
     #request-terrain-offcanvas{
-        --size : 50vh;
+        --size : 30%;
         width: var(--size) !important;
     }
 

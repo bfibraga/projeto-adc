@@ -143,10 +143,7 @@
         <script src="../libs/maps.js"></script>
         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFF-sduDxFSBjCD_C-leaSI-sTkoCNO6Y&callback=initMap&libraries=drawing"></script>
 
-       
         
-    
-    
   </main>
 
   <!-- User Properties Offcanvas -->
@@ -286,234 +283,12 @@
         </div>
       </div>
 
-      <!--<div class="row d-flex flex-column justify-content-center">
-        <div class="col-md-6 col-sm-12 align-items-end">
-          <div id="usr_credentials_scrollspy" class="position-relative light rounded-3 p-3 m-1 shadow-sm align-items-start" style="min-width: 25rem; max-width: 30rem;">
-            <div class="d-flex flex-row m-3 align-items-center">
-              <div class="avatar-wrapper" data-user="" style="min-width: 4rem; min-height: 4rem; max-width: 8rem; max-height: 8rem;">
-                <img id="usr_avatar_perfil_credentials" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-              </div>
-              <div class="ms-3">
-                <h4 id="usr_username">Username</h4>
-                <p style="font-size: 13px;" id="usr_email" class="mb-1">Email</p>
-                <div id="usr_roles_menu">
-                </div>
-              </div>
-            </div>
-            <div class="dropdown position-absolute end-0 top-0 pe-3 pt-3">
-              <a class="" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
-                  <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
-                </svg>
-              </a>
-            
-              <ul id="usr_list_notification" class="dropdown-menu border-0 shadow-sm mt-3" aria-labelledby="dropdownMenuLink">
-              </ul>
-            </div>
-           
-          </div>
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm " style="min-width: 25rem; max-width: 30rem; height: calc(100%-4rem);">
-            <div class="position-relative perfil-header mb-3">
-              <h5 class="">Perfil</h5>
-              <div class="position-absolute end-0 top-50 translate-middle-y">
-                <div id="btn_change_usr_profile_not_active" data-app-menu-active="true">
-                  <a id="btn_change_usr_profile" class="change-usr-profile" href="#" onclick="toggleChangeProfileMenu('usr_profile_menu', 'usr_change_profile_menu', 'btn_change_usr_profile_not_active', 'btn_change_usr_profile_active')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
-                      <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001zm-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z"/>
-                    </svg>
-                    
-                  </a> 
-                </div>
-                
-                <div id="btn_change_usr_profile_active" data-app-menu-active="false">
-                  
-  
-                  <a class="change-usr-profile" href="#" onclick="toggleChangeProfileMenu('usr_profile_menu', 'usr_change_profile_menu', 'btn_change_usr_profile_not_active', 'btn_change_usr_profile_active')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-                    </svg>
-                    
-                  </a>
-                  <a class="change-usr-profile" href="#" onclick="loader('usr_change_profile_menu','true');changing_att();">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16" data-app-menu-active="true">
-                      <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div id="usr_profile_menu" data-app-menu-active="true">
-              <h6>Nome Completo</h6>
-              <p id="usr_fullname" class="border-bottom">-</p>
-              <h6>NIF</h6>
-              <p id="usr_id" class="border-bottom">-</p>
-              <h6>Número de telefone</h6>
-              <p id="usr_telephone" class="border-bottom">-</p>
-              <h6>Número de smartphone</h6>
-              <p id="usr_smartphone" class="border-bottom">-</p>
-              <h6>Morada</h6>
-              <p id="usr_address" class="border-bottom">-</p>
-            </div>
-            <div id="usr_change_profile_menu" data-app-menu-active="false">
-              <h6>Nome Completo</h6>
-              <input id="usr_fullname_input" class="form-control rounded-pill mb-3" value="-"></input>
-              <h6>NIF</h6>
-              <input id="usr_id_input" class="form-control rounded-pill mb-3" value="-"></input>
-              <h6>Número de telefone</h6>
-              <input id="usr_telephone_input" class="form-control rounded-pill mb-3" value="-"></input>
-              <h6>Número de smartphone</h6>
-              <input id="usr_smartphone_input" class="form-control rounded-pill mb-3" value="-"></input>
-              <h6>Morada</h6>
-              <input id="usr_address_input" class="form-control rounded-pill" value="-"></input>
-              <br>
-              <div class="d-flex flex-row justify-content-center">
-                <span class="spinner-border spinner-border-sm text-primary" style="width: 2rem; height: 2rem;" role="status" aria-hidden="true" data-app-menu-active="false"></span>
-              </div>
-            </div>
-            
-    
-          </div>
-        </div>
-      </div>
-      <div class="row d-flex flex-column justify-content-center">
-        <div class="col-md-6 col-sm-12 align-items-end">
-          <div id="usr_credentials_scrollspy" class="position-relative light rounded-3 p-3 m-1 shadow-sm align-items-start" style="min-width: 25rem; max-width: 30rem;">
-            <div class="d-flex flex-row m-3 align-items-center">
-              <div class="avatar-wrapper" data-user="" style="min-width: 4rem; min-height: 4rem; max-width: 8rem; max-height: 8rem;">
-                <img id="usr_avatar_perfil_credentials" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-              </div>
-              <div class="ms-3">
-                <h4 id="usr_username">Username</h4>
-                <p style="font-size: 13px;" id="usr_email" class="mb-1">Email</p>
-                <div id="usr_roles_menu">
-                </div>
-              </div>
-            </div>
-            <div class="dropdown position-absolute end-0 top-0 pe-3 pt-3">
-              <a class="" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
-                  <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
-                </svg>
-              </a>
-            
-              <ul id="usr_list_notification" class="dropdown-menu border-0 shadow-sm mt-3" aria-labelledby="dropdownMenuLink">
-              </ul>
-            </div>
-           
-          </div>
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 m-1 shadow-sm " style="min-width: 25rem; max-width: 30rem; height: calc(100%-4rem);">
-            <div class="position-relative perfil-header mb-3">
-              <h5 class="">Perfil</h5>
-              <div class="position-absolute end-0 top-50 translate-middle-y">
-                <div id="btn_change_usr_profile_not_active" data-app-menu-active="true">
-                  <a id="btn_change_usr_profile" class="change-usr-profile" href="#" onclick="toggleChangeProfileMenu('usr_profile_menu', 'usr_change_profile_menu', 'btn_change_usr_profile_not_active', 'btn_change_usr_profile_active')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
-                      <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001zm-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z"/>
-                    </svg>
-                    
-                  </a> 
-                </div>
-                
-                <div id="btn_change_usr_profile_active" data-app-menu-active="false">
-                  
-  
-                  <a class="change-usr-profile" href="#" onclick="toggleChangeProfileMenu('usr_profile_menu', 'usr_change_profile_menu', 'btn_change_usr_profile_not_active', 'btn_change_usr_profile_active')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-                    </svg>
-                    
-                  </a>
-                  <a class="change-usr-profile" href="#" onclick="loader('usr_change_profile_menu','true');changing_att();">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16" data-app-menu-active="true">
-                      <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div id="usr_profile_menu" data-app-menu-active="true">
-              <h6>Nome Completo</h6>
-              <p id="usr_fullname" class="border-bottom">-</p>
-              <h6>NIF</h6>
-              <p id="usr_id" class="border-bottom">-</p>
-              <h6>Número de telefone</h6>
-              <p id="usr_telephone" class="border-bottom">-</p>
-              <h6>Número de smartphone</h6>
-              <p id="usr_smartphone" class="border-bottom">-</p>
-              <h6>Morada</h6>
-              <p id="usr_address" class="border-bottom">-</p>
-            </div>
-            <div id="usr_change_profile_menu" data-app-menu-active="false">
-              <h6>Nome Completo</h6>
-              <input id="usr_fullname_input" class="form-control rounded-pill mb-3" value="-"></input>
-              <h6>NIF</h6>
-              <input id="usr_id_input" class="form-control rounded-pill mb-3" value="-"></input>
-              <h6>Número de telefone</h6>
-              <input id="usr_telephone_input" class="form-control rounded-pill mb-3" value="-"></input>
-              <h6>Número de smartphone</h6>
-              <input id="usr_smartphone_input" class="form-control rounded-pill mb-3" value="-"></input>
-              <h6>Morada</h6>
-              <input id="usr_address_input" class="form-control rounded-pill" value="-"></input>
-              <br>
-              <div class="d-flex flex-row justify-content-center">
-                <span class="spinner-border spinner-border-sm text-primary" style="width: 2rem; height: 2rem;" role="status" aria-hidden="true" data-app-menu-active="false"></span>
-              </div>
-            </div>
-            
-    
-          </div>
-        </div>
-      </div>-->
-
       <div class="d-flex justify-content-start">
         
       </div>
 
       <!-- Toast Handler-->
     </div>
-    <!-- 
-      <div id="usr_change_profile_menu" class="offcanvas-body" >
-      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
-        <div class="d-flex flex-row justify-content-center mb-3">
-          <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
-            <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-          </div>
-        </div>
-        <h3 id="usr_username">Username
-          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
-            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
-          </a>
-        </h3>
-        <h5 id="usr_email" class="">Email</h5>
-        <div id="usr_roles_change_profile">
-        </div>
-      </div>
-      <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
-        <h5 class="mb-3">Perfil</h5>
-        <h6>Nome Completo</h6>
-        <input id="usr_fullname_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>NIF</h6>
-        <input id="usr_id_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>Número de telefone</h6>
-        <input id="usr_telephone_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>Número de smartphone</h6>
-        <input id="usr_smartphone_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>Morada</h6>
-        <input id="usr_address_input" class="form-control rounded-pill" value="-"></input>
-        <br>
-        <div class="d-flex flex-column justify-content-center">
-          <div class="d-flex flex-row justify-content-center">
-            <a id="btn_callback_change_usr_profile" onclick="toggleChangeProfileMenu('usr_change_profile_menu', 'usr_menu')" href="#" class="btn btn-danger m-3 btn-change-usr-profile" onclick="">Cancelar</a>
-            <a href="#" class="btn btn-primary m-3" onclick="changing_att()">Alterar</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    -->
     
     <div id="usr_change_password" class="offcanvas-body" data-app-menu-active="false">
       <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
@@ -660,45 +435,6 @@
         </div>
       </div>
     </div>
-    <!-- 
-      <div id="usr_change_profile_menu" class="offcanvas-body" >
-      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
-        <div class="d-flex flex-row justify-content-center mb-3">
-          <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
-            <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-          </div>
-        </div>
-        <h3 id="usr_username">Username
-          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
-            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
-          </a>
-        </h3>
-        <h5 id="usr_email" class="">Email</h5>
-        <div id="usr_roles_change_profile">
-        </div>
-      </div>
-      <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
-        <h5 class="mb-3">Perfil</h5>
-        <h6>Nome Completo</h6>
-        <input id="usr_fullname_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>NIF</h6>
-        <input id="usr_id_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>Número de telefone</h6>
-        <input id="usr_telephone_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>Número de smartphone</h6>
-        <input id="usr_smartphone_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>Morada</h6>
-        <input id="usr_address_input" class="form-control rounded-pill" value="-"></input>
-        <br>
-        <div class="d-flex flex-column justify-content-center">
-          <div class="d-flex flex-row justify-content-center">
-            <a id="btn_callback_change_usr_profile" onclick="toggleChangeProfileMenu('usr_change_profile_menu', 'usr_menu')" href="#" class="btn btn-danger m-3 btn-change-usr-profile" onclick="">Cancelar</a>
-            <a href="#" class="btn btn-primary m-3" onclick="changing_att()">Alterar</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    -->
     
     <div id="usr_change_password" class="offcanvas-body" data-app-menu-active="false">
       <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
@@ -775,46 +511,7 @@
       </div>
 
     </div>
-    <!-- 
-      <div id="usr_change_profile_menu" class="offcanvas-body" >
-      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
-        <div class="d-flex flex-row justify-content-center mb-3">
-          <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
-            <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-          </div>
-        </div>
-        <h3 id="usr_username">Username
-          <a id="edit-profile-btn" type="button" class="btn text-reset end-0" onclick="alert('Editar perfil')">
-            <img src="../media/icons/edit_black_24dp.svg" class="grow" alt="Editar">
-          </a>
-        </h3>
-        <h5 id="usr_email" class="">Email</h5>
-        <div id="usr_roles_change_profile">
-        </div>
-      </div>
-      <div id="usr_perfil_scrollspy" class="light rounded-3 p-3 mt-3 shadow-sm">
-        <h5 class="mb-3">Perfil</h5>
-        <h6>Nome Completo</h6>
-        <input id="usr_fullname_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>NIF</h6>
-        <input id="usr_id_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>Número de telefone</h6>
-        <input id="usr_telephone_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>Número de smartphone</h6>
-        <input id="usr_smartphone_input" class="form-control rounded-pill mb-3" value="-"></input>
-        <h6>Morada</h6>
-        <input id="usr_address_input" class="form-control rounded-pill" value="-"></input>
-        <br>
-        <div class="d-flex flex-column justify-content-center">
-          <div class="d-flex flex-row justify-content-center">
-            <a id="btn_callback_change_usr_profile" onclick="toggleChangeProfileMenu('usr_change_profile_menu', 'usr_menu')" href="#" class="btn btn-danger m-3 btn-change-usr-profile" onclick="">Cancelar</a>
-            <a href="#" class="btn btn-primary m-3" onclick="changing_att()">Alterar</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    -->
-    
+
     <div id="usr_change_password" class="offcanvas-body" data-app-menu-active="false">
       <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
         <div class="d-flex flex-row justify-content-center mb-3">
@@ -871,27 +568,16 @@
   <!-- List Properties Sidebar -->
   <div class="offcanvas offcanvas-start bg-light rounded-3 border-0 shadow-sm" style="z-index: 10;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="list-properties" aria-labelledby="offcanvasScrollingLabel">
     <div class="offcanvas-header light shadow-sm">
-      <div class="dropdown">
-        <a class="dropdown-toggle btn light shadow-sm" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Ir para...</a>
-        <ul class="dropdown-menu">
-          <li >
-            <a class="dropdown-item" href="#usr_list_terrain_scrollpsy">Lista de Terrenos</a>
-          </li>
-          <li><a class="dropdown-item" href="#usr_pending_terrain_scrollpsy">Pedidos Pendentes</a></li>
-        </ul>
-      </div>
       <a type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></a>
     </div>
     <div class="offcanvas-body ">
       <div class="row">
-        <div class="col-md-6 col-sm-12">
-          <div class="row flex-column" id="usr_terrain_menu">
+        <div class="col-md-4 col-sm-12">
+          <div class="row flex-column">
             <div class="col-12">
               <div id="usr_list_terrain_scollspy" class="row light rounded-3 m-1 p-3 shadow-sm">
                 <h5 class="mb-3">Lista de Terrenos</h5>
-                <div class="d-flex flex-row justify-content-center align-items-center">
-                  <div class="row" id="usr_terrain_count" data-app-value=0>
-                  </div>
+                <div class="row d-flex flex-row justify-content-center p-0" id="usr_terrain_count" data-app-value=0>
                 </div>
                 
     
@@ -902,17 +588,26 @@
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-sm-12">
-          <div class="row flex-column">
+        <div class="col-md-5 col-sm-12">
+          <div class="row flex-column" id="usr_terrain_menu">
             <div class="col-12">
               <div id="usr_pending_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm" data-app-value=0>
 
-                <div class="row flex-row vw-100">
+                <div class="row flex-row mb-3">
                   <div class="col">
-                    <h5 class="mb-3">Pedidos Pendentes</h5>
+                    <h5 class="">Pedidos Pendentes</h5>
                   </div>
-                  <div class="col align-items-end">
-                    <input type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill" value="Registar novo terreno" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade"> 
+                  <div class="col">
+                    <div class="d-flex flex-fill justify-content-end align-items-center">
+                      <a href="#" type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-circle text-white d-flex align-items-center" style="width: 2.8rem; height: 2.8rem; border: none !important;" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-send-plus-fill" viewBox="0 0 16 16">
+                          <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47L15.964.686Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                          <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm-3.5-2a.5.5 0 0 0-.5.5v1h-1a.5.5 0 0 0 0 1h1v1a.5.5 0 0 0 1 0v-1h1a.5.5 0 0 0 0-1h-1v-1a.5.5 0 0 0-.5-.5Z"/>
+                        </svg>
+                      </a>
+                    </div>
+                    <!--<input type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill" value="Registar novo terreno"> -->
+                    
                   </div>
                 </div>
                 
@@ -926,6 +621,46 @@
                 
                 <!-- Add New Property Button --> 
                 <div class="d-flex flex-row justify-content-center">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-12">
+          <div class="row flex-column">
+            <div class="col-12">
+              <div class="light rounded-3 m-1 p-3 shadow-sm">
+                <h5>Camadas</h5>
+                <div class="row flex-md-column flex-sm-row">
+                  
+                  <div class="col-md-12 col-sm-6">
+                    <div class="light rounded-3 shadow-sm m-2 p-3" style="">
+                      <div class="d-flex flex-row justify-content-center align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-brightness-high-fill text-warning me-3" viewBox="0 0 16 16">
+                          <path d="M12 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+                        </svg>
+                        <div class="form-check form-switch ms-3">
+                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+                        </div>
+                      </div>
+                      
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 col-sm-6">
+                    <div class="light rounded-3 shadow-sm m-2 p-3" style="">
+                      <div class="d-flex flex-row justify-content-center align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-exclamation-square-fill text-danger me-3" viewBox="0 0 16 16">
+                          <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                        </svg>
+                        <div class="ms-3 form-check form-switch">
+                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+                        </div>
+                      </div>
+                      
+                    </div>
+                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -1065,7 +800,7 @@
           <div class="mb-3">
             <label for="define-route-terrain" class="form-label">Caminho de entrada para o terreno</label>
             <br>
-            <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill" data-bs-dismiss="offcanvas" aria-label="Close" value="Definir um caminho" onclick="toggleRouteDrawingControl(true,true)">
+            <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill text-light" data-bs-dismiss="offcanvas" aria-label="Close" value="Definir um caminho" onclick="initRoute()">
           </div>
           
         </div>

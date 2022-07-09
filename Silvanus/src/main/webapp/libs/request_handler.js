@@ -107,9 +107,13 @@ async function getInfo(debug, user){
 	let loader = document.getElementById("loader");
 
 	try{
-		//menu("menu03");
-		//terrainCard(1, "Teste 2", "Teste 3", "Teste 4");
-		//terrainPendingCard("Teste 2", "Teste 3", "Teste 4");
+		/*menu("menu03");
+		terrainCard(1, "Teste 2", "Teste 3", "Teste 4");
+		terrainCard(2, "Teste 2", "Teste 3", "Teste 4");
+		terrainCard(3, "Teste 2", "Teste 3", "Teste 4");
+		terrainPendingCard("Teste 2", "Teste 3", "Uma descrição de teste muito fixe meu :O");
+		terrainPendingCard("Teste 3", "Teste 3", "Uma descrição de teste muito fixe meu :O");*/
+
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
@@ -456,6 +460,8 @@ function loadTerrainInfo(id){
 	if (terrain === null) return;
 
 	const center = terrain.center;
+	const viewport = getViewport();
+	console.log(viewport);
 	const new_center = point(center.lat, center.lng - 5e-4);
 	setCenter(new_center);
 	//setZoom(10);

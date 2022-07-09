@@ -414,6 +414,7 @@ function toggleRouteDrawingControl(value, confirmed){
     const visible = confirmed ? map : null;
     route_drawing_tools.setMap(visible);
     setRoute(visible, registed_route);
+    setMenuID("route_definition_menu",String(value));
 } 
 
 function clearTemporaryData(){

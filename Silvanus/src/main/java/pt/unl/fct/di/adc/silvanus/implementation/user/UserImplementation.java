@@ -535,7 +535,7 @@ public class UserImplementation implements Users {
 			Entity user = datastore.get(userKey);
 			UserInfoVisible info = this.getInfo(user);
 			result_set.add(info);
-			this.cache.put(key, property, result_set);
+			this.cache.put(request_user, property, result_set);
 			return Result.ok(result_set, "");
 		}
 
@@ -546,15 +546,13 @@ public class UserImplementation implements Users {
 			result = this.find(identifier, "UserCredentials", "usr_email", 5);
 		}
 
-		//TODO
 		while(result.hasNext()){
 			Entity curr_result = result.next();
 			UserInfoVisible info = this.getInfo(curr_result);
 			result_set.add(info);
-			//result_mapper.add(property);
+			this.cache.put((String) curr_result.getKey().getNameOrId(), property, result_set);
 		}
 
-		this.cache.put(key, property, result_set);
 
 		return Result.ok(result_set, "");
 	}
@@ -634,6 +632,7 @@ public class UserImplementation implements Users {
 				txn.delete(remove_userKey, remove_userRoleKey, remove_userPermissionKey, remove_userInfoKey);
 				txn.commit();
 
+				this.cache.remove(userID);
 				return Result.ok();
 			} finally {
 				if(txn.isActive()){
@@ -1013,7 +1012,7 @@ public class UserImplementation implements Users {
 					.set("usr_NIF", infoData.getNif())
 					.build();
 
-			this.cache.remove(userID);
+			this.cache.remove(target_username);
 			System.out.println(infoData);
 
 			tnx.put(target);

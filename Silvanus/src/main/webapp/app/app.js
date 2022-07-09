@@ -156,6 +156,17 @@ function typeTerrain(id, menu_id){
   }
 }
 
+function initRoute(){
+  let request_terrain_offcanvas_elem = document.getElementById('request-terrain-offcanvas');
+  let request_terrain_offcanvas = new bootstrap.Offcanvas(request_terrain_offcanvas_elem)
+  request_terrain_offcanvas.hide;
+  toggleRouteDrawingControl(true,true);
+}
+
+function toggleOffcanvas(value){
+  
+}
+
 document.getElementById("search_list_user_input")
 .addEventListener("keydown", function(event){
   switch (event.key){

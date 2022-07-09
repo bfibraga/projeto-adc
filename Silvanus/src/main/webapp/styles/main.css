@@ -334,6 +334,10 @@ a {
   color: #6eae65 !important;
 }
 
+a.disabled{
+  color:gray !important;
+}
+
 .btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
   background-color: #90ca87 !important;
   border: none !important; /*Author: António Duarte 58278*/
