@@ -246,9 +246,6 @@ public class UserImplementation implements Users {
 					this.cache.put(user_id, "permissions", roleCredentials);
 				}
 
-				String jws = TOKEN.createNewJWS(user_id, 1, roleCredentials.getPermissions());
-				String refresh_token = TOKEN.newRefreshToken();
-
 				UserStateData userStateData = this.cache.getStateData(loginData.getID());
 				if (userStateData == null){
 					Key permissionKey = userPermissionKeyFactory.newKey(loginData.getID());
@@ -259,6 +256,13 @@ public class UserImplementation implements Users {
 
 					this.cache.put(data.getID(), userStateData);
 				}
+
+				if (!userStateData.isActive()){
+					return Result.error(Status.CONFLICT, String.format("User %s not active", data.getUsername()));
+				}
+
+				String jws = TOKEN.createNewJWS(user_id, 1, roleCredentials.getPermissions());
+				String refresh_token = TOKEN.newRefreshToken();
 
 				LoggedInData loggedInData = new LoggedInData(jws, userStateData);
 
@@ -303,8 +307,6 @@ public class UserImplementation implements Users {
 						this.cache.put(data.getID(), "permissions", roleCredentials);
 					}
 
-					int operation_level = 1;
-
 					UserStateData userStateData = this.cache.getStateData(data.getID());
 					if (userStateData == null){
 						Key permissionKey = userPermissionKeyFactory.newKey(data.getID());
@@ -315,6 +317,12 @@ public class UserImplementation implements Users {
 
 						this.cache.put(data.getID(), userStateData);
 					}
+
+					if (!userStateData.isActive()){
+						return Result.error(Status.CONFLICT, String.format("User %s not active", data.getUsername()));
+					}
+
+					int operation_level = 1;
 
 					String jws = TOKEN.createNewJWS(data.getID(), operation_level, roleCredentials.getPermissions());
 					String refresh_token = TOKEN.newRefreshToken();

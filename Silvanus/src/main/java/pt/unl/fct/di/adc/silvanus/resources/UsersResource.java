@@ -76,8 +76,7 @@ public class UsersResource implements RestUsers {
 				new LoginData(identifier, LoginData.NOT_DEFINED, password);
 		Result<LoggedInData> result = impl.login(data);
 
-		UserStateData userStateData = result.value().getStateData();
-		if (!result.isOK() || !userStateData.isActive()) {
+		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).cookie(TOKEN.cookie(null)).build();
 		}
 

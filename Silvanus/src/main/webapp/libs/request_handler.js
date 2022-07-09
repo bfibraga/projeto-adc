@@ -73,11 +73,13 @@ async function login(){
 
 		const response_data = response.data;
 
-		let uri = response_data.set === "ACTIVE" ? base_uri.concat("/app") : base_uri.concat("/verification");
-
-		window.location.replace(uri);
+		window.location.replace(base_uri.concat("/app"));
 	} catch (error){
 		console.log(error);
+		const status = error.response.status;
+		if (status === 409){
+			window.location.replace(base_uri.concat("/verification"));
+		}
 		document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
 	} finally {
 		loader("false");
