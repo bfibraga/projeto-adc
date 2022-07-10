@@ -2,6 +2,8 @@ package pt.unl.fct.di.adc.silvanus.data.user;
 
 public class UserInfoData {
 
+    private static final String DEFAULT_AVATAR = "https://storage.googleapis.com/projeto-adc.appspot.com/placeholder/avatar";
+
     private String name;
     private String visibility;
     private String nif;
@@ -12,7 +14,17 @@ public class UserInfoData {
     private String avatar;
 
     public UserInfoData(){
-        this("", "PUBLIC", "", "", "", "", "");
+        this("", "PUBLIC", "", "", "", "");
+    }
+
+    public UserInfoData(String name, String visibility, String nif, String address, String telephone, String smartphone){
+        this.name = name;
+        this.visibility = visibility.toUpperCase();
+        this.nif = nif;
+        this.address = address;
+        this.telephone = telephone;
+        this.smartphone = smartphone;
+        this.avatar = DEFAULT_AVATAR;
     }
 
     public UserInfoData(String name, String visibility, String nif, String address, String telephone, String smartphone, String avatar){
@@ -22,6 +34,7 @@ public class UserInfoData {
         this.address = address;
         this.telephone = telephone;
         this.smartphone = smartphone;
+        this.avatar = avatar;
     }
 
     public String getName() {
@@ -109,6 +122,10 @@ public class UserInfoData {
     public UserInfoData setAvatar(String avatar) {
         this.avatar = avatar;
         return this;
+    }
+
+    public UserInfoData replaceAvatar(String avatar) {
+        return !validField(this.getAvatar()) && validField(avatar) ? this.setAvatar(avatar) : this ;
     }
 
     /**

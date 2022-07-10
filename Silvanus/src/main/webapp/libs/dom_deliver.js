@@ -225,6 +225,8 @@ function handleListUser(name, xmlDoc, params){
 
     target.setAttribute("data-app-value", String(key+1));
 
+    elems[name].querySelector(".user-avatar-profile").src = profile.info.avatar;
+
     elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", profile.username);
     elems[name].querySelector(".usr_email").insertAdjacentHTML("beforeend", profile.email);
 
@@ -247,6 +249,9 @@ function handleListUser(name, xmlDoc, params){
     if (profile.loggedinData.menus.includes("menu05")){
         elems[name].querySelector(".usr_role_unchanged").setAttribute("data-app-menu-active", "false");
         elems[name].querySelector(".usr_role").setAttribute("data-app-menu-active", "true");
+    } else {
+        elems[name].querySelector(".usr_role_unchanged").setAttribute("data-app-menu-active", "true");
+        elems[name].querySelector(".usr_role").setAttribute("data-app-menu-active", "false");
     }
 
     elems[name].querySelector(".usr_role_unchanged").insertAdjacentHTML("beforeend", profile.role_name);

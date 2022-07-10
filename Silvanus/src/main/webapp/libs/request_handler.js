@@ -41,7 +41,8 @@ async function register(){
 					"nif": u_nif,
 					"address": u_address,
 					"telephone": u_telephone,
-					"smartphone": u_smartphone
+					"smartphone": u_smartphone,
+					"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/" + u_username + "/avatar"
 				}
 			});
 
@@ -49,7 +50,7 @@ async function register(){
 
 		let form = new FormData();
 		form.append("file", avatar_image["content"]);
-		form.append("destination", u_username + "/" + u_email);
+		form.append("destination", u_username);
 		form.append("filename", "avatar");
 
 		const avatar_response = await axios.post("/files/projeto-adc.appspot.com/", form, 
@@ -60,7 +61,7 @@ async function register(){
 		});
 		console.log(avatar_response);
 
-		//window.location.replace(base_uri + "/verification");
+		window.location.replace(base_uri + "/verification");
 	} catch (error){
 
 		const error_elems = document.getElementsByClassName("error-msg");
@@ -132,6 +133,13 @@ async function getInfo(debug, user){
 		terrainPendingCard("Teste 2", "Teste 3", "Uma descrição de teste muito fixe meu :O");
 		terrainPendingCard("Teste 3", "Teste 3", "Uma descrição de teste muito fixe meu :O");*/
 
+		//document.getElementById("usr_avatar_perfil_credentials").src = "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar";
+
+		/*const avatar_elems = document.getElementsByClassName("user-avatar");
+		for (let i = 0; i < avatar_elems.length; i++) {
+			const element = avatar_elems.item(i);
+			element.src = "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar";
+		}*/
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
@@ -149,18 +157,6 @@ async function getInfo(debug, user){
 		const lastLogout = response_data.logoutData;
 		setCenter(lastLogout.center);
 		setZoom(lastLogout.zoom);
-
-		//Avatar
-		//TODO Alter this avatar url
-		let avatar_url = "https://storage.cloud.google.com/projeto-adc.appspot.com/placeholder/user.png?authuser=2";
-		/*document.querySelectorAll('.avatar-wrapper')
-			.forEach(function(elem) {
-				const value = elem.getAttribute("data-user");
-				if (value.value === user){
-					elem.firstElementChild.src = avatar_url;
-					console.log(elem.firstElementChild.src);
-				}
-		});*/
 		
 		loadMenus(response_data.loggedinData.menus);
 
@@ -215,6 +211,13 @@ function updatePerfil(data){
 	document.getElementById("usr_telephone_input").value = String(data.telephone);
 	document.getElementById("usr_smartphone_input").value = String(data.smartphone);
 	document.getElementById("usr_address_input").value = String(data.address);
+
+	const avatar_elems = document.getElementsByClassName("user-avatar");
+	for (let i = 0; i < avatar_elems.length; i++) {
+		const element = avatar_elems.item(i);
+		element.src = String(data.avatar);
+	}
+	document.getElementById("usr_avatar_perfil_credentials").src = String(data.avatar);
 }
 
 function loadMenus(menus){
@@ -277,7 +280,23 @@ async function changing_att(){
 
 		const response_data = response.data;
 		perfil = response_data;
-		updatePerfil(response_data);
+
+		const avatar_image = getAvatarImageContent();
+
+		console.log(avatar_image);
+		let form = new FormData();
+		form.append("file", avatar_image["content"]);
+		form.append("destination", String(document.getElementById("usr_username").innerHTML));
+		form.append("filename", "avatar");
+
+		const avatar_response = await axios.post("/files/projeto-adc.appspot.com/", form, 
+		{
+			headers: {
+			"Content-Type": "multipart/form-data",
+			}
+		});
+
+		updatePerfil(perfil);
 		loader('usr_change_profile_menu','false');
 		toggleChangeProfileMenu('usr_profile_menu', 'usr_change_profile_menu', 'btn_change_usr_profile_not_active', 'btn_change_usr_profile_active');
 

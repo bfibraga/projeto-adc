@@ -123,6 +123,7 @@ public class UserImplementation implements Users {
 					.set("usr_smartphone", userInfoData.getSmartphone())
 					.set("usr_address", userInfoData.getAddress())
 					.set("usr_NIF", userInfoData.getNif())
+					.set("usr_avatar", userInfoData.getAvatar())
 					.build();
 			this.cache.put(user_id, userInfoData);
 
@@ -587,7 +588,7 @@ public class UserImplementation implements Users {
 				infoEntity.getString("usr_address"),
 				infoEntity.getString("usr_telephone"),
 				infoEntity.getString("usr_smartphone"),
-				"");
+				infoEntity.getString("usr_avatar"));
 		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
 		System.out.println(role);
 		UserRoleData roleData = new UserRoleData(role.getDisplayName(), role.getRoleColor());
@@ -1059,7 +1060,8 @@ public class UserImplementation implements Users {
 					.replaceAddress(target.getString("usr_address"))
 					.replaceNIF(target.getString("usr_NIF"))
 					.replaceTelephone(target.getString("usr_telephone"))
-					.replaceSmartphone(target.getString("usr_smartphone"));
+					.replaceSmartphone(target.getString("usr_smartphone"))
+					.setAvatar(target.getString("usr_avatar"));
 
 			target = Entity.newBuilder(target_usrKey_info)
 					.set("usr_visibility", infoData.getVisibility())
@@ -1068,6 +1070,7 @@ public class UserImplementation implements Users {
 					.set("usr_smartphone", infoData.getSmartphone())
 					.set("usr_address", infoData.getAddress())
 					.set("usr_NIF", infoData.getNif())
+					.set("usr_avatar", infoData.getAvatar())
 					.build();
 
 			this.cache.remove(target_username);

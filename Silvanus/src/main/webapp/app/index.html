@@ -49,7 +49,7 @@
       <li class="app-nav-item" onclick="toggleDrawing(false)">
         <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#user-properties">
           <div class="avatar-wrapper d-flex" data-user="" style="width: 2rem; height: 2rem;">
-            <img id="usr_avatar_navbar" src="../media/imgs/user.png" class="rounded-circle shadow-sm">
+            <img id="usr_avatar_navbar" src="../media/imgs/user.png" class="rounded-circle shadow-sm user-avatar">
           </div>
           <span class="app-link-text">
             Perfil
@@ -161,7 +161,7 @@
               <div id="usr_credentials_scrollspy" class="position-relative light rounded-3 p-3 m-1 shadow-sm">
                 <div class="d-flex flex-row m-3 align-items-center">
                   <div class="avatar-wrapper" data-user="" style="min-width: 4rem; min-height: 4rem; max-width: 8rem; max-height: 8rem;">
-                    <img id="usr_avatar_perfil_credentials" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+                    <img id="usr_avatar_perfil_credentials" src="../media/imgs/user.png" class="rounded-circle shadow-sm user-avatar" style="">
                   </div>
                   <div class="ms-3">
                     <h4 id="usr_username">Username</h4>
@@ -190,7 +190,7 @@
                     <div id="btn_change_usr_profile_active" data-app-menu-active="false">
                       
       
-                      <a class="text-reset change-usr-profile" href="#" onclick="toggleChangeProfileMenu('usr_profile_menu', 'usr_change_profile_menu', 'btn_change_usr_profile_not_active', 'btn_change_usr_profile_active')">
+                      <a class="text-reset change-usr-profile" href="#" onclick="updatePerfil(perfil);toggleChangeProfileMenu('usr_profile_menu', 'usr_change_profile_menu', 'btn_change_usr_profile_not_active', 'btn_change_usr_profile_active')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                           <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
                         </svg>
@@ -226,7 +226,9 @@
                   <h6>Número de smartphone</h6>
                   <input id="usr_smartphone_input" class="form-control rounded-pill mb-3" value="-"></input>
                   <h6>Morada</h6>
-                  <input id="usr_address_input" class="form-control rounded-pill" value="-"></input>
+                  <input id="usr_address_input" class="form-control rounded-pill mb-3" value="-"></input>
+                  <h6>Imagem de Perfil</h6>
+                  <input id="usr_avatar" type="file" accept="image/jpeg, image/png" onchange="loadAvatar(event)" class="form-control rounded-pill" placeholder="Avatar">
                   <br>
                   <div class="d-flex flex-row justify-content-center">
                     <span class="spinner-border spinner-border-sm text-primary" style="width: 2rem; height: 2rem;" role="status" aria-hidden="true" data-app-menu-active="false"></span>
@@ -335,7 +337,7 @@
                 <div class="d-flex flex-row align-items-center justify-content-center mb-3">
                   
                   <div class="avatar-wrapper" data-user="" style="max-width: 7rem; max-height: 7rem;">
-                    <img id="usr_avatar_perfil_credentials" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+                    <img src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
                   </div>
                 </div>
                 <h4 class=" mb-3 text-center">Nome da Comunidade</h4>
