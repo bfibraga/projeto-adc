@@ -28,8 +28,24 @@ public class TerrainInfoData {
         Collections.addAll(this.route, route);
     }
 
+    public TerrainInfoData(
+            String description,
+            String type_of_soil_coverage,
+            String current_use,
+            String previous_use,
+            Set<String> images,
+            List<LatLng> route
+    ){
+        this.description = description;
+        this.type_of_soil_coverage = type_of_soil_coverage;
+        this.current_use = current_use;
+        this.previous_use = previous_use;
+        this.images = images;
+        this.route = route;
+    }
+
     public TerrainInfoData(){
-        this("","","","",new String[]{}, new LatLng[]{});
+        this("","","","", new HashSet<>(), new ArrayList<>());
     }
 
     public String getDescription() {

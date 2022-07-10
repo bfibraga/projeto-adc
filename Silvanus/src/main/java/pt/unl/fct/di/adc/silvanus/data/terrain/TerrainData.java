@@ -1,5 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.data.terrain;
 
+import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
+
 import java.util.Arrays;
 
 //TODO Rethink this part
@@ -55,16 +57,8 @@ public class TerrainData {
         edgesTerrain[1] = Float.POSITIVE_INFINITY; // The more a point is to the right, the more positive it is
         edgesTerrain[2] = Float.POSITIVE_INFINITY; // The upper a point is, the more positive it is
         edgesTerrain[3] = Float.NEGATIVE_INFINITY; // The lower a point is, the more negative it is
-        //TODO Calculate centroid of this terrain
 
-        int points = parcela.length;
-        float[] center_value = new float[2];
-        for (LatLng point : parcela) {
-            center_value[0] += point.getLat() / points;
-            center_value[1] += point.getLng() / points;
-            System.out.println("\n\n\n(" + point.getLng() + "," + point.getLat() + ")\n\n\n");
-        }
-        this.center = new LatLng(center_value[0], center_value[1]);
+        this.center = PolygonUtils.centroid(parcela);
     }
 
     public void createEdges() {
@@ -80,7 +74,6 @@ public class TerrainData {
 
             if (point.getLat() > edgesTerrain[3])
                 edgesTerrain[3] = point.getLat();
-
         }
     }
 
@@ -110,6 +103,14 @@ public class TerrainData {
 
     public float[] getEdgesTerrain() {
         return edgesTerrain;
+    }
+
+    public boolean validation(){
+        boolean pointsValid = this.getParcela().length > 0;
+        boolean credentialsValid = this.getCredentials().validation();
+        boolean ownerValid = this.owner.validation();
+
+        return pointsValid && credentialsValid && ownerValid;
     }
 
     @Override

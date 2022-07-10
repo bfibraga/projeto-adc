@@ -44,14 +44,30 @@ async function register(){
 					"smartphone": u_smartphone
 				}
 			});
-		window.location.replace(base_uri + "/verification");
+
+		const avatar_image = getAvatarImageContent();
+
+		let form = new FormData();
+		form.append("file", avatar_image["content"]);
+		form.append("destination", u_username + "/" + u_email);
+		form.append("filename", "avatar");
+
+		const avatar_response = await axios.post("/files/projeto-adc.appspot.com/", form, 
+		{
+			headers: {
+			"Content-Type": "multipart/form-data",
+			}
+		});
+		console.log(avatar_response);
+
+		//window.location.replace(base_uri + "/verification");
 	} catch (error){
 
 		const error_elems = document.getElementsByClassName("error-msg");
 
 		for (let i = 0; i < error_elems.length; i++) {
 			const element = error_elems.item(i);
-			element.insertAdjacentHTML("beforeend", error.data);
+			element.insertAdjacentHTML("beforeend", error.response.data.message);
 		}
 
 		console.log(error);

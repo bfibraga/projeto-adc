@@ -90,17 +90,9 @@ public class TerrainOwner {
      * @return if the keyword is valid or not
      */
     private boolean validField(String keyword) {
-        return keyword != null && !keyword.trim().equals("");
+        return keyword != null;
     }
 
-    /**
-     * Checks if the given keyword is not equal to an empty string or null
-     * @param keyword to validate
-     * @return if the keyword is valid or not
-     */
-    private boolean validVisibality(String keyword) {
-        return validField(keyword) && (keyword.trim().equalsIgnoreCase("PUBLIC") || keyword.trim().equalsIgnoreCase("PRIVATE"));
-    }
     public boolean validation() {
         return validField(this.getName()) &&
                 validField(this.getAddress()) &&
