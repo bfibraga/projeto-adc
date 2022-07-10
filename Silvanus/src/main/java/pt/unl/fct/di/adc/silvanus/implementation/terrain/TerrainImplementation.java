@@ -61,7 +61,7 @@ public class TerrainImplementation implements Parcel {
     public static final String ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE = "type_of_soil_coverage";
     public static final String ENTITY_PROPERTY_CURRENT_USE_OF_SOIL = "current_use_of_soil";
     public static final String ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL = "previous_use_of_soil";
-    public static final String ENTITY_PROPERTY_CHUNKS_OF_PARCELA = "chunks_of_terrain";
+    public static final String ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA = "area_of_terrain";
     public static final String ENTITY_PROPERTY_LEFT_MOST_POINT = "left_most_point";
     public static final String ENTITY_PROPERTY_RIGHT_MOST_POINT = "right_most_point";
     public static final String ENTITY_PROPERTY_TOP_MOST_POINT = "top_most_point";
@@ -119,13 +119,6 @@ public class TerrainImplementation implements Parcel {
         terrainData.createEdges();
         Polygon terrainAsPolygon = PolygonUtils.polygon(terrainData.getParcela());
 
-        //List<String> result = completeMethod(terrainAsPolygon, portugalContinentalPolygon, bigBBPolygon);
-
-        /*if (result == null) {
-            LOG.severe("Terrain is not well created.");
-            return Result.error(Response.Status.NOT_ACCEPTABLE, "Terrain is not well created.");
-        }*/
-
         List<Chunk<String>> chunks = locateChunks(terrainData.getParcela());
 
         if (chunks.isEmpty()) {
@@ -150,7 +143,7 @@ public class TerrainImplementation implements Parcel {
         TerrainOwner owner = terrainData.getOwner();
         TerrainInfoData info = terrainData.getInfo();
 
-        //TODO Send entity for onwership of this terrain and chunks the parcel is locate
+        //TODO Send entity for ownership of this terrain and chunks the parcel is locate
         Transaction txn = datastore.newTransaction();
         try {
 
@@ -213,11 +206,11 @@ public class TerrainImplementation implements Parcel {
                     .set(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE, info.getType_of_soil_coverage())
                     .set(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL, info.getCurrent_use())
                     .set(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL, info.getPrevious_use())
-                    //.set(ENTITY_PROPERTY_CHUNKS_OF_PARCELA, JSON.encode(chunks))
                     .set(ENTITY_PROPERTY_LEFT_MOST_POINT, terrainData.getEdgesTerrain()[0])
                     .set(ENTITY_PROPERTY_RIGHT_MOST_POINT, terrainData.getEdgesTerrain()[1])
                     .set(ENTITY_PROPERTY_TOP_MOST_POINT, terrainData.getEdgesTerrain()[2])
-                    .set(ENTITY_PROPERTY_BOTTOM_MOST_POINT, terrainData.getEdgesTerrain()[3]).build();
+                    .set(ENTITY_PROPERTY_BOTTOM_MOST_POINT, terrainData.getEdgesTerrain()[3])
+                    .set(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA, terrainAsPolygon.getArea()).build();
 
             txn.put(terrainEntity, ownerTerrainEntity);
             txn.commit();
