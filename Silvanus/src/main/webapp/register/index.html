@@ -61,15 +61,22 @@
             </a>
           </div>
 
+          <!-- Password Strength -->
+          <div class="progress rounded-pill center-images invisible" style="width: 20rem; margin-bottom: 1rem;">
+            <div id="password-progress" class="progress-bar rounded-pill bg-success" style="width: 0%;"></div>
+          </div>
+
           <!-- Confirm Password Input -->
           <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
             <input id="usr_confirm" type="password" class="form-control rounded-pill" placeholder="Confirmar palavra-passe">
           </div>
 
-          <!-- Password Strength -->
-          <div class="progress rounded-pill center-images invisible" style="width: 20rem; margin-bottom: 1rem;">
-            <div id="password-progress" class="progress-bar rounded-pill bg-success" style="width: 0%;"></div>
-          </div>
+          
+
+          <!-- Error Message -->
+        <p class="text-center error-msg" style="height: 0.5rem; margin-bottom: 1.5rem; margin-top: 1rem;">
+            
+        </p>
           
           <!-- Submit Button -->
           <div class="input-group center-x" style="width: 20rem; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -97,8 +104,7 @@
 
         <!-- First & Last Name Input -->
         <div class="input-group" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
-          <input id="usr_firstname" type="text" class="form-control rounded-pill" placeholder="Primeiro Nome">
-          <input id="usr_lastname" type="text" class="form-control rounded-pill" placeholder="Apelido">
+          <input id="usr_fullname" type="text" class="form-control rounded-pill" placeholder="Nome Completo">
         </div>
 
         <!-- Phone Number Input -->
@@ -124,7 +130,13 @@
           <input id="usr_avatar" type="file" accept="image/jpeg, image/png" onchange="loadAvatar(event)" class="form-control" placeholder="Avatar">
         </div>
 
+        <!-- Error Message -->
+        <p class="text-center error-msg" style="height: 0.5rem; margin-bottom: 1.5rem; margin-top: 1rem;">
+            Erro
+        </p>
+
         <script src="../libs/request_handler.js"></script>
+        <script src="main.js"></script>
         <!-- Submit Button -->
         <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
           <input type="button" style="width: 10rem;" onclick="previousStep()" id="previous-submit-1" class="btn btn-primary rounded-pill" value="Voltar atrás">

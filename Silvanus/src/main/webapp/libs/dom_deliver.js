@@ -50,6 +50,14 @@ async function LoadHTMLDoc(dname, callback, params){
     }
   }
 
+function addEvent(el, type, handler) {
+    
+    el.attachEvent ?
+      el.attachEvent('on' + type, handler) :
+      el.addEventListener(type, handler);
+    console.log("Event created")
+  }
+
 //------
 
 function notification(sender, avatar, content){
@@ -104,17 +112,27 @@ function handleTerrainCard(name, xmlDoc, params){
     let count = target.getAttribute("data-app-value");
     target.setAttribute("data-app-value", String(parseInt(count)+1));
 
-    elems[name].querySelector(".card").setAttribute("data-app-terrain-id", params[0]);
+    elems[name].querySelector(".col").setAttribute("data-app-terrain-id", params[0]);
 
-    elems[name].querySelector(".card").addEventListener("click", function (){
-        loadTerrainInfo(params[0]);
-    });
+    //elems[name].querySelector(".card")
+
+    addEvent(target, 'click', function (event) {
+        console.log(event.target);
+        let parent = event.target.parentElement;
+        while (parent.getAttribute("data-app-terrain-id") === null){
+            parent = parent.parentElement;
+        }
+        console.log(parent);
+        console.log(parent.getAttribute("data-app-terrain-id"));
+        if (parent.getAttribute("data-app-terrain-id") === params[0]){
+            console.log('Button Clicked');
+            loadTerrainInfo(params[0]);
+        }
+      });
 
     elems[name].querySelector(".card__title").insertAdjacentHTML("beforeend", params[1]);
     elems[name].querySelector(".card__status").insertAdjacentHTML("beforeend", params[2]);
     elems[name].querySelector(".card__description").insertAdjacentHTML("beforeend", params[3]);
-
-
 
     target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
     
@@ -160,11 +178,138 @@ function communityResponsible(username, email, avatar){
 function handleCommunityMember(name, xmlDoc, params){
     elems[name] = parser.parseFromString(xmlDoc, "text/html");
 
-    elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", params[0]);
-    elems[name].querySelector(".usr_email").insertAdjacentHTML("beforeend", params[1]);
-    elems[name].querySelector(".profile-img").src = params[2];
+    const profile = params[0];
+
+    elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", profile.username);
+    elems[name].querySelector(".usr_email").insertAdjacentHTML("beforeend", profile.email);
+    elems[name].querySelector(".profile-img").src = profile.avatar;
+
+    document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
+function listUserProfile(profile){
+    const elemName = "elems/user_profile.html"; 
+    let params = [profile, "list_search_users"];
+
+    LoadHTMLDoc(elemName, handleListUser, params);
+}
+
+function handleListUser(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    const target = document.getElementById(params[1]);
+
+    const profile = params[0];
+    
+    const key = parseInt(target.getAttribute("data-app-value"));
+
+    elems[name].querySelector(".toggle-info").setAttribute("data-user", key);
+    elems[name].querySelector(".user-info").setAttribute("data-user", key);
+
+    addEvent(target, 'click', function (event) {
+        let parent = event.target;
+        while (!parent.classList.contains("list-group-item")){
+            parent = parent.parentElement;
+        }
+
+        if (event.target.classList.contains("toggle-info") ||
+        event.target.classList.contains("bi-arrows-expand")){
+            const array = parent.querySelectorAll(".user-info");
+            array.forEach(element => {
+                if (element.getAttribute("data-user") === String(key)){
+                    toggleMenu(element);
+                }
+            });
+        }
+      });
+
+    target.setAttribute("data-app-value", String(key+1));
+
+    elems[name].querySelector(".user-avatar-profile").src = profile.info.avatar;
+
+    elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", profile.username);
+    elems[name].querySelector(".usr_email").insertAdjacentHTML("beforeend", profile.email);
+
+    elems[name].querySelector(".usr_fullname").insertAdjacentHTML("beforeend", profile.info.name);
+    elems[name].querySelector(".usr_id").insertAdjacentHTML("beforeend", profile.info.nif);
+    elems[name].querySelector(".usr_telephone").insertAdjacentHTML("beforeend", profile.info.telephone);
+    elems[name].querySelector(".usr_smartphone").insertAdjacentHTML("beforeend", profile.info.smartphone);
+    elems[name].querySelector(".usr_address").insertAdjacentHTML("beforeend", profile.info.address);
+
+    elems[name].querySelector(".usr_active").insertAdjacentHTML("beforeend", profile.state);
+    console.log(profile.state === "ACTIVE");
+    elems[name].querySelector(".usr_active_radio").checked = profile.state === "ACTIVE" ? true : false;
+    console.log(elems[name].querySelector(".usr_active_radio").checked);
+
+    console.log(profile.loggedinData.menus.includes("menu04"));
+    if (profile.loggedinData.menus.includes("menu04")){
+        elems[name].querySelector(".usr_active_radio").setAttribute("data-app-menu-active", "true");
+    }
+
+    if (profile.loggedinData.menus.includes("menu05")){
+        elems[name].querySelector(".usr_role_unchanged").setAttribute("data-app-menu-active", "false");
+        elems[name].querySelector(".usr_role").setAttribute("data-app-menu-active", "true");
+    } else {
+        elems[name].querySelector(".usr_role_unchanged").setAttribute("data-app-menu-active", "true");
+        elems[name].querySelector(".usr_role").setAttribute("data-app-menu-active", "false");
+    }
+
+    elems[name].querySelector(".usr_role_unchanged").insertAdjacentHTML("beforeend", profile.role_name);
+
+    const available_roles = listInferiorRoles(profile.role_name);
+    const usr_role_elem = elems[name].querySelector(".usr_role");
+
+    console.log(available_roles);
+    available_roles.forEach(role => {
+        usr_role_elem.insertAdjacentHTML("beforeend", "<option>" + role + "</option>")
+    });
+
+    elems[name].querySelector(".usr_n_terrains").insertAdjacentHTML("beforeend", 0);
 
     //let target = ;
-    document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+    target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
+function listInferiorRoles(role_name){
+    let result = [];
+    const parts = role_name.split(" ");
+    switch (parts[0]){
+        case "Administrador":
+            result.push("Administrador");
+        case "Funcionario":
+            result.push("Funcionario");
+        case "Utilizador":
+            result.push("Utilizador");
+    }
+    return result;
+}
+
+const menuHandler = {
+    "menu03": handleMenu03,
+    "menu02": handleMenu02,
+    "menu01": handleMenu01
+}
+
+function menu(menu_id){
+    const elemName = "elems/menus/" + menu_id + ".html"; 
+    let params = [];
+
+    LoadHTMLDoc(elemName, menuHandler[menu_id], params);
+}
+
+function handleMenu03(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    document.getElementById("usr_terrain_menu").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
+function handleMenu02(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    document.getElementById("community-app-nav-item").insertAdjacentHTML("afterend", elems[name].body.innerHTML);
+}
+
+function handleMenu01(name, xmlDoc, params){
+
 }
 

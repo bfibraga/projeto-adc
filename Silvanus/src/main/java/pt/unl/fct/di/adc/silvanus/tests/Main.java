@@ -1,14 +1,11 @@
 package pt.unl.fct.di.adc.silvanus.tests;
 
-import com.beust.ah.A;
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.util.chunks.Chunk2;
-import pt.unl.fct.di.adc.silvanus.util.chunks.ChunkBoard;
-import pt.unl.fct.di.adc.silvanus.util.chunks.exceptions.OutOfChunkBounds;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.chunks.Chunk;
+import pt.unl.fct.di.adc.silvanus.data.terrain.chunks.ChunkBoard;
+import pt.unl.fct.di.adc.silvanus.data.terrain.chunks.exceptions.OutOfChunkBounds;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class Main {
@@ -69,14 +66,14 @@ public class Main {
         points[3] = new LatLng((float) 40.13441, (float) -7.98427);
         points[4] = new LatLng((float) 39.19581, (float) -8.04469);
 
-        List<Chunk2<String>> polygonResult = new ArrayList<>();
+        List<Chunk<String>> polygonResult = new ArrayList<>();
         try {
             polygonResult = portugal.polygon(points);
         } catch (OutOfChunkBounds e) {
             System.out.println(e.getMessage());
         }
 
-        for (Chunk2<String> chunk: polygonResult) {
+        for (Chunk<String> chunk: polygonResult) {
             chunk.setTag("P");
         }
 

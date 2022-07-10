@@ -9,6 +9,7 @@ public class LoginData {
 	private String password;
 
 	public LoginData() {
+		this("","","");
 	}
 
 	public LoginData(String username, String email, String password) {
@@ -74,7 +75,7 @@ public class LoginData {
 	 * @return if the keyword is valid or not
 	 */
 	private boolean validField(String keyword) {
-		return !keyword.trim().equals("");
+		return keyword != null && !keyword.trim().equals("");
 	}
 	
 	/**
@@ -83,7 +84,28 @@ public class LoginData {
 	 * @return
 	 */
 	private boolean validPassword(String password) {
-		return validField(password) && password.length() > 5 && password.matches("/^[0-9A-Za-z]+$/");
+		if (!validField(password))
+			return false;
+
+		String n = ".*[0-9].*";
+		String A = ".*[A-Z].*";
+		String a = ".*[a-z].*";
+
+		boolean hasLowerCaseLetters = password.matches(a);
+		boolean hasUpperCaseLetters = password.matches(A);
+		boolean hasNumbers = password.matches(n);
+
+		return hasNumbers && (hasLowerCaseLetters || hasUpperCaseLetters) && password.length() >= 5;
+	}
+
+	private boolean validEmail(String email){
+		if (!validField(email)){
+			return false;
+		}
+
+		String e = "^(.+)@(.+)$";
+
+		return email.matches(e);
 	}
 
 	/**
@@ -91,7 +113,7 @@ public class LoginData {
 	 * @return if they are or not
 	 */
 	public boolean validation() {
-		return validField(this.getUsername()) && validField(this.getEmail()) && validPassword(this.getPassword());
+		return validField(this.getUsername()) && validEmail(this.getEmail()) && validPassword(this.getPassword());
 	}
 
 	public String getID(){

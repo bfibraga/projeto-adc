@@ -1,7 +1,5 @@
 package pt.unl.fct.di.adc.silvanus.implementation.user;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -11,14 +9,18 @@ import javax.ws.rs.core.Response.Status;
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import io.jsonwebtoken.*;
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
+import org.apache.commons.codec.BinaryDecoder;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
+import pt.unl.fct.di.adc.silvanus.data.user.perms.RoleCredentials;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInVisibleData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.user.perms.UserRole;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
+import pt.unl.fct.di.adc.silvanus.util.Random;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.cache.UserCacheManager;
 
@@ -35,6 +37,7 @@ public class UserImplementation implements Users {
 	private KeyFactory userRoleKeyFactory;
 	private KeyFactory userPerfilKeyFactory;
 	private KeyFactory userPermissionKeyFactory;
+	private KeyFactory roleCredentialsKeyFactory;
 
 	//Cache
 	private UserCacheManager<String> cache = new UserCacheManager<>();
@@ -45,6 +48,7 @@ public class UserImplementation implements Users {
 		this.userRoleKeyFactory = datastore.newKeyFactory().setKind("UserRole");
 		this.userPerfilKeyFactory = datastore.newKeyFactory().setKind("UserPerfil");
 		this.userPermissionKeyFactory = datastore.newKeyFactory().setKind("UserPermission");
+		this.roleCredentialsKeyFactory = datastore.newKeyFactory().setKind("RoleCredentials");
 	}
 	@Override
 	public Result<String> register(UserData data) {
@@ -57,7 +61,7 @@ public class UserImplementation implements Users {
 
 		if (!validation_code) {
 			LOG.warning("User " + loginData.getUsername() + " tryied to register with some empty important information");
-			return Result.error(Response.Status.BAD_REQUEST, "User " + loginData.getUsername() + " tryied to register with some empty important information");
+			return Result.error(Response.Status.BAD_REQUEST, "Alguns parametros vazios ou mal preenchidos");
 		}
 		String user_id = data.getID();
 
@@ -65,6 +69,7 @@ public class UserImplementation implements Users {
 		Key userInfoKey = datastore.newKeyFactory().setKind("UserPerfil").newKey(user_id);
 		Key userPermissionKey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 		Key logoutKey = datastore.newKeyFactory().setKind("UserLastLogout").newKey(user_id);
+		Key roleCredentialsKey = roleCredentialsKeyFactory.newKey(data.getRole().toUpperCase());
 
 		//Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(user_id);
 		Key userKey = userKeyFactory.newKey(user_id);
@@ -105,6 +110,10 @@ public class UserImplementation implements Users {
 					.set("role_priority", role.getPriority()).build();
 			this.cache.put(user_id, role);
 
+			Entity roleCredentialsEntity = txn.get(roleCredentialsKey);
+			RoleCredentials roleCredentials = new RoleCredentials(roleCredentialsEntity.getProperties());
+			this.cache.put(user_id, "permissions", roleCredentials);
+
 			// Info of the new user
 			UserInfoData userInfoData = data.getInfo();
 			Entity userInfo = Entity.newBuilder(userInfoKey)
@@ -114,6 +123,7 @@ public class UserImplementation implements Users {
 					.set("usr_smartphone", userInfoData.getSmartphone())
 					.set("usr_address", userInfoData.getAddress())
 					.set("usr_NIF", userInfoData.getNif())
+					.set("usr_avatar", userInfoData.getAvatar())
 					.build();
 			this.cache.put(user_id, userInfoData);
 
@@ -123,6 +133,7 @@ public class UserImplementation implements Users {
 			Entity userPermission = Entity.newBuilder(userPermissionKey)
 					.set("usr_state", userStateData.getSet())
 					.set("list_usr_validation", verified)
+					.set("confirm_code", Random.code())
 					.build();
 			this.cache.put(user_id, userStateData);
 
@@ -132,7 +143,7 @@ public class UserImplementation implements Users {
 					.build();
 
 			//TODO: First Registration information
-			String jws = TOKEN.createNewJWS(user_id, 1, new ArrayList<>());
+			String jws = TOKEN.createNewJWS(user_id, 1, roleCredentials.getPermissions());
 
 			txn.put(user, userRole, userInfo, userPermission);
 			txn.commit();
@@ -203,7 +214,7 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<String> login(LoginData data) {
+	public Result<LoggedInData> login(LoginData data) {
 		boolean validation_code = data.validation();
 		if (validation_code) {
 			return Result.error(Response.Status.BAD_REQUEST, "Invalid parameters");
@@ -214,6 +225,7 @@ public class UserImplementation implements Users {
 		String user_id = data.getID();
 
 		//TODO refactor this cache part
+		RoleCredentials roleCredentials = this.cache.get(user_id, "permissions", RoleCredentials.class);
 		LoginData loginData = this.cache.getLoginData(user_id);
 
 		// Verify if the user is in cache
@@ -222,13 +234,41 @@ public class UserImplementation implements Users {
 			hashedPassword = loginData.getPassword();
 
 			if (hashedPassword.equals(PASSWORD.digest(data.getPassword()))){
-				String jws = TOKEN.createNewJWS(user_id, 1, new ArrayList<>());
+				if (roleCredentials == null){
+					Key userRoleKey = userRoleKeyFactory.newKey(loginData.getID());
 
+					Entity userRoleEntity = datastore.get(userRoleKey);
+
+					Key roleCredentialsKey = roleCredentialsKeyFactory.newKey(userRoleEntity.getString("role_name").toUpperCase());
+
+					Entity roleCredentialsEntity = datastore.get(roleCredentialsKey);
+
+					roleCredentials = new RoleCredentials(roleCredentialsEntity.getProperties());
+
+					this.cache.put(user_id, "permissions", roleCredentials);
+				}
+
+				UserStateData userStateData = this.cache.getStateData(loginData.getID());
+				if (userStateData == null){
+					Key permissionKey = userPermissionKeyFactory.newKey(loginData.getID());
+					Entity permissionEntity = datastore.get(permissionKey);
+
+					userStateData = new UserStateData(permissionEntity.getString("usr_state"),
+							JSON.decode(permissionEntity.getString("list_usr_validation"), Set.class));
+
+					this.cache.put(data.getID(), userStateData);
+				}
+
+				if (!userStateData.isActive()){
+					return Result.error(Status.CONFLICT, String.format("User %s not active", data.getUsername()));
+				}
+
+				String jws = TOKEN.createNewJWS(user_id, 1, roleCredentials.getPermissions());
 				String refresh_token = TOKEN.newRefreshToken();
 
-				System.out.println(jws);
+				LoggedInData loggedInData = new LoggedInData(jws, userStateData);
 
-				return Result.ok(jws, "Login success");
+				return Result.ok(loggedInData, "Login success");
 			} else {
 				LOG.warning("Wrong Password: Line 153");
 				return Result.error(Status.FORBIDDEN, "Wrong Username or Password");
@@ -246,6 +286,7 @@ public class UserImplementation implements Users {
 				String givenPassword = PASSWORD.digest(data.getPassword());
 
 				if (hashedPassword.equals(givenPassword)) {
+
 					// Correct password
 					// Return token
 					LOG.info("User " + data.getUsername() + "logged in successfully");
@@ -254,17 +295,47 @@ public class UserImplementation implements Users {
 							.setEmail(curr_result.getString("usr_email"))
 							.setPassword(givenPassword);
 
+					if (roleCredentials == null){
+						Key userRoleKey = userRoleKeyFactory.newKey(data.getID());
+
+						Entity userRoleEntity = datastore.get(userRoleKey);
+
+						Key roleCredentialsKey = roleCredentialsKeyFactory.newKey(userRoleEntity.getString("role_name").toUpperCase());
+
+						Entity roleCredentialsEntity = datastore.get(roleCredentialsKey);
+
+						roleCredentials = new RoleCredentials(roleCredentialsEntity.getProperties());
+
+						this.cache.put(data.getID(), "permissions", roleCredentials);
+					}
+
+					UserStateData userStateData = this.cache.getStateData(data.getID());
+					if (userStateData == null){
+						Key permissionKey = userPermissionKeyFactory.newKey(data.getID());
+						Entity permissionEntity = datastore.get(permissionKey);
+
+						userStateData = new UserStateData(permissionEntity.getString("usr_state"),
+								JSON.decode(permissionEntity.getString("list_usr_validation"), Set.class));
+
+						this.cache.put(data.getID(), userStateData);
+					}
+
+					if (!userStateData.isActive()){
+						return Result.error(Status.CONFLICT, String.format("User %s not active", data.getUsername()));
+					}
+
 					int operation_level = 1;
 
-					String jws = TOKEN.createNewJWS(data.getID(), operation_level, new ArrayList<>());
-
+					String jws = TOKEN.createNewJWS(data.getID(), operation_level, roleCredentials.getPermissions());
 					String refresh_token = TOKEN.newRefreshToken();
+
+					LoggedInData loggedInData = new LoggedInData(jws, userStateData);
 
 					//Store in cache
 					this.cache.put(data.getID(), data);
 					this.cache.put(data.getID(), "token:" + operation_level, jws);
 
-					return Result.ok(jws, "Login success");
+					return Result.ok(loggedInData, "Login success");
 				}
 			}
 
@@ -305,6 +376,7 @@ public class UserImplementation implements Users {
 
 		try{
 			Entity logoutEntity = Entity.newBuilder(logoutKey)
+					.set("time", LogoutData.fmt.format(new Date()))
 					.set("map_center_location", JSON.encode(data.getCenter()))
 					.set("map_zoom", data.getZoom())
 					.build();
@@ -456,12 +528,10 @@ public class UserImplementation implements Users {
 	public Result<List<UserInfoVisible>> getUser(String request_user, String identifier) {
 
 		//TODO Change key to remove some values when changing the values in other commands
-		String key = request_user + "." + identifier;
-		String property = "getUser:" + request_user + "." + identifier;
-		//TODO to test this set object
+		String key = identifier;
+		String property = request_user;
 		@SuppressWarnings("unchecked")
 		List<UserInfoVisible> stored = this.cache.get(key, property, List.class);
-		//List<String> result_mapper = this.resultCacheManager.get(identifier);
 
 		if (stored != null){
 			System.out.println("Result in cache");
@@ -475,6 +545,7 @@ public class UserImplementation implements Users {
 			Entity user = datastore.get(userKey);
 			UserInfoVisible info = this.getInfo(user);
 			result_set.add(info);
+			this.cache.put(request_user, property, result_set);
 			return Result.ok(result_set, "");
 		}
 
@@ -485,15 +556,13 @@ public class UserImplementation implements Users {
 			result = this.find(identifier, "UserCredentials", "usr_email", 5);
 		}
 
-		//TODO
 		while(result.hasNext()){
 			Entity curr_result = result.next();
 			UserInfoVisible info = this.getInfo(curr_result);
 			result_set.add(info);
-			//result_mapper.add(property);
+			this.cache.put((String) curr_result.getKey().getNameOrId(), property, result_set);
 		}
 
-		this.cache.put(key, property, result_set);
 
 		return Result.ok(result_set, "");
 	}
@@ -518,14 +587,17 @@ public class UserImplementation implements Users {
 				infoEntity.getString("usr_NIF"),
 				infoEntity.getString("usr_address"),
 				infoEntity.getString("usr_telephone"),
-				infoEntity.getString("usr_smartphone"));
+				infoEntity.getString("usr_smartphone"),
+				infoEntity.getString("usr_avatar"));
 		UserRole role = UserRole.compareType(roleEntiry.getString("role_name"));
 		System.out.println(role);
-		UserRoleData roleData = new UserRoleData(role.getRoleName(), role.getRoleColor());
+		UserRoleData roleData = new UserRoleData(role.getDisplayName(), role.getRoleColor());
 		System.out.println(roleData);
 		LogoutData logoutData = lastLogout == null ?
 				new LogoutData() :
-				new LogoutData(JSON.decode(lastLogout.getString("map_center_location"), LatLng.class),
+				new LogoutData(
+						lastLogout.getString("time"),
+						JSON.decode(lastLogout.getString("map_center_location"), LatLng.class),
 						lastLogout.getDouble("map_zoom"));
 
 		//TODO Change the way to return result
@@ -534,9 +606,10 @@ public class UserImplementation implements Users {
 				userEntity.getString("usr_email"),
 				info,
 				stateEntity.getString("usr_state"),
-				role.getRoleName(),
+				role.getDisplayName(),
 				role.getRoleColor(),
-				logoutData
+				logoutData,
+				new LoggedInVisibleData(Arrays.asList(role.getMenus()))
 		);
 
 		return result;
@@ -569,6 +642,7 @@ public class UserImplementation implements Users {
 				txn.delete(remove_userKey, remove_userRoleKey, remove_userPermissionKey, remove_userInfoKey);
 				txn.commit();
 
+				this.cache.remove(userID);
 				return Result.ok();
 			} finally {
 				if(txn.isActive()){
@@ -605,7 +679,7 @@ public class UserImplementation implements Users {
 
 			txn.delete(remove_userKey, remove_userRoleKey, remove_userPermissionKey, remove_userInfoKey);
 			txn.commit();
-
+			this.cache.remove(remove_id);
 			return Result.ok();
 		} finally {
 			if(txn.isActive()){
@@ -686,18 +760,64 @@ public class UserImplementation implements Users {
 	}
 
 	@Override
-	public Result<Void> activate(String token, String username) {
-		LOG.fine("Verification user " + username);
+	public Result<Void> activate(String responsible, String identifier, String code, boolean value) {
 
-		Claims jws = TOKEN.verifyToken(token);
-
-		if (jws == null){
-			return Result.error(Status.FORBIDDEN, "Invalid token");
+		if (identifier.trim().equals("")){
+			return Result.error(Status.BAD_REQUEST, "Invalid parameter " + identifier);
 		}
 
-		// Create key outside of this transaction
+		if (code.trim().equals("") || code.length() < 8){
+			return Result.error(Status.BAD_REQUEST, "Invalid parameter " + code);
+		}
+
+		LOG.fine("Verification user " + identifier);
+
+		QueryResults<Entity> result = this.find(identifier, "UserCredentials", "usr_username", 1);
+		if (!result.hasNext()){
+			result = this.find(identifier, "UserCredentials", "usr_email", 1);
+		}
+
+		String activate_id = "";
+
+		if (!result.hasNext()){
+			return Result.error(Status.NOT_FOUND, "User "+ identifier + " doens't exist");
+		} else {
+			activate_id = result.next().getKey().getName();
+		}
+
+		Key userPermissionKey = userPermissionKeyFactory.newKey(activate_id);
+
+		Transaction txn = datastore.newTransaction();
+
+		try {
+			Entity userPermissionEntity = txn.get(userPermissionKey);
+
+			String confirm = userPermissionEntity.getString("confirm_code");
+			if (confirm == null || confirm.equals(code)){
+				Set<String> confirmed = JSON.decode(userPermissionEntity.getString("list_usr_validation"), Set.class);
+				confirmed.add(responsible);
+				String final_value = value ? "ACTIVE" : "INACTIVE";
+				userPermissionEntity = Entity.newBuilder(userPermissionEntity)
+						.set("usr_state", final_value)
+						.set("list_usr_validation", JSON.encode(confirmed))
+						.set("confirm_code", code)
+						.build();
+				txn.put(userPermissionEntity);
+				this.cache.remove(activate_id);
+			} else {
+				txn.rollback();
+				return Result.error(Status.FORBIDDEN, "Wrong code. Try again");
+			}
+			txn.commit();
+		} finally {
+			if (txn.isActive()){
+				txn.rollback();
+			}
+		}
+		return Result.ok();
+		/*// Create key outside of this transaction
 		// User to verify
-		String user_id = username.trim();
+		String user_id = identifier.trim();
 		Key usrPermissionkey = datastore.newKeyFactory().setKind("UserPermission").newKey(user_id);
 		Key usrRoleKey = datastore.newKeyFactory().setKind("UserRole").newKey(user_id);
 		Key usrCurrentToken = datastore.newKeyFactory().setKind("UserToken").newKey(token);
@@ -748,7 +868,7 @@ public class UserImplementation implements Users {
 			// Already active user
 			if (user_verify.getString("usr_state").equals("ACTIVE")) {
 				tnx.rollback();
-				LOG.warning("User " + username + " already active");
+				LOG.warning("User " + identifier + " already active");
 				return Result.error(Status.BAD_REQUEST, "");
 			}
 
@@ -771,7 +891,55 @@ public class UserImplementation implements Users {
 			if (tnx.isActive()) {
 				tnx.rollback();
 			}
+		}*/
+	}
+
+	@Override
+	public Result<String> newActivationCode(String identifier) {
+
+		if (identifier.trim().equals("")){
+			return Result.error(Status.FORBIDDEN, "Invalid identifier " + identifier);
 		}
+
+		String code = "";
+
+		QueryResults<Entity> result = this.find(identifier, "UserCredentials", "usr_username", 1);
+		if (!result.hasNext()){
+			result = this.find(identifier, "UserCredentials", "usr_email", 1);
+		}
+
+		String activate_id = "";
+
+		if (!result.hasNext()){
+			return Result.error(Status.NOT_FOUND, "User "+ identifier + " doens't exist");
+		} else {
+			activate_id = result.next().getKey().getName();
+		}
+
+		Key userKey = userPermissionKeyFactory.newKey(activate_id);
+		Transaction txn = datastore.newTransaction();
+		try{
+			code = this.newCode(txn, userKey);
+			txn.commit();
+		} finally {
+			if (txn.isActive()){
+				txn.rollback();
+			}
+		}
+
+		return Result.ok(code, "New activation code for " + identifier);
+	}
+
+	private String newCode(Transaction txn, Key userPermissionKey){
+		Entity userPermissionEntity = txn.get(userPermissionKey);
+		String code = Random.code();
+		userPermissionEntity = Entity.newBuilder(userPermissionKey)
+				.set("usr_state", userPermissionEntity.getString("usr_state"))
+				.set("list_usr_validation", userPermissionEntity.getString("list_usr_validation"))
+				.set("confirm_code", code)
+				.build();
+		txn.put(userPermissionEntity);
+		return code;
 	}
 
 	@Override
@@ -892,10 +1060,8 @@ public class UserImplementation implements Users {
 					.replaceAddress(target.getString("usr_address"))
 					.replaceNIF(target.getString("usr_NIF"))
 					.replaceTelephone(target.getString("usr_telephone"))
-					.replaceSmartphone(target.getString("usr_smartphone"));
-
-			this.cache.remove(userID);
-			System.out.println(infoData);
+					.replaceSmartphone(target.getString("usr_smartphone"))
+					.setAvatar(target.getString("usr_avatar"));
 
 			target = Entity.newBuilder(target_usrKey_info)
 					.set("usr_visibility", infoData.getVisibility())
@@ -904,7 +1070,11 @@ public class UserImplementation implements Users {
 					.set("usr_smartphone", infoData.getSmartphone())
 					.set("usr_address", infoData.getAddress())
 					.set("usr_NIF", infoData.getNif())
+					.set("usr_avatar", infoData.getAvatar())
 					.build();
+
+			this.cache.remove(target_username);
+			System.out.println(infoData);
 
 			tnx.put(target);
 			tnx.commit();

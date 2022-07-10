@@ -27,7 +27,7 @@ public class TOKENTests {
     public void test2(){
         String userID = "userID1";
 
-        String token1 = TOKEN.createNewJWS(userID, 1, new ArrayList<>());
+        String token1 = TOKEN.createNewJWS(userID, 1, new HashSet<>());
 
         assert !token1.trim().equals("");
 

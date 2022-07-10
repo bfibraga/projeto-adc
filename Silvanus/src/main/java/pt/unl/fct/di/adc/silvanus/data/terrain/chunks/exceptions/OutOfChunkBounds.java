@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.util.chunks.exceptions;
+package pt.unl.fct.di.adc.silvanus.data.terrain.chunks.exceptions;
 
 public class OutOfChunkBounds extends Exception{
     private static final String message = "Selected chunk %s is out of bounds";

@@ -1,22 +1,38 @@
 package pt.unl.fct.di.adc.silvanus.implementation.user.perms;
 
 public enum UserRole {
-	HELPDESK("Helpdesk", "#202020"),
-	USER("User", "#6aa84f"),
-	BACKOFC("BackOffice", "#6fa8dc"),
-	SUPBACKOFC("SuperBackOffice", "#e69138"),
-	ADMIN("Admin", "#cc0000");
+	HELPDESK("Helpdesk", "Helpdesk", "#202020"),
+	ENDUSER("End-User", "Utilizador", "#6aa84f"),
+	FUNCCONS("Func-Cons", "Funcionario de %s", "#6fa8dc",
+			"menu02",
+			"menu03",
+			"menu04",
+			"menu05"),
+	FUNCDIST("Func-Dist", "Funcionario de %s", "#e69138",
+			"menu02",
+			"menu03",
+			"menu04",
+			"menu05"),
+	ADMIN("Admin", "Administrador", "#cd0000",
+			"menu02",
+			"menu03",
+			"menu04",
+			"menu05");
 
 	private String role_name;
+	private String display_name;
 	private String role_color;
+	private String[] menus;
 
-	UserRole(String role_name, String role_color){
+	UserRole(String role_name, String display_name, String role_color, String... menus){
 		this.role_name = role_name;
+		this.display_name = display_name;
 		this.role_color = role_color;
+		this.menus = menus;
 	}
 
 	UserRole(){
-		this("User", "#6aa84f");
+		this("End-User", "Utilizador", "#6aa84f");
 	}
 
 	public static UserRole compareType(String type) {
@@ -25,7 +41,7 @@ public enum UserRole {
 				return r;
 			}
 		}
-		return USER;
+		return ENDUSER;
 	}
 	
 	public String toString() {
@@ -36,11 +52,19 @@ public enum UserRole {
 		return this.role_name;
 	}
 
+	public String getDisplayName() {
+		return display_name;
+	}
+
 	public String getRoleColor(){
 		return this.role_color;
 	}
 	
 	public int getPriority() {
 		return this.ordinal();
+	}
+
+	public String[] getMenus() {
+		return menus;
 	}
 }

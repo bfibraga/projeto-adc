@@ -67,8 +67,13 @@ public interface RestUsers {
 	@Path("/activate/{" + IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response activate(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier);
-	
+	Response activate(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier, @QueryParam("code") @DefaultValue(" ") String code, @QueryParam("value") @DefaultValue("true") boolean value);
+
+	@GET
+	@Path("/code/{"+ IDENTIFIER + "}")
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response newCode(@PathParam(IDENTIFIER) String identifier);
+
 	@PUT
 	@Path("/change/password")
 	@Consumes(MediaType.APPLICATION_JSON)

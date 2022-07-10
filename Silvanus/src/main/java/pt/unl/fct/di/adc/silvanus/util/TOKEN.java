@@ -43,7 +43,7 @@ public class TOKEN {
      * @param operation_level - Level of the operation that can perform with this token
      * @return JWT for given user
      */
-    public static String createNewJWS(String user_id, int operation_level, List<String> scope){
+    public static String createNewJWS(String user_id, int operation_level, Set<String> scope){
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         Date expiration = new Date(nowMillis + (DEFAULT_USER_EXPIRATION)/operation_level);
@@ -57,7 +57,7 @@ public class TOKEN {
                 .setSubject(user_id)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
-                .claim("params", tokenParams)
+                .claim("scope", scope)
                 .signWith(key);
 
         //Builds the JWT and serializes it to a compact, URL-safe string

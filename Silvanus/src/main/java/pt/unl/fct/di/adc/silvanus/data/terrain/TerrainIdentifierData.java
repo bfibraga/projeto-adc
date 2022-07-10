@@ -1,4 +1,4 @@
-package pt.unl.fct.di.adc.silvanus.data.parcel;
+package pt.unl.fct.di.adc.silvanus.data.terrain;
 
 public class TerrainIdentifierData {
     private String userID;
@@ -77,5 +77,49 @@ public class TerrainIdentifierData {
     @Override
     public String toString() {
         return String.format("%s:\n\tUserID:%s\n\tName:%s\n\tTownhall:%s\n\tDistrict:%s\n\tSection:%s\n\tArticle:%s\n", this.getClass().getName(), getUserID(), getName(), getTownhall(), getDistrict(), getSection(), getNumber_article());
+    }
+
+    /**
+     * Checks if the given keyword is not equal to an empty string or null
+     * @param keyword to validate
+     * @return if the keyword is valid or not
+     */
+    private boolean validField(String keyword) {
+        return keyword != null && !keyword.trim().equals("");
+    }
+
+    /**
+     * @param keyword to validate
+     * @return if the keyword is valid or not
+     */
+    private boolean validString(String keyword) {
+        if (!validField(keyword)){
+            return false;
+        }
+
+        String n = ".*[0-9].*";
+
+        boolean hasNumbers = keyword.matches(n);
+        return !hasNumbers;
+    }
+
+    private boolean validNumber(String keyword){
+        if (!validField(keyword)){
+            return false;
+        }
+
+        String A = ".*[A-Z].*";
+
+        boolean hasUpperLetters = keyword.toUpperCase().matches(A);
+        return !hasUpperLetters;
+    }
+
+    public boolean validation() {
+        return validField(this.getName()) &&
+                validField(this.getUserID()) &&
+                validString(this.getDistrict()) &&
+                validString(this.getTownhall()) &&
+                validNumber(this.getNumber_article()) &&
+                validNumber(this.getSection());
     }
 }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação</title>
+
+    <!-- BootStrap-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Axios API -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Application Imports -->
+    <link href="../styles/main.css" rel="stylesheet">
+
+</head>
+<body class="bg-light">
+    <!-- Verification Code Menu -->
+    <main class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <form  class="light rounded-3 p-3 shadow-sm d-flex flex-column justify-content-center align-items-center" data-app-menu-active="true">
+            <p class="text-center" style="font-size: 4.8rem;">✉️</p>
+            <h1 class="text-center m-3" style="font-size: 1.8rem;">Código de Verificação</h1>
+            <p class="text-center ms-3 me-3">O código de verificação foi enviado <br> para o email vinculado com esta conta.</p>
+            <div class="input-group m-3" style=" width: 15rem; font-size: 200;">
+                <input  type="text" class="form-control rounded-pill text-center m-1 code-confirm" placeholder="" maxlength="4">
+                <input  type="text" class="form-control rounded-pill text-center m-1 code-confirm" placeholder="" maxlength="4">
+            </div>
+    
+            <!--
+              <div  class="progress invisible" style="width: 20rem; margin-left: 1.7rem;  margin-bottom: 1rem;">
+              <div id="password-progress" class="progress-bar progress-bar-striped progress-bar-animated rounded bg-danger"></div>
+              </div>
+            -->
+    
+            <!-- Error Message -->
+            <p class="text-center error-msg pb-3" style="height: 0.5rem;">
+    
+            </p>
+    
+            <script src="main.js"></script>
+
+            <!-- Submit Button -->
+            <a href="#" style="font-size: 0.8rem;">Não recebi o código de Verificação</a>
+            <div class="input-group m-3 justify-content-center" style="width: 20rem;">
+                <input id="verification_code_btn" type="button" style="width: 10rem;" onclick="location.href='./index.html'" class="btn btn-primary rounded-pill" value="Confirmar" disabled>
+            </div>
+        </form>
+    </main>
+    
+
+</body>
+</html>

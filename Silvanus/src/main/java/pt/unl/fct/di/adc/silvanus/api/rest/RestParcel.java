@@ -1,7 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.api.rest;
 
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
-import pt.unl.fct.di.adc.silvanus.data.parcel.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainData;
 
 import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.*;
 
@@ -144,26 +144,30 @@ public interface RestParcel {
     @Path("/list/{idOfOwner}/county")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainsOfUserInCounty(@PathParam("idOfOwner") String idOfOwner, @QueryParam("terrain") String county);
+    Response listTerrainsOfUserInCounty(@CookieParam(TOKEN) String token, @PathParam("idOfOwner") String idOfOwner, @QueryParam("terrain") String county);
 
     /**
-     * This method is used to list all the terrains in a given chunk.
+     * This method is used to list all the terrains in a certain chunk. The chunk is identified by a
+     * latitude value and a longitude value.
      *
-     * @param pos position of the user on the map
+     * @param token the token the user gets upon login
+     * @param lat the latitude to query
+     * @param lng the longitude to query
      * @return ok if everything went correctly, an error otherwise
      */
     @GET
     @Path("/list/chunk")
     @Produces(MediaType.APPLICATION_JSON)
-    Response listTerrainsInChunk(@QueryParam("lat") double lat, @QueryParam("lng") double lng);
+    Response listTerrainsInChunk(@CookieParam(TOKEN) String token, @QueryParam("lat") double lat, @QueryParam("lng") double lng);
 
 
     /**
-     *
-     * @param token
-     * @param coordinate
-     * @param orientation
-     * @return
+     * This method is used to list all the approved terrains that are in a relative position (NORTH, SOUTH, EAST, WEST) to a
+     * certain coordinate regardless of user.
+     * @param token the token the user gets upon login
+     * @param coordinate the coordinate that serves as a base point
+     * @param orientation the relation between the coordinate and the terrain
+     * @return ok if everything went correctly, an error otherwise
      */
     @POST
     @Path("/list/search/coordinate/{coordinate}/orientation/{orientation}")

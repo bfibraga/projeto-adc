@@ -1,4 +1,5 @@
 let field = 0;
+let disabled = true;
 let btn = document.getElementById("button-submit");
 
 function loader(value){
@@ -35,6 +36,19 @@ document.querySelectorAll(".usr-fields").forEach(elem => {
             }
         }
 
-        btn.disabled = !(field === 2)
+        disabled = !(field >= 1);
+        btn.disabled = disabled;
     })
+});
+
+document.addEventListener("keydown", function(event){
+    switch (event.key){
+        case "Enter":
+            if (!disabled){
+                loader(true);
+                login();
+            }
+            
+            break;
+    }
 });

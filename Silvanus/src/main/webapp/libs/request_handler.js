@@ -16,15 +16,13 @@ async function register(){
 	try{
 		let u_username = String(document.getElementById("usr_identifier").value);
 		let u_email = String(document.getElementById("usr_email").value);
-		let u_name = String(document.getElementById("usr_firstname").value + " " + document.getElementById("usr_lastname").value);
+		let u_name = String(document.getElementById("usr_fullname").value);
 		let u_password = String(document.getElementById("usr_password").value);
 		let u_confirm = String(document.getElementById("usr_confirm").value);
 
-		//let u_role = "USER";
-		//let u_state = "ACTIVE";
 		let u_visibility = "PUBLIC";
 		let u_telephone = checkUndefined(String(document.getElementById("usr_telephone").value));
-		let u_smartphone = "911";
+		let u_smartphone = "";
 		let u_nif = String(document.getElementById("usr_id").value);
 		let u_address = String(document.getElementById("usr_adress").value);
 
@@ -43,16 +41,44 @@ async function register(){
 					"nif": u_nif,
 					"address": u_address,
 					"telephone": u_telephone,
-					"smartphone": u_smartphone
+					"smartphone": u_smartphone,
+					"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/" + u_username + "/avatar"
 				}
 			});
-		window.location.replace(base_uri + "/app");
+
+		const avatar_image = getAvatarImageContent();
+
+		let form = new FormData();
+		form.append("file", avatar_image["content"]);
+		form.append("destination", u_username);
+		form.append("filename", "avatar");
+
+		const avatar_response = await axios.post("/files/projeto-adc.appspot.com/", form, 
+		{
+			headers: {
+			"Content-Type": "multipart/form-data",
+			}
+		});
+		console.log(avatar_response);
+
+		window.location.replace(base_uri + "/verification");
 	} catch (error){
+
+		const error_elems = document.getElementsByClassName("error-msg");
+
+		for (let i = 0; i < error_elems.length; i++) {
+			const element = error_elems.item(i);
+			element.insertAdjacentHTML("beforeend", error.response.data.message);
+		}
 
 		console.log(error);
 	
 	} finally {
 	}
+}
+
+async function activate(){
+
 }
 
 async function login(){
@@ -61,11 +87,19 @@ async function login(){
 		let u_password = checkUndefined(String(document.getElementById("usr_password").value));
 
 		const response = await axios.post("/api/user/login/" + u_identifier + "?password=" + u_password);
-		console.log(response);
+
+		const response_data = response.data;
+
 		window.location.replace(base_uri.concat("/app"));
 	} catch (error){
-		console.log(error);
-		document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
+		const status = error.response.status;
+		if (status === 409){
+			window.location.replace(base_uri.concat("/verification"));
+		}
+
+		if (status === 403){
+			document.getElementById("validation_error").innerHTML = "Palavra-passe ou Utilizador errado";
+		}
 	} finally {
 		loader("false");
 	}
@@ -74,13 +108,11 @@ async function login(){
 async function logout() {
 	try{
 		const viewport = getViewport();
-		console.log(viewport);
 		const response = await axios.post("/api/user/logout",
 			{
 				"center": viewport.center,
 				"zoom": viewport.zoom
 			});
-		console.log(response);
 		window.location.replace(base_uri);
 	} catch (error){
 		console.log(error);
@@ -94,20 +126,20 @@ async function getInfo(debug, user){
 	let loader = document.getElementById("loader");
 
 	try{
-		
-		/*communityResponsible("Grande", "grande@email.com", "https://cdn.discordapp.com/attachments/963781705100066836/991750011773779968/unknown.png")
-		communityMember("Teste", "teste@gmail.com", "https://media.discordapp.net/attachments/519977496117248012/982784973062942770/petpet.gif");
-		communityMember("Teste1", "teste@gmail.com", "https://media.discordapp.net/attachments/519977496117248012/982783082623029258/petpet.gif");
-		communityMember("Teste2", "teste@gmail.com", "mekie");
-		communityMember("Teste3", "teste@gmail.com", "mekie");
-		communityMember("Teste4", "teste@gmail.com", "mekie");
-		terrainCard('1:1', 'Teste', 'Status', 'Description');
-		terrainCard('1:1', 'Teste', 'Status', 'Description');
-		terrainCard('1:1', 'Teste', 'Status', 'Description');
-		terrainCard('1:1', 'Teste', 'Status', 'Description');
-		terrainCard('1:1', 'Teste', 'Status', 'Description');
+		/*menu("menu03");
+		terrainCard(1, "Teste 2", "Teste 3", "Teste 4");
+		terrainCard(2, "Teste 2", "Teste 3", "Teste 4");
+		terrainCard(3, "Teste 2", "Teste 3", "Teste 4");
+		terrainPendingCard("Teste 2", "Teste 3", "Uma descrição de teste muito fixe meu :O");
+		terrainPendingCard("Teste 3", "Teste 3", "Uma descrição de teste muito fixe meu :O");*/
 
-		terrainPendingCard("1","2","3s");*/
+		//document.getElementById("usr_avatar_perfil_credentials").src = "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar";
+
+		/*const avatar_elems = document.getElementsByClassName("user-avatar");
+		for (let i = 0; i < avatar_elems.length; i++) {
+			const element = avatar_elems.item(i);
+			element.src = "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar";
+		}*/
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
@@ -122,26 +154,16 @@ async function getInfo(debug, user){
 		badge(response_data.role_name,response_data.role_color);
 		updatePerfil(response_data.info);
 
-		let lastLogout = response_data.logoutData;
+		const lastLogout = response_data.logoutData;
 		setCenter(lastLogout.center);
 		setZoom(lastLogout.zoom);
-
-		//Avatar
-		//TODO Alter this avatar url
-		let avatar_url = "https://storage.cloud.google.com/projeto-adc.appspot.com/placeholder/user.png?authuser=2";
-		document.querySelectorAll('.avatar-wrapper')
-			.forEach(function(elem) {
-				const value = elem.getAttribute("data-user");
-				if (value.value === user){
-					elem.firstElementChild.src = avatar_url;
-					console.log(elem.firstElementChild.src);
-				}
-		});
 		
-		Promise.all([
+		loadMenus(response_data.loggedinData.menus);
+
+		await Promise.all([
 			getOwnTerrain(),
 			getPendingTerrain(),
-			listNotification()
+			listNotification(),
 		]);
 
 	} catch (error){
@@ -151,6 +173,28 @@ async function getInfo(debug, user){
 		}
 	} finally{
 		loader.setAttribute("data-app-menu-active", "false");
+	}
+}
+
+async function get(){
+	let spinner = document.getElementById("promote_spinner");
+	spinner.setAttribute("data-app-menu-active", "true");
+
+	try{
+		const value = String(document.getElementById("search_list_user_input").value);
+		const response = await axios.get("/api/user/info?identifier="+value);
+		const response_data = response.data;
+		console.log(response_data);
+		document.getElementById("list_search_users").replaceChildren();
+
+		response_data.forEach(elem => {
+			listUserProfile(elem);
+		});
+	} catch (error){
+		console.log(error);
+		
+	} finally{
+		spinner.setAttribute("data-app-menu-active", "false");
 	}	
 }
 
@@ -167,7 +211,23 @@ function updatePerfil(data){
 	document.getElementById("usr_telephone_input").value = String(data.telephone);
 	document.getElementById("usr_smartphone_input").value = String(data.smartphone);
 	document.getElementById("usr_address_input").value = String(data.address);
+
+	const avatar_elems = document.getElementsByClassName("user-avatar");
+	for (let i = 0; i < avatar_elems.length; i++) {
+		const element = avatar_elems.item(i);
+		element.src = String(data.avatar);
+	}
+	document.getElementById("usr_avatar_perfil_credentials").src = String(data.avatar);
 }
+
+function loadMenus(menus){
+	if (menus !== null && menus.length > 0){
+		menus.forEach(element => {
+			menu(element);
+		});
+	} 
+}	
+	
 
 async function activate(identifier){
 	try{
@@ -220,8 +280,26 @@ async function changing_att(){
 
 		const response_data = response.data;
 		perfil = response_data;
-		updatePerfil(response_data);
+
+		const avatar_image = getAvatarImageContent();
+
+		console.log(avatar_image);
+		let form = new FormData();
+		form.append("file", avatar_image["content"]);
+		form.append("destination", String(document.getElementById("usr_username").innerHTML));
+		form.append("filename", "avatar");
+
+		const avatar_response = await axios.post("/files/projeto-adc.appspot.com/", form, 
+		{
+			headers: {
+			"Content-Type": "multipart/form-data",
+			}
+		});
+
+		updatePerfil(perfil);
 		loader('usr_change_profile_menu','false');
+		toggleChangeProfileMenu('usr_profile_menu', 'usr_change_profile_menu', 'btn_change_usr_profile_not_active', 'btn_change_usr_profile_active');
+
 	} catch (error){
 		console.log(error);
 	} finally {
@@ -331,14 +409,24 @@ async function getOwnTerrain(){
 	try{
 		let response = await axios.post("/api/parcel/list");
 		terrain_list = response.data;
-		if (terrain_list != null || terrain_list !== []){
+
+		const terrain_counter_elem = document.getElementsByClassName("nmr_terrain");
+
+		if (terrain_list != null && terrain_list.length > 0){
 			for (let i = 0; i < terrain_list.length; i++) {
 				const element = terrain_list[i];
+				console.log(element);
 				//const id = element.credentials.id;
 				//terrain_list[i] = element;
 
 				const status = String(element.credentials.townhall) + " " + String(element.credentials.district);
 				terrainCard(String(i), element.credentials.name, status, element.info.description);
+			}
+			for (let i = 0; i < terrain_counter_elem.length; i++) {
+				const element = terrain_counter_elem.item(i);
+				let counter = parseInt(element.innerHTML);
+				counter += terrain_list.length;
+				element.innerHTML = counter;
 			}
 		}
 		
@@ -356,7 +444,7 @@ async function getPendingTerrain(){
 		let response = await axios.post("/api/parcel/list/pending");
 		const data = response.data;
 		console.log(data);
-		if (data != null || data != []) {
+		if (data !== null || data.length > 0) {
 			data.forEach(element => {
 				console.log(element);
 				const status = String(element.credentials.townhall) + " " + String(element.credentials.district);
@@ -375,18 +463,28 @@ async function getPendingTerrain(){
 
 async function loadChunk(pos){
 	try{
+
+		//Get from server
 		let response = await axios.get("/api/parcel/list/chunk",{
 			params: pos
 		});
-		console.log(response);
+
 		const response_data = response.data;
-		console.log(response_data.chunk);
+
+		//Verify if the content exist in the browser
+		const chunk = response_data.chunk;
+		if (hasChunk(chunk)){
+			return;
+		}
 
 		const array = response_data.data;
+		saveChunk(chunk, true);
 		array.forEach(element => {
-			console.log(element);
 			addPolygon(element.points, element.color);
+			addMarker(element.center);
 		});
+		//addCluster();
+
 	} catch (error){
 		console.log(error);
 	} finally {
@@ -396,14 +494,57 @@ async function loadChunk(pos){
 function loadTerrainInfo(id){
 	const terrain = terrain_list[parseInt(id)];
 	console.log(terrain);
-	if (terrain == null) return;
+	if (terrain === null) return;
 
-	document.getElementById("terrain_name").innerHTML += terrain.credentials.name;
-	document.getElementById("terrain_description").innerHTML += terrain.info.description;
-	document.getElementById("terrain_townhall").innerHTML += terrain.info.townhall;
-	document.getElementById("terrain_district").innerHTML += terrain.info.district;
-	document.getElementById("terrain_number_section").innerHTML += terrain.info.section;
-	document.getElementById("terrain_number_article").innerHTML += terrain.info.number_article;
+	const center = terrain.center;
+	const viewport = getViewport();
+	console.log(viewport);
+	const new_center = point(center.lat, center.lng - 5e-4);
+	setCenter(new_center);
+	//setZoom(10);
+
+	document.getElementById("terrain_name").innerHTML = terrain.credentials.name;
+	document.getElementById("terrain_townhall").innerHTML = terrain.credentials.townhall;
+	document.getElementById("terrain_district").innerHTML = terrain.credentials.district;
+	document.getElementById("terrain_number_section").innerHTML = terrain.credentials.section;
+	document.getElementById("terrain_number_article").innerHTML = terrain.credentials.number_article;
 	//document.getElementById("terrain_documents_validation").insertAdjacentHTML("beforeend", terrain.info.district);
 
+	document.getElementById("terrain_description").innerHTML = terrain.info.description;
+	document.getElementById("terrain_type").innerHTML = terrain.info.type_of_soil_coverage;
+	document.getElementById("terrain_current_use").innerHTML = terrain.info.current_use;
+	document.getElementById("terrain_previous_use").innerHTML = terrain.info.previous_use;
+
+	document.getElementById("owner_fullname").innerHTML = terrain.owner.name;
+	document.getElementById("owner_id").innerHTML = terrain.owner.nif;
+	document.getElementById("owner_telephone").innerHTML = terrain.owner.telephone;
+	document.getElementById("owner_smartphone").innerHTML = terrain.owner.smartphone;
+	document.getElementById("owner_address").innerHTML = terrain.owner.address;
+
+}
+
+
+async function getRCM(day, dico, target_id){
+	try{
+		day = (Math.max(Math.min(day,1),0));
+		const response = await axios.get("https://api.ipma.pt/open-data/forecast/meteorology/rcm/rcm-d" + day + ".json");
+		const response_data = response.data;
+
+		document.getElementById(target_id).innerHTML = response_data.local[dico]["data"]["rcm"]
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getBroadcast(day, target_id){
+	try{
+		day = (Math.max(Math.min(day,2),0));
+ 		const response = await axios.get("https://api.ipma.pt/open-data/forecast/meteorology/cities/daily/hp-daily-forecast-day" + day + ".json");
+		const response_data = response.data;
+
+		console.log(response_data)
+		//document.getElementById(target_id).innerHTML = response_data.local["0101"]["data"]["rcm"]
+	} catch (error){
+		console.log(error);
+	} 
 }

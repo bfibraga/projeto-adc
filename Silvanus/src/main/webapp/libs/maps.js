@@ -3,6 +3,7 @@ let geocoder;
 let polygon_drawing_tools;
 let route_drawing_tools;
 let markers = [];
+let markers_points = [];
 
 let last_index = 0;
 let other_markers = 0;
@@ -14,6 +15,7 @@ let polygon_result = null;
 let route_result = null;
 
 let polygons = [];
+let polygons_points = [];
 
 let click_listener;
 
@@ -23,7 +25,8 @@ let viewport_zoom;
 let viewport_moving = false;
 
 let MAP_MODE = {
-    "LIGHT": 'c5f91d16484f03de'
+    "LIGHT": 'c5f91d16484f03de',
+    "DARK": 'e00de21e9b37f13e'
 };
 
 //TODO Change map bounds
@@ -301,11 +304,22 @@ function area(points){
 }
 
 function addMarker(coords){
-    const marker = new google.maps.Marker({
-        position: coords,
-        map,
-      });
-    markers.push(marker);
+    let exist = false;
+    for (let marker_index = 0; marker_index < markers_points.length && !exist; marker_index++) {
+        const element = markers_points[marker_index];
+        exist = JSON.stringify(element) === JSON.stringify(coords);
+
+    }
+    
+    if (!exist){
+        const marker = new google.maps.Marker({
+            position: coords,
+            map,
+        });
+    
+        markers.push(marker);
+        markers_points.push(coords);
+    }
 }
 
 function addLine(coords, color){
@@ -322,20 +336,41 @@ function addLine(coords, color){
 }
 
 function addPolygon(coords, color){
-    const polygon = new google.maps.Polygon({
-        map,
-        paths: coords,
-        strokeColor: color,
-        strokeOpacity: 0.6,
-        strokeWeight: 2,
-        fillColor: color,
-        fillOpacity: 0.30,
-        geodesic: true,
-      });
-    
-    polygons.push(polygon);
+    let exist = false;
 
-    //addMarker(_center);
+    for (let i = 0; i < polygons_points.length && !exist; i++) {
+        const element = polygons_points[i];
+        exist = JSON.stringify(element) === JSON.stringify(coords);
+    }
+
+    if(!exist){
+        const polygon = new google.maps.Polygon({
+            map,
+            paths: coords,
+            strokeColor: color,
+            strokeOpacity: 0.6,
+            strokeWeight: 2,
+            fillColor: color,
+            fillOpacity: 0.30,
+            geodesic: true,
+        });
+
+        google.maps.event.addListener(polygon, 'click', function(event) {
+            console.log("Clicked on Polygon");
+        })
+
+        polygons.push(polygon);
+        polygons_points.push(coords);
+    }
+}
+
+function addCluster(){
+    cluster(markers);
+}
+
+function cluster(marker_list){
+    // Add a marker clusterer to manage the markers.
+  new MarkerClusterer({ marker_list, map });
 }
 
 function center(given_points){
@@ -368,7 +403,7 @@ function togglePolygonDrawingControl(value){
 }
 
 function toggleRouteDrawingControl(value, confirmed){
-    setMenuID('route_definition_menu',String(value));
+    //setMenuID('route_definition_menu',String(value));
 
     polygon_drawing_tools.setOptions({
         drawingControl: !value
@@ -379,6 +414,7 @@ function toggleRouteDrawingControl(value, confirmed){
     const visible = confirmed ? map : null;
     route_drawing_tools.setMap(visible);
     setRoute(visible, registed_route);
+    setMenuID("route_definition_menu",String(value));
 } 
 
 function clearTemporaryData(){
@@ -424,4 +460,19 @@ function setLines(low_index, high_index, value){
 
 function submitPolygon(){
 	submitTerrain(polygon_result, route_result);
+}
+
+//---- Chunk Loading Related ----
+let loaded_chunk = {};
+
+function saveChunk(id, content){
+    loaded_chunk[id] = content;
+}
+
+//TODO Make this function work
+function hasChunk(id){
+    if (loaded_chunk[id] === null){
+        loaded_chunk[id] = false;
+    }
+    return loaded_chunk[id];
 }

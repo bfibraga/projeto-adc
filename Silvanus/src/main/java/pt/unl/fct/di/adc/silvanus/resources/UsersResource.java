@@ -2,7 +2,9 @@ package pt.unl.fct.di.adc.silvanus.resources;
 
 import io.jsonwebtoken.Claims;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
+import pt.unl.fct.di.adc.silvanus.data.user.UserStateData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
+import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInVisibleData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
@@ -14,7 +16,9 @@ import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Path(RestUsers.PATH)
 public class UsersResource implements RestUsers {
@@ -70,14 +74,14 @@ public class UsersResource implements RestUsers {
 		LoginData data = identifier.matches(LoginData.EMAIL_REGEX) ?
 				new LoginData(LoginData.NOT_DEFINED, identifier, password) :
 				new LoginData(identifier, LoginData.NOT_DEFINED, password);
-		Result<String> result = impl.login(data);
+		Result<LoggedInData> result = impl.login(data);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).cookie(TOKEN.cookie(null)).build();
 		}
 
 		//Add http-only cookie
-		return Response.ok().cookie(TOKEN.cookie(result.value())).build();
+		return Response.ok().cookie(TOKEN.cookie(result.value().getToken())).entity(result.value().getStateData()).build();
 	}
 
 	@Override
@@ -106,6 +110,8 @@ public class UsersResource implements RestUsers {
 		if (jws == null){
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
+
+		Set<String> scope = jws.get("scope", HashSet.class);
 
 		Result<Void> result = impl.promote(token, username, new_role);
 
@@ -167,7 +173,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response activate(String token, String identifier) {
+	public Response activate(String token, String identifier, String code, boolean value) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -175,13 +181,24 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		Result<Void> result = impl.activate(token, identifier);
+		Result<Void> result = impl.activate(jws.getSubject(), identifier, code, value);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
 		return Response.ok().entity("User was sucessfully activated").build();
+	}
+
+	@Override
+	public Response newCode(String identifier) {
+		Result<String> result = impl.newActivationCode(identifier);
+
+		if (!result.isOK()){
+			return Response.status(result.error()).entity(result.statusMessage()).build();
+		}
+
+		return Response.ok().entity(result.value()).build();
 	}
 
 	@Override

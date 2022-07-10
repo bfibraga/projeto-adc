@@ -3,7 +3,7 @@ package pt.unl.fct.di.adc.silvanus.util;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
-import pt.unl.fct.di.adc.silvanus.data.parcel.LatLng;
+import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 
 public class PolygonUtils {
 
@@ -26,5 +26,19 @@ public class PolygonUtils {
         coordinates[3] = new Coordinate(bottom, right);
         coordinates[4] = new Coordinate(coordinates[0].getX(), coordinates[0].getY());
         return geometryFactory.createPolygon(coordinates);
+    }
+
+    public static LatLng centroid(LatLng[] points){
+        int size = points.length;
+        float lng = 0;
+        float lat = 0;
+        for (int i = 0; i < size; i++) {
+            LatLng point = points[i];
+            lng += point.getLng();
+            lat += point.getLat();
+        }
+        lng /= size;
+        lat /= size;
+        return new LatLng(lat,lng);
     }
 }

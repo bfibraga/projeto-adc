@@ -99,6 +99,16 @@ function set(elem, attr, value){
     elem.setAttribute(attr, value);
 }
 
+function toggleMenuID(id){
+  const elem = document.getElementById(id);
+  toggleMenu(elem);
+}
+
+function toggleMenuClass(class_name){
+  const elem = document.querySelector(class_name);
+  toggleMenu(elem);
+}
+
 function toggleMenu(elem){
     toggle(elem, "data-app-menu-active");
 }
@@ -146,4 +156,36 @@ function typeTerrain(id, menu_id){
   }
 }
 
+function initRoute(){
+  const btn = document.getElementById("define-route-terrain");
+  setMenu(btn, "true");
+  let request_terrain_offcanvas_elem = document.getElementById('request-terrain-offcanvas');
+  let request_terrain_offcanvas = new bootstrap.Offcanvas(request_terrain_offcanvas_elem)
+  request_terrain_offcanvas.hide;
+
+  toggleRouteDrawingControl(true,true);
+}
+
+function terminateRoute(confirmed){
+  const btn = document.getElementById("define-route-terrain");
+  setMenu(btn, "true");
+  let request_terrain_offcanvas_elem = document.getElementById('request-terrain-offcanvas');
+  let request_terrain_offcanvas = new bootstrap.Offcanvas(request_terrain_offcanvas_elem)
+  request_terrain_offcanvas.show;
+
+  toggleRouteDrawingControl(false, confirmed);
+}
+
+function toggleOffcanvas(value){
+
+}
+
+document.getElementById("search_list_user_input")
+.addEventListener("keydown", function(event){
+  switch (event.key){
+      case "Enter":
+          get();
+          break;
+  }
+});
 
