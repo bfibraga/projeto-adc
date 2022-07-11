@@ -3,6 +3,8 @@ package pt.unl.fct.di.adc.silvanus.data.terrain.result;
 import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
 
+import java.util.Arrays;
+
 public class PolygonDrawingData {
 
     private static final String PENDING_COLOR = "#222222";
@@ -36,5 +38,10 @@ public class PolygonDrawingData {
 
     public String getColor() {
         return color;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("PolygonDrawingData\n\tPoints: %s\n\tCenter: %s\n\tColor: %s\n", Arrays.toString(this.getPoints()), this.getCenter(), this.getColor());
     }
 }

@@ -11,8 +11,8 @@ let points = [];
 let lines = [];
 let registed_polygon;
 let registed_route;
-let polygon_result = null;
-let route_result = null;
+let polygon_result = [];
+let route_result = [];
 
 let polygons = [];
 let polygons_points = [];
@@ -31,10 +31,10 @@ let MAP_MODE = {
 
 //TODO Change map bounds
 const PORTUGAL_BOUND = {
-    north: -34.36,
-    south: -47.35,
-    west: 166.28,
-    east: -175.81,
+    north: 42.17,
+    south: 36.85,
+    west: -9.55,
+    east: -6.17,
 };
 
 function initMap() 
@@ -45,6 +45,14 @@ function initMap()
         center: map_center,
         zoom: 15,
         mapId: 'c5f91d16484f03de',
+        restriction: {
+            latLngBounds: {
+              north: PORTUGAL_BOUND.north,
+              south: PORTUGAL_BOUND.south,
+              east: PORTUGAL_BOUND.east,
+              west: PORTUGAL_BOUND.west,
+            },
+          }
     });
 
     geocoder = new google.maps.Geocoder();
@@ -81,6 +89,7 @@ function initViewmap(){
 
         //Request to DB
         console.log(viewport_center);
+        console.log(viewport);
         let center = point(viewport_center.lat(), viewport_center.lng());
         console.log(center);
         loadChunk(center);
@@ -103,6 +112,10 @@ function setCenter(latlng){
 
 function setZoom(zoom){
     map.setZoom(zoom);
+}
+
+function setBounds(bounds){
+    map.fitBounds(bounds);
 }
 
 function getViewport(){

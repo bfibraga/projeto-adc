@@ -56,11 +56,11 @@ public class QuadTree<X extends Comparable<X>,V>{
 		return head;
 	}
 	
-	public Node rangeScan(X[] interval) {
-		return rangeScan(root, interval);
+	public Node rangeScan(X upperValue, X lowerValue) {
+		return rangeScan(root, upperValue, lowerValue);
 	}
 	
-	private Node rangeScan(Node head, X[] interval) {
+	private Node rangeScan(Node head, X upperValue, X lowerValue) {
 		
 		//TODO
 		

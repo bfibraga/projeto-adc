@@ -37,8 +37,8 @@ public class PolygonUtils {
             lng += point.getLng();
             lat += point.getLat();
         }
-        lng /= size;
-        lat /= size;
+        lng = size == 0 ? 0 : lng/size;
+        lat = size == 0 ? 0 : lat /size;
         return new LatLng(lat,lng);
     }
 }

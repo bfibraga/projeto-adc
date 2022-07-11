@@ -109,7 +109,6 @@ public class TerrainImplementation implements Parcel {
         portugal = new ChunkBoard<>(38, 26, PORTUGAL_SIZE_X, PORTUGAL_SIZE_Y, LEFT_MOST_LONGITUDE_CONTINENTE, BOTTOM_MOST_LATITUDE_CONTINENTE);
         madeira = new ChunkBoard<>(4, 6, MADEIRA_SIZE_X, MADEIRA_SIZE_Y, LEFT_MOST_LONGITUDE_MADEIRA, BOTTOM_MOST_LATITUDE_MADEIRA);
         chunkCacheManager = new ChunkCacheManager<>(1000 * 60 * 60 * 24 * 2);
-
     }
 
     // ---------- METHODS USED TO AID IN THE CREATION OF A TERRAIN ---------- \\
@@ -180,14 +179,16 @@ public class TerrainImplementation implements Parcel {
                 chunkEntity = txn.get(chunkKey);
 
                 if (chunkEntity == null) {
+                    List<String> newlyContained = new ArrayList<>();
+                    newlyContained.add(terrainID);
                     chunkEntity = Entity.newBuilder(chunkKey)
-                            .set("parcels_id", terrainID)
+                            .set("parcels_id", JSON.encode(newlyContained))
                             .build();
                 } else {
-                    String alreadyContained = chunkEntity.getString("parcels_id");
-                    alreadyContained = alreadyContained.concat("/" + terrainID);
+                    List<String> alreadyContained = JSON.decode(chunkEntity.getString("parcels_id"), List.class);
+                    alreadyContained.add(terrainID);
                     chunkEntity = Entity.newBuilder(chunkKey)
-                            .set("parcels_id", alreadyContained)
+                            .set("parcels_id", JSON.encode(alreadyContained))
                             .build();
                 }
                 txn.put(chunkEntity);
@@ -210,7 +211,10 @@ public class TerrainImplementation implements Parcel {
                     .set(ENTITY_PROPERTY_RIGHT_MOST_POINT, terrainData.getEdgesTerrain()[1])
                     .set(ENTITY_PROPERTY_TOP_MOST_POINT, terrainData.getEdgesTerrain()[2])
                     .set(ENTITY_PROPERTY_BOTTOM_MOST_POINT, terrainData.getEdgesTerrain()[3])
-                    .set(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA, terrainAsPolygon.getArea()).build();
+                    .set(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA, terrainAsPolygon.getArea())
+                    .set("images", JSON.encode(terrainData.getInfo().getImages()))
+                    .set("route", JSON.encode(terrainData.getInfo().getRoute()))
+                    .build();
 
             txn.put(terrainEntity, ownerTerrainEntity);
             txn.commit();
@@ -489,18 +493,22 @@ public class TerrainImplementation implements Parcel {
 
             System.out.println(chunkResultData.getChunk());
             Set<PolygonDrawingData> polygonDrawingData = chunkResultData.getData();
+            System.out.println(polygonDrawingData);
             for (PolygonDrawingData data: polygonDrawingData) {
                 Polygon selected = PolygonUtils.polygon(data.getPoints());
-                Geometry intersection = selected.intersection(polygon.getBoundary());
-
-                System.out.println(Arrays.toString(intersection.getCoordinates()));
-                if (intersection != null && intersection.getDimension() > 1){
-                    return Result.ok(intersection.toText(), "Intersecta com um terreno existente");
+                boolean intersects = polygon.intersects(selected);
+                if (intersects){
+                    return Result.ok(String.valueOf(true), "Intersecta com um terreno existente");
                 }
+                /*Geometry intersection = selected.intersection(polygon.getBoundary());
+                //System.out.println(Arrays.toString(intersection.getCoordinates()));
+                if (intersection != null && !intersection.isEmpty()){
+                    return Result.ok(String.valueOf(intersection.isEmpty()), "Intersecta com um terreno existente");
+                }*/
             }
 
         }
-        return Result.ok();
+        return Result.error(Response.Status.CONFLICT, "Not intersect");
 
         /*Polygon terrainAsPolygon = coordinatesToPolygon(terrain);
         LOG.fine("Query was started.");
@@ -693,8 +701,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
-                            new String[]{},
-                            new LatLng[]{}
+                            JSON.decode(tmp.getString("images"), String[].class),
+                            JSON.decode(tmp.getString("route"), LatLng[].class)
                     )
             );
             list.add(resultData);
@@ -746,8 +754,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
-                            new String[]{},
-                            new LatLng[]{}
+                            JSON.decode(tmp.getString("images"), String[].class),
+                            JSON.decode(tmp.getString("route"), LatLng[].class)
                     )
             );
             list.add(resultData);
@@ -855,15 +863,15 @@ public class TerrainImplementation implements Parcel {
         Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
         Entity selectedChunk = datastore.get(chunkKey);
         if (selectedChunk != null){
-            String parcelsIDs = selectedChunk.getString("parcels_id");
-            String[] parcels = parcelsIDs.split("/");
+            List<String> parcelsIDs = JSON.decode(selectedChunk.getString("parcels_id"), List.class);
+            System.out.println("Parcel ID's: " + parcelsIDs);
 
             KeyFactory selectedParcelKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME);
             KeyFactory selectedParcelNotApprovedKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME);
 
             Key selectedParcelKey;
             Key selectedParcelNotApprovedKey;
-            for (String parcelID : parcels) {
+            for (String parcelID : parcelsIDs) {
                 selectedParcelKey = selectedParcelKeyFactory.newKey(parcelID);
                 Entity selectedParcel = datastore.get(selectedParcelKey);
 
@@ -922,15 +930,36 @@ public class TerrainImplementation implements Parcel {
         Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
         Entity selectedChunk = datastore.get(chunkKey);
 
-        String parcelsIDs = selectedChunk.getString("parcels_id");
-        String[] parcels = parcelsIDs.split("/");
+        Transaction txn = datastore.newTransaction();
+
+        try{
+            if (selectedChunk == null) {
+                selectedChunk = Entity.newBuilder(chunkKey)
+                        .set("parcels_id", "")
+                        .build();
+                txn.put(selectedChunk);
+                txn.commit();
+            }
+        } finally {
+            if (txn.isActive()){
+                txn.rollback();
+            }
+        }
+
+        List<String> parcelsIDs = JSON.decode(selectedChunk.getString("parcels_id"), List.class);
+        if (parcelsIDs.size() <= 0){
+            resultData = new ChunkResultData(chunk, topRight, bottomLeft, result);
+            chunkCacheManager.put(chunk, "data", resultData);
+
+            return Result.ok(resultData, "");
+        }
 
         KeyFactory selectedParcelKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_THAT_ARE_APPROVED_TABLE_NAME);
         KeyFactory selectedParcelNotApprovedKeyFactory = datastore.newKeyFactory().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME);
 
         Key selectedParcelKey;
         Key selectedParcelNotApprovedKey;
-        for (String parcelID : parcels) {
+        for (String parcelID : parcelsIDs) {
             selectedParcelKey = selectedParcelKeyFactory.newKey(parcelID);
             selectedParcelNotApprovedKey = selectedParcelNotApprovedKeyFactory.newKey(parcelID);
             Entity selectedParcel = datastore.get(selectedParcelKey);
@@ -1022,8 +1051,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
-                            new String[]{},
-                            new LatLng[]{}
+                            JSON.decode(tmp.getString("images"), String[].class),
+                            JSON.decode(tmp.getString("route"), LatLng[].class)
                     )
             );
             list.add(resultData);
