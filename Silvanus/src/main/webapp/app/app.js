@@ -67,6 +67,51 @@ createGraph(ambient_temperature_elem,
 }
 ]);
 
+let avatar_data = {
+  "content": "",
+  "type": ""
+};
+
+let documentation_data ={
+  "content": "",
+}
+
+let image_data ={
+  "content": "",
+}
+
+function loadAvatar(event){
+  const avatar = document.getElementById("usr_avatar_perfil_credentials");
+  const src = URL.createObjectURL(event.target.files[0]);
+  avatar.src = src
+  
+  avatar_data["content"] = event.target.files[0];
+
+  avatar_data["type"] = event.target.files[0].type;
+}
+
+function getAvatarImageContent(){
+  return avatar_data;
+}
+
+function loadDocumentationFiles(event){
+  documentation_data["content"] = event.target.files;
+  console.log(documentation_data);
+}
+
+function getDocumentationFiles(){
+  return documentation_data;
+}
+
+function loadImageFiles(event){
+  image_data["content"] = event.target.files;
+  console.log(image_data);
+}
+
+function getImageFiles(){
+  return image_data;
+}
+
 function toggleChangeProfileMenu(id1, id2, iconId1, iconId2){
     let elem1 = document.getElementById(id1);
     let elem2 = document.getElementById(id2);
