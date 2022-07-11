@@ -98,9 +98,9 @@ function handleBadge(name, xmlDoc, params){
 }
 
 //TODO Implement more params
-function terrainCard(id, title, status, description){
+function terrainCard(id, title, status, description, banner){
     const elemName = "elems/terrain_card.html"; 
-    let params = [id, title, status, description];
+    let params = [id, title, status, description, banner];
 
     LoadHTMLDoc(elemName, handleTerrainCard, params);
 }
@@ -113,8 +113,6 @@ function handleTerrainCard(name, xmlDoc, params){
     target.setAttribute("data-app-value", String(parseInt(count)+1));
 
     elems[name].querySelector(".col").setAttribute("data-app-terrain-id", params[0]);
-
-    //elems[name].querySelector(".card")
 
     addEvent(target, 'click', function (event) {
         console.log(event.target);
@@ -133,9 +131,32 @@ function handleTerrainCard(name, xmlDoc, params){
     elems[name].querySelector(".card__title").insertAdjacentHTML("beforeend", params[1]);
     elems[name].querySelector(".card__status").insertAdjacentHTML("beforeend", params[2]);
     elems[name].querySelector(".card__description").insertAdjacentHTML("beforeend", params[3]);
+    elems[name].querySelector(".card__image").src = params[4];
 
     target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
     
+}
+
+function carouselTerrainImage(image, active){
+    const elemName = "elems/terrainCarouselImage.html"; 
+    let params = [image, active];
+
+    LoadHTMLDoc(elemName, handlecarouselTerrainImage, params);
+}
+
+function handlecarouselTerrainImage(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    const target = document.getElementById("terrain_images");
+    const image_uri = params[0];
+    const active = params[1];
+    console.log(active);
+    const image_carousel =  elems[name].querySelector(".carousel-image");
+    image_carousel.src = image_uri;
+        if (active){
+            elems[name].querySelector(".carousel-item").classList.add("active");
+        }
+        target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
 
 function terrainPendingCard(title, status, description){
@@ -227,8 +248,14 @@ function handleListUser(name, xmlDoc, params){
 
     elems[name].querySelector(".user-avatar-profile").src = profile.info.avatar;
 
+    //elems[name].querySelector(".user-avatar-profile").href += key;
     elems[name].querySelector(".usr_username").insertAdjacentHTML("beforeend", profile.username);
+    elems[name].querySelector(".usr_username").href += key;
+    console.log(elems[name].querySelector(".usr_username").href );
     elems[name].querySelector(".usr_email").insertAdjacentHTML("beforeend", profile.email);
+    elems[name].querySelector(".usr_email").href += key;
+
+    elems[name].getElementById("collapseUserPerfil").id += key;
 
     elems[name].querySelector(".usr_fullname").insertAdjacentHTML("beforeend", profile.info.name);
     elems[name].querySelector(".usr_id").insertAdjacentHTML("beforeend", profile.info.nif);

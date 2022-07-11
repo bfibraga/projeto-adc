@@ -127,9 +127,9 @@ async function getInfo(debug, user){
 
 	try{
 		/*menu("menu03");
-		terrainCard(1, "Teste 2", "Teste 3", "Teste 4");
-		terrainCard(2, "Teste 2", "Teste 3", "Teste 4");
-		terrainCard(3, "Teste 2", "Teste 3", "Teste 4");
+		terrainCard(1, "Teste 2", "Teste 3", "Teste 4", "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar");
+		terrainCard(2, "Teste 2", "Teste 3", "Teste 4", "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar");
+		terrainCard(3, "Teste 2", "Teste 3", "Teste 4", "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar");
 		terrainPendingCard("Teste 2", "Teste 3", "Uma descrição de teste muito fixe meu :O");
 		terrainPendingCard("Teste 3", "Teste 3", "Uma descrição de teste muito fixe meu :O");*/
 
@@ -140,6 +140,61 @@ async function getInfo(debug, user){
 			const element = avatar_elems.item(i);
 			element.src = "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar";
 		}*/
+
+		/*listUserProfile({
+			"username": "bfibraga",
+			"email": "brunobfi2000@gmail.com",
+			"info": {
+				"name": "Bruno Braga",
+				"visibility": "PUBLIC",
+				"nif": "1234",
+				"address": "Rua de Braga",
+				"telephone": "212 212 212",
+				"smartphone": "932290047",
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/bfibraga/avatar"
+			},
+			"state": "ACTIVE",
+			"role_name": "Administrador",
+			"role_color": "#6aa84f",
+			"logoutData": {
+				"center": {
+					"lat": 38.656372,
+					"lng": -9.196873
+				},
+				"zoom": 14
+			},
+			"loggedinData": {
+				"time": "2022-07-10 23:13:10",
+				"menus": []
+			}
+		});
+		listUserProfile({
+			"username": "bfibraga",
+			"email": "brunobfi2000@gmail.com",
+			"info": {
+				"name": "Bruno Braga",
+				"visibility": "PUBLIC",
+				"nif": "1234",
+				"address": "Rua de Braga",
+				"telephone": "212 212 212",
+				"smartphone": "932290047",
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/bfibraga/avatar"
+			},
+			"state": "ACTIVE",
+			"role_name": "Administrador",
+			"role_color": "#6aa84f",
+			"logoutData": {
+				"center": {
+					"lat": 38.656372,
+					"lng": -9.196873
+				},
+				"zoom": 14
+			},
+			"loggedinData": {
+				"time": "2022-07-10 23:13:10",
+				"menus": []
+			}
+		});*/
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
@@ -342,47 +397,71 @@ async function submitTerrain(points_data, route_data) {
 	
 	//TODO Remake this function
 	let parcela = points_data;
-	console.log(points_data);
-
-	let credentials = {
-		"name": String(document.getElementById("name-terrain").value),
-		"townhall": String(document.getElementById("townhall-terrain").value),
-		"district": String(document.getElementById("district-terrain").value),
-		"section": String(document.getElementById("section-terrain").value),
-		"number_article": String(document.getElementById("number-article-terrain").value),
-	};
-
-	let checked = document.getElementById("this_acc_terrain_option").checked;
-	console.log(checked);
-	let owner = checked ? 
-	{
-		"name": String(perfil.info.name),
-		"nif": String(perfil.info.nif),
-		"address": String(perfil.info.address),
-		"telephone": String(perfil.info.telephone),
-		"smartphone": String(perfil.info.smartphone),
-	} :
-	 {
-		"name": String(document.getElementById("other_acc_fullname_input").value),
-		"nif": String(document.getElementById("other_acc_id_input").value),
-		"address": String(document.getElementById("other_acc_address_input").value),
-		"telephone": String(document.getElementById("other_acc_telephone_input").value),
-		"smartphone": String(document.getElementById("other_acc_smartphone_input").value),
-	};
-	console.log(owner);
-
-	let info = {
-		"description": String(document.getElementById("description-terrain").value),
-		"type_of_soil_coverage": String(document.getElementById("type-terrain").value),
-		"current_use": String(document.getElementById("current-use-terrain").value),
-		"previous_use": String(document.getElementById("previous-use-terrain").value),
-		"images": [
-			//String(document.getElementById("image-terrain").src)
-		], //TODO
-		"route": route_data
-	};
 
 	try{
+		let credentials = {
+			"name": String(document.getElementById("name-terrain").value),
+			"townhall": String(document.getElementById("townhall-terrain").value),
+			"district": String(document.getElementById("district-terrain").value),
+			"section": String(document.getElementById("section-terrain").value),
+			"number_article": String(document.getElementById("number-article-terrain").value),
+		};
+
+		let checked = document.getElementById("this_acc_terrain_option").checked;
+		console.log(checked);
+		let owner = checked ? 
+		{
+			"name": String(perfil.info.name),
+			"nif": String(perfil.info.nif),
+			"address": String(perfil.info.address),
+			"telephone": String(perfil.info.telephone),
+			"smartphone": String(perfil.info.smartphone),
+		} :
+		{
+			"name": String(document.getElementById("other_acc_fullname_input").value),
+			"nif": String(document.getElementById("other_acc_id_input").value),
+			"address": String(document.getElementById("other_acc_address_input").value),
+			"telephone": String(document.getElementById("other_acc_telephone_input").value),
+			"smartphone": String(document.getElementById("other_acc_smartphone_input").value),
+		};
+		console.log(owner);
+
+		const username = String(document.getElementById("usr_username").innerHTML);
+		const url = "terrains/" + credentials.district + "/" + credentials.townhall + "/" + username  + "/" +  credentials.name;
+
+		const image_content = getImageFiles();
+		let content = image_content["content"];
+		let image_uris = [];
+
+		for (let i = 0; i < content.length; i++) {
+			const image = content[i];
+			let form_image = new FormData();
+			form_image.append("file", image);
+				
+			form_image.append("destination", url);
+			const filename = "image-terrain-" + String(i);
+			form_image.append("filename", filename);
+
+			axios.post("/files/projeto-adc.appspot.com/", form_image, 
+				{
+					headers: {
+					"Content-Type": "multipart/form-data",
+					}
+				});	
+			
+			image_uris.push("https://storage.googleapis.com/projeto-adc.appspot.com/" + url + "/" + filename);
+		}
+
+		let info = {
+			"description": String(document.getElementById("description-terrain").value),
+			"type_of_soil_coverage": String(document.getElementById("type-terrain").value),
+			"current_use": String(document.getElementById("current-use-terrain").value),
+			"previous_use": String(document.getElementById("previous-use-terrain").value),
+			"images": image_uris,
+			"route": route_data
+		};
+
+	
 		/*let check = await axios.put("/api/" + resource.TERRAIN + "/intersect", parcela)
 		console.log(check);*/
 
@@ -394,6 +473,26 @@ async function submitTerrain(points_data, route_data) {
 		};
 		let response = await axios.post("/api/parcel/create", parcel);
 		console.log(response);
+
+		const documentation_data = getDocumentationFiles();
+
+		content = documentation_data["content"]
+		for (let i = 0; i < content.length; i++) {
+			const file_content = content[i];
+			
+			let form = new FormData();
+			form.append("file", file_content);
+			form.append("destination", url);
+			form.append("filename", "documentation" + String(i));
+
+			axios.post("/files/projeto-adc.appspot.com/", form, 
+			{
+				headers: {
+				"Content-Type": "multipart/form-data",
+				}
+			});
+		}
+		
 		const status = String(credentials.townhall) + " " + String(credentials.district);
 		terrainPendingCard(credentials.name, status, info.description);
 
@@ -415,12 +514,9 @@ async function getOwnTerrain(){
 		if (terrain_list != null && terrain_list.length > 0){
 			for (let i = 0; i < terrain_list.length; i++) {
 				const element = terrain_list[i];
-				console.log(element);
-				//const id = element.credentials.id;
-				//terrain_list[i] = element;
 
 				const status = String(element.credentials.townhall) + " " + String(element.credentials.district);
-				terrainCard(String(i), element.credentials.name, status, element.info.description);
+				terrainCard(String(i), element.credentials.name, status, element.info.description, element.info.images[0]);
 			}
 			for (let i = 0; i < terrain_counter_elem.length; i++) {
 				const element = terrain_counter_elem.item(i);
@@ -501,7 +597,15 @@ function loadTerrainInfo(id){
 	console.log(viewport);
 	const new_center = point(center.lat, center.lng - 5e-4);
 	setCenter(new_center);
-	//setZoom(10);
+
+	const images = terrain.info.images;
+
+	document.getElementById("terrain_images").innerHTML = "";
+	carouselTerrainImage(images[0], true);
+	for (let i = 1; i < images.length; i++) {
+		const image = images[i];
+		carouselTerrainImage(image, false);
+	}
 
 	document.getElementById("terrain_name").innerHTML = terrain.credentials.name;
 	document.getElementById("terrain_townhall").innerHTML = terrain.credentials.townhall;

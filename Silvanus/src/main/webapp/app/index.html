@@ -735,7 +735,7 @@
           </div>
           <div class="mb-3">
             <label for="documentation-validation-terrain" class="form-label">Documentos de Validação do Terreno</label>
-            <input type="file" class="form-control rounded-pill" id="documentation-validation-terrain">
+            <input type="file" class="form-control rounded-pill" id="documentation-validation-terrain" accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="loadDocumentationFiles(event)" multiple>
           </div>
           <div class="mb-3">
             <label for="type_of_terrain_select" class="form-label">Tipo de Terreno</label>
@@ -810,8 +810,8 @@
             <textarea class="form-control rounded-3" id="description-terrain" rows="2"></textarea>
           </div>
           <div class="mb-3">
-            <label for="image-terrain" class="form-label">Foto do Terreno</label>
-            <input type="file" class="form-control rounded-pill" id="image-terrain">
+            <label for="image-terrain" class="form-label">Fotos do Terreno</label>
+            <input type="file" class="form-control rounded-pill" id="image-terrain" accept="image/jpeg, image/png" onchange="loadImageFiles(event)" multiple >
           </div>
           <div class="mb-3">
             <label for="type-terrain" class="form-label">Cobertura de Solo</label>
@@ -828,7 +828,7 @@
           <div class="mb-3">
             <label for="define-route-terrain" class="form-label">Caminho de entrada para o terreno</label>
             <br>
-            <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill text-light" onclick="initRoute()">
+            <input id="define-route-terrain" type="button" class="btn btn-info rounded-pill text-light" value="Definir caminho" onclick="initRoute()">
           </div>
           
         </div>
@@ -925,8 +925,17 @@
                     </a>
                   </div>
                   
-                  <div class="avatar-wrapper rounded-3" style="width: 100%;">
-                    <img class="rounded-3" src="../media/imgs/natureza1.jpg" alt="Foto do terreno">
+                  <div id="carouselTerrainImages" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner rounded-3" id="terrain_images">
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselTerrainImages" data-bs-slide="prev">
+                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselTerrainImages" data-bs-slide="next">
+                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Next</span>
+                    </button>
                   </div>
                 </div>
               </div>

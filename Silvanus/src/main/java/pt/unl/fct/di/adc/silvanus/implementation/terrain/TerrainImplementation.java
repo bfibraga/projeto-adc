@@ -210,7 +210,10 @@ public class TerrainImplementation implements Parcel {
                     .set(ENTITY_PROPERTY_RIGHT_MOST_POINT, terrainData.getEdgesTerrain()[1])
                     .set(ENTITY_PROPERTY_TOP_MOST_POINT, terrainData.getEdgesTerrain()[2])
                     .set(ENTITY_PROPERTY_BOTTOM_MOST_POINT, terrainData.getEdgesTerrain()[3])
-                    .set(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA, terrainAsPolygon.getArea()).build();
+                    .set(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA, terrainAsPolygon.getArea())
+                    .set("images", JSON.encode(terrainData.getInfo().getImages()))
+                    .set("route", JSON.encode(terrainData.getInfo().getRoute()))
+                    .build();
 
             txn.put(terrainEntity, ownerTerrainEntity);
             txn.commit();
@@ -693,8 +696,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
-                            new String[]{},
-                            new LatLng[]{}
+                            JSON.decode(tmp.getString("images"), String[].class),
+                            JSON.decode(tmp.getString("route"), LatLng[].class)
                     )
             );
             list.add(resultData);
@@ -746,8 +749,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
-                            new String[]{},
-                            new LatLng[]{}
+                            JSON.decode(tmp.getString("images"), String[].class),
+                            JSON.decode(tmp.getString("route"), LatLng[].class)
                     )
             );
             list.add(resultData);
@@ -1022,8 +1025,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
-                            new String[]{},
-                            new LatLng[]{}
+                            JSON.decode(tmp.getString("images"), String[].class),
+                            JSON.decode(tmp.getString("route"), LatLng[].class)
                     )
             );
             list.add(resultData);
