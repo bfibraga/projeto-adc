@@ -1,0 +1,31 @@
+html, body {
+    background-image: url("../media/imgs/landing4.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+  }
+
+  .aboutApp {
+    width: 100%;
+    height: auto;
+    background-color: rgba(255,255,255,0.5);
+  }
+  
+  .aboutUs {
+    width: 100%;
+    height: auto;
+    background-color: rgba(255,255,255,0.7);
+  }
+  
+  .finalBar {
+    width: 100%;
+    height: auto;
+    background-color: rgba(255,255,255,0.8);
+  }
+
+  .p {
+    overflow-wrap: break-word;
+  }
