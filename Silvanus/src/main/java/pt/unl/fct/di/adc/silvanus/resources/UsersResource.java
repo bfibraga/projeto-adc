@@ -111,9 +111,11 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		Set<String> scope = jws.get("scope", HashSet.class);
+		/*Set<String> scope = jws.get("scope", HashSet.class);
 
-		Result<Void> result = impl.promote(token, username, new_role);
+		System.out.println(scope);*/
+
+		Result<Void> result = impl.promote(jws.getSubject(), username, new_role);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();

@@ -10,6 +10,7 @@ import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import io.jsonwebtoken.*;
 import org.apache.commons.codec.BinaryDecoder;
+import org.apache.commons.codec.EncoderException;
 import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.user.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Users;
@@ -397,18 +398,72 @@ public class UserImplementation implements Users {
 
 	//TODO TESTING
 	@Override
-	public Result<Void> promote(String token, String identifier, String new_role) {
+	public Result<Void> promote(String request_user, String identifier, String new_role) {
+		String user_id_promote = "";
 
-		Claims jws = TOKEN.verifyToken(token);
-
-		if (jws == null){
-			return Result.error(Status.FORBIDDEN, "Invalid Token");
+		QueryResults<Entity> result = this.find(identifier, "UserCredentials", "usr_username", 1);
+		if (!result.hasNext()){
+			result = this.find(identifier, "UserCredentials", "usr_email", 1);
 		}
 
-		String high_user_id = jws.getSubject();
+		if (!result.hasNext()){
+			return Result.error(Status.NOT_FOUND, "User "+ identifier + " doens't exist");
+		} else {
+			user_id_promote = result.next().getKey().getName();
+		}
+
+		if (request_user.equals(user_id_promote)){
+			return Result.error(Status.FORBIDDEN, "Same user");
+		}
+
+		UserRole requestUserRole = this.cache.getRoleData(request_user);
+		if (requestUserRole == null){
+			Key userRoleKey = this.userRoleKeyFactory.newKey(request_user);
+			Entity userRoleEntity = datastore.get(userRoleKey);
+
+			requestUserRole = UserRole.compareType(userRoleEntity.getString("role_name"));
+			this.cache.put(request_user, requestUserRole);
+		}
+
+		UserRole targetRole = UserRole.compareType(new_role);
+
+		if (targetRole.getPriority() > requestUserRole.getPriority()){
+			return Result.error(Status.FORBIDDEN, "Higher role then logged in user");
+		}
+
+		UserRole userRole = this.cache.getRoleData(user_id_promote);
+
+		Key userRoleKey = this.userRoleKeyFactory.newKey(user_id_promote);
+		Entity userRoleEntity;
+		if (userRole == null){
+			userRoleEntity = datastore.get(userRoleKey);
+
+			userRole = UserRole.compareType(userRoleEntity.getString("role_name"));
+		}
+
+		Transaction txn = datastore.newTransaction();
+
+		try{
+			userRoleEntity = Entity.newBuilder(userRoleKey)
+					.set("role_name", targetRole.getRoleName())
+					.set("role_priority", targetRole.getPriority())
+					.build();
+
+			txn.put(userRoleEntity);
+			txn.commit();
+		} finally {
+			if (txn.isActive()){
+				txn.rollback();
+			}
+		}
+
+		return Result.ok();
+
+		/*String high_user_id = jws.getSubject();
+
 		System.out.println("High user id: " + high_user_id);
 		System.out.println("Promotion on: " + identifier);
-		String user_id_promote;
+
 		LoginData loginData = this.cache.getLoginData(identifier);
 		UserStateData userStateData = this.cache.getStateData(identifier);
 		UserStateData highuserStateData = this.cache.getStateData(high_user_id);
@@ -521,7 +576,7 @@ public class UserImplementation implements Users {
 				tnx.rollback();
 			}
 		}
-
+*/
 	}
 
 	@Override
