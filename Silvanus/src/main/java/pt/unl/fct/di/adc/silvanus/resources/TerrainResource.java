@@ -86,7 +86,7 @@ public class TerrainResource implements RestParcel {
         Result<Void> result = impl.approveTerrain(userID, terrainName);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
-        return Response.ok().build();
+        return Response.ok().entity(result.value()).build();
     }
 
     @Override
