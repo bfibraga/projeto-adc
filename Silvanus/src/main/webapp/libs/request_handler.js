@@ -141,33 +141,7 @@ async function getInfo(debug, user){
 			element.src = "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar";
 		}*/
 
-		/*listUserProfile({
-			"username": "bfibraga",
-			"email": "brunobfi2000@gmail.com",
-			"info": {
-				"name": "Bruno Braga",
-				"visibility": "PUBLIC",
-				"nif": "1234",
-				"address": "Rua de Braga",
-				"telephone": "212 212 212",
-				"smartphone": "932290047",
-				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/bfibraga/avatar"
-			},
-			"state": "ACTIVE",
-			"role_name": "Administrador",
-			"role_color": "#6aa84f",
-			"logoutData": {
-				"center": {
-					"lat": 38.656372,
-					"lng": -9.196873
-				},
-				"zoom": 14
-			},
-			"loggedinData": {
-				"time": "2022-07-10 23:13:10",
-				"menus": []
-			}
-		});
+		/*
 		listUserProfile({
 			"username": "bfibraga",
 			"email": "brunobfi2000@gmail.com",
@@ -178,7 +152,7 @@ async function getInfo(debug, user){
 				"address": "Rua de Braga",
 				"telephone": "212 212 212",
 				"smartphone": "932290047",
-				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/bfibraga/avatar"
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
 			},
 			"state": "ACTIVE",
 			"role_name": "Administrador",
@@ -194,7 +168,94 @@ async function getInfo(debug, user){
 				"time": "2022-07-10 23:13:10",
 				"menus": []
 			}
-		});*/
+		},
+		{
+			"username": "bfibraga",
+			"email": "brunobfi2000@gmail.com",
+			"info": {
+				"name": "Bruno Braga",
+				"visibility": "PUBLIC",
+				"nif": "1234",
+				"address": "Rua de Braga",
+				"telephone": "212 212 212",
+				"smartphone": "932290047",
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
+			},
+			"state": "ACTIVE",
+			"role_name": "Funcionario",
+			"role_color": "#6aa84f",
+			"logoutData": {
+				"center": {
+					"lat": 38.656372,
+					"lng": -9.196873
+				},
+				"zoom": 14
+			},
+			"loggedinData": {
+				"time": "2022-07-10 23:13:10",
+				"menus": [
+					"menu05"
+				]
+			}
+		}
+		);
+		listUserProfile({
+			"username": "bfibraga",
+			"email": "brunobfi2000@gmail.com",
+			"info": {
+				"name": "Bruno Braga",
+				"visibility": "PUBLIC",
+				"nif": "1234",
+				"address": "Rua de Braga",
+				"telephone": "212 212 212",
+				"smartphone": "932290047",
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
+			},
+			"state": "ACTIVE",
+			"role_name": "Administrador",
+			"role_color": "#6aa84f",
+			"logoutData": {
+				"center": {
+					"lat": 38.656372,
+					"lng": -9.196873
+				},
+				"zoom": 14
+			},
+			"loggedinData": {
+				"time": "2022-07-10 23:13:10",
+				"menus": []
+			}
+		},
+		{
+			"username": "bfibraga",
+			"email": "brunobfi2000@gmail.com",
+			"info": {
+				"name": "Bruno Braga",
+				"visibility": "PUBLIC",
+				"nif": "1234",
+				"address": "Rua de Braga",
+				"telephone": "212 212 212",
+				"smartphone": "932290047",
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
+			},
+			"state": "ACTIVE",
+			"role_name": "Funcionario",
+			"role_color": "#6aa84f",
+			"logoutData": {
+				"center": {
+					"lat": 38.656372,
+					"lng": -9.196873
+				},
+				"zoom": 14
+			},
+			"loggedinData": {
+				"time": "2022-07-10 23:13:10",
+				"menus": [
+					"menu05"
+				]
+			}
+		}
+		);*/
 
 		const response = await axios.get("/api/user/info");
 		const response_data = response.data[0];
@@ -243,7 +304,7 @@ async function get(){
 		document.getElementById("list_search_users").replaceChildren();
 
 		response_data.forEach(elem => {
-			listUserProfile(elem);
+			listUserProfile(elem, perfil);
 		});
 	} catch (error){
 		console.log(error);
@@ -359,6 +420,30 @@ async function changing_att(){
 		console.log(error);
 	} finally {
 		console.log("Executed successfully");
+		
+	}
+}
+
+async function promote(username, role, influence){
+	const confirm_elem = document.getElementById('confirmPromotion');
+	toggleMenu(confirm_elem.querySelector(".spinner-border"));
+	toggleMenu(confirm_elem.querySelector(".confirm-promote"));
+
+	try{
+		const response = await axios.put("/api/user/promote/" + username, {
+			params:{
+				"role": role,
+				"PlaceOfInfluence": influence
+			}
+		});
+		console.log(response);
+	} catch (error){
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+		toggleMenu(confirm_elem.querySelector(".spinner-border"));
+		toggleMenu(confirm_elem.querySelector(".confirm-promote"));
+		confirm_elem.innerHTML = '';
 	}
 }
 
@@ -569,11 +654,11 @@ async function loadChunk(pos){
 
 		//Verify if the content exist in the browser
 		const chunk = response_data.chunk;
-		if (hasChunk(chunk)){
-			return;
-		}
+		console.log(chunk);
 
 		const array = response_data.data;
+		console.log(array);
+
 		saveChunk(chunk, true);
 		array.forEach(element => {
 			addPolygon(element.points, element.color);
@@ -595,7 +680,9 @@ function loadTerrainInfo(id){
 	const center = terrain.center;
 	const viewport = getViewport();
 	console.log(viewport);
-	const new_center = point(center.lat, center.lng - 5e-4);
+	const ne = viewport.bounds.getNorthEast();
+	const sw = viewport.bounds.getSouthWest();
+	const new_center = point(center.lat, center.lng - ((ne.lng()-sw.lng())/4));
 	setCenter(new_center);
 
 	const images = terrain.info.images;

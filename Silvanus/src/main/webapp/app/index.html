@@ -29,8 +29,8 @@
     <link href="../styles/card.css" rel="stylesheet">
 
 </head>
-<body id="main" class="" onload='getInfo(false, "")'>
-  <div id="loader" class="overlay d-none" style="z-index: 100000;" data-app-menu-active="true">
+<body id="main" class="" onload='getInfo(true, "")'>
+  <div id="loader" class="overlay" style="z-index: 100000;" data-app-menu-active="true">
     <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
   </div>
 
@@ -42,6 +42,9 @@
     </div>
   </div>
   
+  <div id="confirmPromotion">
+    
+  </div>
 
   <nav class="app-navbar">
     <ul class="app-navbar-nav">
@@ -160,8 +163,8 @@
             <div class="col-12">
               <div id="usr_credentials_scrollspy" class="position-relative light rounded-3 p-3 m-1 shadow-sm">
                 <div class="d-flex flex-row m-3 align-items-center">
-                  <div class="avatar-wrapper" data-user="" style="min-width: 4rem; min-height: 4rem; max-width: 8rem; max-height: 8rem;">
-                    <img id="usr_avatar_perfil_credentials" src="../media/imgs/user.png" class="rounded-circle shadow-sm user-avatar" style="">
+                  <div class="avatar-wrapper d-flex" data-user="" style="width: 7rem; height: 7rem;">
+                    <img id="usr_avatar_perfil_credentials" src="../media/imgs/user.png" class="rounded-circle shadow-sm user-avatar">
                   </div>
                   <div class="ms-3">
                     <h4 id="usr_username">Username</h4>
@@ -286,7 +289,6 @@
       </div>
 
       <div class="d-flex justify-content-start">
-        
       </div>
 
       <!-- Toast Handler-->
@@ -298,6 +300,7 @@
           <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
             <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
           </div>
+          
         </div>
         <h3 id="usr_username">Username
         </h3>
@@ -335,9 +338,8 @@
             <div class="col-12">
               <div class="light rounded-3 p-3 m-1 shadow-sm">
                 <div class="d-flex flex-row align-items-center justify-content-center mb-3">
-                  
-                  <div class="avatar-wrapper" data-user="" style="max-width: 7rem; max-height: 7rem;">
-                    <img src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
+                  <div class="avatar-wrapper d-flex" data-user="" style="width: 2rem; height: 2rem;">
+                    <img src="../media/imgs/user.png" class="rounded-circle shadow-sm">
                   </div>
                 </div>
                 <h4 class=" mb-3 text-center">Nome da Comunidade</h4>
@@ -614,11 +616,8 @@
                   </div>
                   <div class="col">
                     <div class="d-flex flex-fill justify-content-end align-items-center">
-                      <a href="#" type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-circle text-white d-flex align-items-center" style="width: 2.8rem; height: 2.8rem; border: none !important;" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-send-plus-fill" viewBox="0 0 16 16">
-                          <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47L15.964.686Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
-                          <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm-3.5-2a.5.5 0 0 0-.5.5v1h-1a.5.5 0 0 0 0 1h1v1a.5.5 0 0 0 1 0v-1h1a.5.5 0 0 0 0-1h-1v-1a.5.5 0 0 0-.5-.5Z"/>
-                        </svg>
+                      <a href="#" type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill text-white d-flex align-items-center" style="border: none !important;" data-bs-toggle="offcanvas" data-bs-target="#request-terrain-offcanvas" aria-controls="offcanvasScrolling" data-tooltip="Adicionar uma Propriedade">
+                        Registar terreno
                       </a>
                     </div>
                     <!--<input type="button" onclick="togglePolygonDrawingControl(true)" class="btn btn-primary rounded-pill" value="Registar novo terreno"> -->

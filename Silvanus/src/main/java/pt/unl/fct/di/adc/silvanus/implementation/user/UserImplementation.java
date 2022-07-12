@@ -451,6 +451,7 @@ public class UserImplementation implements Users {
                     .set("place_of_influence", placeOfInfluence)
                     .build();
 
+            this.cache.remove(user_id_promote);
             txn.put(userRoleEntity);
             txn.commit();
         } finally {

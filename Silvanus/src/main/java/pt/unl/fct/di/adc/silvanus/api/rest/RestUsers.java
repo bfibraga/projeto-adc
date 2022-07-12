@@ -46,7 +46,7 @@ public interface RestUsers {
 	@Path("/promote/{" + IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response promote(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String username, @QueryParam(ROLE) String new_role, @QueryParam("PlaceOfInfluence") @DefaultValue(DEFAULT_VALUE) String placeOfInfluence);
+	Response promote(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String username, @QueryParam(ROLE) @DefaultValue(DEFAULT_VALUE) String new_role, @QueryParam("PlaceOfInfluence") @DefaultValue(DEFAULT_VALUE) String placeOfInfluence);
 	
 	@GET
 	@Path("/info")

@@ -208,9 +208,9 @@ function handleCommunityMember(name, xmlDoc, params){
     document.getElementById(params[3]).insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
 
-function listUserProfile(profile){
+function listUserProfile(profile, user){
     const elemName = "elems/user_profile.html"; 
-    let params = [profile, "list_search_users"];
+    let params = [profile, user, "list_search_users"];
 
     LoadHTMLDoc(elemName, handleListUser, params);
 }
@@ -218,9 +218,10 @@ function listUserProfile(profile){
 function handleListUser(name, xmlDoc, params){
     elems[name] = parser.parseFromString(xmlDoc, "text/html");
 
-    const target = document.getElementById(params[1]);
+    const target = document.getElementById(params[2]);
 
     const profile = params[0];
+    const user = params[1];
     
     const key = parseInt(target.getAttribute("data-app-value"));
 
@@ -233,6 +234,8 @@ function handleListUser(name, xmlDoc, params){
             parent = parent.parentElement;
         }
 
+        parent.setAttribute("data-user", profile.username);
+
         if (event.target.classList.contains("toggle-info") ||
         event.target.classList.contains("bi-arrows-expand")){
             const array = parent.querySelectorAll(".user-info");
@@ -242,6 +245,13 @@ function handleListUser(name, xmlDoc, params){
                 }
             });
         }
+
+        if (event.target.classList.contains("promote-user")){
+            const role_elem = parent.querySelector(".usr_role");
+            const influence_elem = parent.querySelector(".promote-user-influence");
+            menuPromotionConfirm(profile.username, role_elem.value, influence_elem.value);
+        }
+
       });
 
     target.setAttribute("data-app-value", String(key+1));
@@ -265,15 +275,15 @@ function handleListUser(name, xmlDoc, params){
 
     elems[name].querySelector(".usr_active").insertAdjacentHTML("beforeend", profile.state);
     console.log(profile.state === "ACTIVE");
-    elems[name].querySelector(".usr_active_radio").checked = profile.state === "ACTIVE" ? true : false;
+    elems[name].querySelector(".usr_active_radio").checked = profile.state === "ACTIVE";
     console.log(elems[name].querySelector(".usr_active_radio").checked);
 
-    console.log(profile.loggedinData.menus.includes("menu04"));
-    if (profile.loggedinData.menus.includes("menu04")){
+    console.log(user.loggedinData.menus.includes("menu04"));
+    if (user.loggedinData.menus.includes("menu04")){
         elems[name].querySelector(".usr_active_radio").setAttribute("data-app-menu-active", "true");
     }
 
-    if (profile.loggedinData.menus.includes("menu05")){
+    if (user.loggedinData.menus.includes("menu05")){
         elems[name].querySelector(".usr_role_unchanged").setAttribute("data-app-menu-active", "false");
         elems[name].querySelector(".usr_role").setAttribute("data-app-menu-active", "true");
     } else {
@@ -283,7 +293,7 @@ function handleListUser(name, xmlDoc, params){
 
     elems[name].querySelector(".usr_role_unchanged").insertAdjacentHTML("beforeend", profile.role_name);
 
-    const available_roles = listInferiorRoles(profile.role_name);
+    const available_roles = listInferiorRoles(user.role_name);
     const usr_role_elem = elems[name].querySelector(".usr_role");
 
     console.log(available_roles);
@@ -291,20 +301,80 @@ function handleListUser(name, xmlDoc, params){
         usr_role_elem.insertAdjacentHTML("beforeend", "<option>" + role + "</option>")
     });
 
-    elems[name].querySelector(".usr_n_terrains").insertAdjacentHTML("beforeend", 0);
+    
+
+    //elems[name].querySelector(".usr_n_terrains").insertAdjacentHTML("beforeend", 0);
 
     //let target = ;
     target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
 }
 
+function menuPromotionConfirm(username, role, influence){
+    const elemName = "elems/confirmPromotion.html"; 
+    let params = [username, role, influence];
+
+    LoadHTMLDoc(elemName, handlePromotionConfirm, params);
+}
+
+function handlePromotionConfirm(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    const username = params[0];
+    const role = params[1];
+    const influence = params[2];
+
+    elems[name].querySelector(".overlay").setAttribute("data-user", username);
+    elems[name].querySelector(".overlay").setAttribute("data-role", role);
+    elems[name].querySelector(".overlay").setAttribute("data-influence", influence);
+
+    elems[name].querySelector(".confirm-promotion-username").innerHTML = username;
+    elems[name].querySelector(".confirm-promotion-role").innerHTML = role;
+
+    document.getElementById("confirmPromotion").insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
+const role_mapper={
+    "Administrador":"admin",
+    "Funcionario Concelho":"func-cons",
+    "Funcionario Distrito":"func-dist",
+    "Funcionario Governo":"gov",
+    "Utilizador":"end-user",
+}
+
+function handlePromote(){
+    const target = document.getElementById("confirmPromotion").querySelector(".overlay");
+
+    const username = target.getAttribute("data-user");
+    const role = role_mapper[target.getAttribute("data-role")];
+    const influence = target.getAttribute("data-influence");
+
+    console.log("Promote");
+    console.log(username);
+    console.log(role);
+    console.log(influence);
+
+    promote(username, role, influence);
+}
+
 function listInferiorRoles(role_name){
     let result = [];
     const parts = role_name.split(" ");
+    console.log(parts);
     switch (parts[0]){
         case "Administrador":
             result.push("Administrador");
         case "Funcionario":
-            result.push("Funcionario");
+            //TODO Make for townhall and district
+            switch(parts[1]){
+                case "Governo":
+                    result.push("Funcionario Governo");
+                case "Distrito":
+                    result.push("Funcionario Distrito");
+                case "Concelho":
+                    result.push("Funcionario Concelho");
+                default:
+                    //TODO ????
+            }
         case "Utilizador":
             result.push("Utilizador");
     }

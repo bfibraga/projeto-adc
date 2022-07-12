@@ -1,10 +1,7 @@
 <li class="list-group-item border-1 border-light p-3 mt-1 mb-1 rounded-3" data-user="=">
   <div class="d-flex flex-row align-items-center">
-    <div class="avatar-wrapper" data-user="" style="max-width: 3rem; max-height: 3rem;">
-      <a type="button" class="text-reset" data-bs-toggle="collapse" href="#collapseUserPerf" role="button" aria-expanded="false" aria-controls="collapseUserPerf" >
-          <img src="../media/imgs/user.png" class="profile-img rounded-circle shadow-sm user-avatar-profile" style="">
-
-      </a>
+    <div data-user="" class="avatar-wrapper" style="width: 3rem; height: 3rem;">
+      <img src="../media/imgs/user.png" class="profile-img rounded-circle shadow-sm user-avatar-profile" style="">
     </div>
     <div class="position-relative ms-3 mt-1 justify-content-center">
       <h6 >
@@ -39,11 +36,16 @@
         </div>
       </div>
       <h6>Role</h6>
-      <select class="form-select usr_role mb-3" data-app-menu-active="false" onchange="console.log('Hello')">
+      <select class="form-select usr_role mb-3" data-app-menu-active="false">
       </select>
+      <input type="text" class="form-control rounded-pill mb-3 promote-user-influence" placeholder="Área de Influência">
+      <div class="d-flex flex-row justify-content-center">
+        <a href="#" class="btn border mb-3 promote-user">
+          Confirmar
+        </a>
+      </div>
+      
       <p class="border-bottom usr_role_unchanged" data-app-menu-active="true"></p>
-      <h6>Terrenos</h6>
-      <p class="border-bottom usr_n_terrains"></p>
     </div>
   </div>
   <div class="row user-info" data-app-menu-active="false" data-user="-">

@@ -105,7 +105,8 @@ public class TOKEN {
                 .setExpiration(expirationDate) //a java.util.Date
                 .setIssuedAt(creationDate) // for example, now
                 .signWith(key)
-                .setId(UUID.randomUUID().toString());
+                .setId(UUID.randomUUID().toString())
+                .setSubject(UUID.randomUUID().toString());
         return refresh_token.compact();
     }
 
