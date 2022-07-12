@@ -2,6 +2,7 @@ const base_uri = window.location.origin;
 
 let perfil;
 let terrain_list = [];
+let terrain_on_pending = [];
 
 const resource = {
 	"USER": "user",
@@ -131,7 +132,136 @@ async function getInfo(debug, user){
 		terrainCard(2, "Teste 2", "Teste 3", "Teste 4", "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar");
 		terrainCard(3, "Teste 2", "Teste 3", "Teste 4", "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar");
 		terrainPendingCard("Teste 2", "Teste 3", "Uma descrição de teste muito fixe meu :O");
-		terrainPendingCard("Teste 3", "Teste 3", "Uma descrição de teste muito fixe meu :O");*/
+		terrainPendingCard("Teste 3", "Teste 3", "Uma descrição de teste muito fixe meu :O");
+		terrainOnPending(1, 
+			{
+				"points": [
+					{
+						"lat": 40.427975,
+						"lng": -7.9812384
+					},
+					{
+						"lat": 40.42858,
+						"lng": -7.9824452
+					},
+					{
+						"lat": 40.42755,
+						"lng": -7.9832716
+					}
+				],
+				"center": {
+					"lat": 38.659782,
+					"lng": -9.202765
+				},
+				"credentials": {
+					"userID": "",
+					"name": "tereeren gd isqbdcibcqobqwob",
+					"townhall": "Carregal do Sal",
+					"district": "Viseu",
+					"section": "42",
+					"number_article": "42",
+					"id": "0:-2113247677"
+				},
+				"owner": {
+					"name": "Bruno Braga",
+					"nif": "1234",
+					"address": "Rua de Braga",
+					"telephone": "212 212 212",
+					"smartphone": "932290047"
+				},
+				"info": {
+					"description": "cdcsdcdcsdcsd",
+					"type_of_soil_coverage": "fértil",
+					"current_use": "65",
+					"previous_use": "2",
+					"images": [],
+					"route": [
+						{
+							"lat": 40.428265,
+							"lng": -7.9813724
+						},
+						{
+							"lat": 40.427975,
+							"lng": -7.9816995
+						},
+						{
+							"lat": 40.428547,
+							"lng": -7.9817104
+						},
+						{
+							"lat": 40.428265,
+							"lng": -7.9813724
+						}
+					],
+					"documents": null
+				},
+				"color": "#124a41"
+			});
+			terrainOnPending(2, 
+				{
+					"points": [
+						{
+							"lat": 40.427975,
+							"lng": -7.9812384
+						},
+						{
+							"lat": 40.42858,
+							"lng": -7.9824452
+						},
+						{
+							"lat": 40.42755,
+							"lng": -7.9832716
+						}
+					],
+					"center": {
+						"lat": 38.659782,
+						"lng": -9.202765
+					},
+					"credentials": {
+						"userID": "",
+						"name": "tereeren gd isqbdcibcqobqwob",
+						"townhall": "Carregal do Sal",
+						"district": "Viseu",
+						"section": "42",
+						"number_article": "42",
+						"id": "0:-2113247677"
+					},
+					"owner": {
+						"name": "Bruno Braga",
+						"nif": "1234",
+						"address": "Rua de Braga",
+						"telephone": "212 212 212",
+						"smartphone": "932290047"
+					},
+					"info": {
+						"description": "cdcsdcdcsdcsd",
+						"type_of_soil_coverage": "fértil",
+						"current_use": "65",
+						"previous_use": "2",
+						"images": [],
+						"route": [
+							{
+								"lat": 40.428265,
+								"lng": -7.9813724
+							},
+							{
+								"lat": 40.427975,
+								"lng": -7.9816995
+							},
+							{
+								"lat": 40.428547,
+								"lng": -7.9817104
+							},
+							{
+								"lat": 40.428265,
+								"lng": -7.9813724
+							}
+						],
+						"documents": null
+					},
+					"color": "#124a41"
+				});*/
+	
 
 		//document.getElementById("usr_avatar_perfil_credentials").src = "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar";
 
@@ -265,6 +395,18 @@ async function getInfo(debug, user){
 		//Update User Profile
 		document.getElementById("usr_username").innerHTML = String(response_data.username);
 		document.getElementById("usr_email").innerHTML = String(response_data.email);
+
+		const role_parts = response_data.role_name.split(" ");
+		console.log(role_parts);
+		const influence = String(role_parts[role_parts.length-1]);
+
+		if (role_parts[1] === "Concelho"){
+			getPendingByCounty(influence);
+		}
+
+		if (role_parts[1] === "Distrito"){
+			getPendingByDistrict(influence);
+		}
 
 		//Put all user badges
 		badge(response_data.role_name,response_data.role_color);
@@ -625,12 +767,55 @@ async function getPendingTerrain(){
 		let response = await axios.post("/api/parcel/list/pending");
 		const data = response.data;
 		console.log(data);
-		if (data !== null || data.length > 0) {
+		if (data !== null && data.length > 0) {
 			data.forEach(element => {
 				console.log(element);
 				const status = String(element.credentials.townhall) + " " + String(element.credentials.district);
 				terrainPendingCard(element.credentials.name, status, element.info.description);
 			});
+		}
+		
+		console.log(response);
+	} catch (error){
+		//alert(error);
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
+}
+
+async function getPendingByCounty(county){
+	try{
+		let response = await axios.get("/api/parcel/list/pending/county/" + county);
+		const data = response.data;
+		terrain_on_pending = data;
+		console.log(data);
+		if (data !== null && data.length > 0) {
+			for (let i = 0; i < data.length; i++) {
+				const element = data[i];
+				terrainOnPending(String(i), element);
+			}
+		}
+		
+		console.log(response);
+	} catch (error){
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
+}
+
+async function getPendingByDistrict(district){
+	try{
+		let response = await axios.get("/api/parcel/list/pending/district/" + district);
+		const data = response.data;
+		terrain_on_pending = data;
+		console.log(data);
+		if (data !== null && data.length > 0) {
+			for (let i = 0; i < data.length; i++) {
+				const element = data[i];
+				terrainOnPending(String(i), element);
+			}
 		}
 		
 		console.log(response);
@@ -714,6 +899,76 @@ function loadTerrainInfo(id){
 
 }
 
+function loadTerrainOnPendingInfo(id){
+	const terrain = terrain_on_pending[parseInt(id)];
+	console.log(terrain);
+	if (terrain === null) return;
+
+	const center = terrain.center;
+	const viewport = getViewport();
+	console.log(viewport);
+	const ne = viewport.bounds.getNorthEast();
+	const sw = viewport.bounds.getSouthWest();
+	const new_center = point(center.lat, center.lng - ((ne.lng()-sw.lng())/4));
+	setCenter(new_center);
+
+	const images = terrain.info.images;
+
+	document.getElementById("terrain_images").innerHTML = "";
+	carouselTerrainImage(images[0], true);
+	for (let i = 1; i < images.length; i++) {
+		const image = images[i];
+		carouselTerrainImage(image, false);
+	}
+
+	document.getElementById("terrain_name").innerHTML = terrain.credentials.name;
+	document.getElementById("terrain_townhall").innerHTML = terrain.credentials.townhall;
+	document.getElementById("terrain_district").innerHTML = terrain.credentials.district;
+	document.getElementById("terrain_number_section").innerHTML = terrain.credentials.section;
+	document.getElementById("terrain_number_article").innerHTML = terrain.credentials.number_article;
+	//document.getElementById("terrain_documents_validation").insertAdjacentHTML("beforeend", terrain.info.district);
+
+	document.getElementById("terrain_description").innerHTML = terrain.info.description;
+	document.getElementById("terrain_type").innerHTML = terrain.info.type_of_soil_coverage;
+	document.getElementById("terrain_current_use").innerHTML = terrain.info.current_use;
+	document.getElementById("terrain_previous_use").innerHTML = terrain.info.previous_use;
+
+	document.getElementById("owner_fullname").innerHTML = terrain.owner.name;
+	document.getElementById("owner_id").innerHTML = terrain.owner.nif;
+	document.getElementById("owner_telephone").innerHTML = terrain.owner.telephone;
+	document.getElementById("owner_smartphone").innerHTML = terrain.owner.smartphone;
+	document.getElementById("owner_address").innerHTML = terrain.owner.address;
+
+}
+
+
+async function approveTerrain(username, terrain_name){
+	try{
+		let response = await axios.put("/api/parcel/approve/" + username + "?terrain=" + terrain_name);
+		const data = response.data;
+		console.log(data);
+		
+	} catch (error){
+		//alert(error);
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
+}
+
+async function denyTerrain(terrain_name){
+	try{
+		let response = await axios.put("/api/parcel/deny/user?terrain" + terrain_name);
+		const data = response.data;
+		console.log(data);
+		
+	} catch (error){
+		//alert(error);
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
+}
 
 async function getRCM(day, dico, target_id){
 	try{

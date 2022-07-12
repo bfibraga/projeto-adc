@@ -547,6 +547,15 @@ public class TerrainImplementation implements Parcel {
 
     // ---------- METHODS USED TO CHECK IF A TERRAIN INTERSECTS ANOTHER ---------- \\
 
+    private QueryResults<Entity> find(String identifier, String kind, String parameter, int limit_query) {
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind(kind)
+                .setFilter(StructuredQuery.PropertyFilter.eq(parameter, identifier))
+                .setLimit(limit_query)
+                .build();
+
+        return datastore.run(query);
+    }
 
     // ---------- METHODS USED TO AID IN THE PROCESS OF APPROVING A TERRAIN ---------- \\
 
@@ -555,6 +564,20 @@ public class TerrainImplementation implements Parcel {
         Entity terrainToBeApproved = checkIfTerrainIsInWaitList(nameTerrain);
         if (terrainToBeApproved == null)
             return Result.error(Response.Status.NOT_FOUND, "Terrain was not found.");
+
+        /*String ownerID = "";
+
+        QueryResults<Entity> resultQuery = this.find(ownerTerrain, "UserCredentials", "usr_username", 1);
+        if (!resultQuery.hasNext()) {
+            resultQuery = this.find(ownerTerrain, "UserCredentials", "usr_email", 1);
+        }
+
+        if (!resultQuery.hasNext()) {
+            return Result.error(Response.Status.NOT_FOUND, "User " + ownerTerrain + " doesn't exist");
+        } else {
+            ownerID = resultQuery.next().getKey().getName();
+        }*/
+
         Result<Void> result = denyTerrain(ownerTerrain, nameTerrain);
         if (!result.isOK())
             return result;
@@ -681,6 +704,7 @@ public class TerrainImplementation implements Parcel {
                     PolygonUtils.centroid(points),
                     Random.color(),
                     new TerrainIdentifierData(
+                            tmp.getString(ENTITY_PROPERTY_ID_OWNER),
                             tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN),
@@ -735,6 +759,7 @@ public class TerrainImplementation implements Parcel {
                     PolygonUtils.centroid(points),
                     Random.color(),
                     new TerrainIdentifierData(
+                            tmp.getString(ENTITY_PROPERTY_ID_OWNER),
                             tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN),
@@ -1032,6 +1057,7 @@ public class TerrainImplementation implements Parcel {
                     new LatLng(),
                     Random.color(),
                     new TerrainIdentifierData(
+                            tmp.getString(ENTITY_PROPERTY_ID_OWNER),
                             tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN),
@@ -1086,6 +1112,7 @@ public class TerrainImplementation implements Parcel {
                     new LatLng(),
                     Random.color(),
                     new TerrainIdentifierData(
+                            tmp.getString(ENTITY_PROPERTY_ID_OWNER),
                             tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN),
@@ -1140,6 +1167,7 @@ public class TerrainImplementation implements Parcel {
                     new LatLng(),
                     Random.color(),
                     new TerrainIdentifierData(
+                            tmp.getString(ENTITY_PROPERTY_ID_OWNER),
                             tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN),
                             tmp.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN),
@@ -1192,6 +1220,7 @@ public class TerrainImplementation implements Parcel {
                 return Result.error(Response.Status.BAD_REQUEST, "This user can't approve this terrain.");
             }
         }
+
         if (userRole.getString("role_name").equals("Func-Dist")) {
             if (!userRole.getString("place_of_influence").equals(terrainToBeApproved.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN))) {
                 return Result.error(Response.Status.BAD_REQUEST, "This user can't approve this terrain.");

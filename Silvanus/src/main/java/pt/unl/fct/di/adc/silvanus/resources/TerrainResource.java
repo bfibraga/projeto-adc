@@ -6,6 +6,7 @@ import pt.unl.fct.di.adc.silvanus.data.terrain.LatLng;
 import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainData;
 import pt.unl.fct.di.adc.silvanus.data.terrain.result.ChunkResultData;
 import pt.unl.fct.di.adc.silvanus.data.terrain.result.TerrainResultData;
+import pt.unl.fct.di.adc.silvanus.implementation.NotificationImplementation;
 import pt.unl.fct.di.adc.silvanus.implementation.terrain.TerrainImplementation;
 import pt.unl.fct.di.adc.silvanus.implementation.user.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestParcel;
@@ -21,6 +22,7 @@ public class TerrainResource implements RestParcel {
 
     private TerrainImplementation impl = new TerrainImplementation();
     private UserImplementation userImplementation = new UserImplementation();
+    private NotificationImplementation notificationImplementation = new NotificationImplementation();
 
     public TerrainResource() {
     }
@@ -182,6 +184,48 @@ public class TerrainResource implements RestParcel {
         Result<List<TerrainResultData>> result = impl.getAllPendingTerrainsOfUser(idOfUser);
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
+        return Response.ok(result.value()).build();
+    }
+
+    @Override
+    public Response listPendingTerrainCounty(String token, String county) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        if (county == null){
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        Result<List<TerrainResultData>> result = impl.getAllTerrainsToBeApprovedInCounty(county);
+
+        if (!result.isOK())
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+
+        return Response.ok(result.value()).build();
+    }
+
+    @Override
+    public Response listPendingTerrainDistrict(String token, String district) {
+        //Token verifycation
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        if (district == null){
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        Result<List<TerrainResultData>> result = impl.getAllTerrainsToBeApprovedInDistrict(district);
+
+        if (!result.isOK())
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+
         return Response.ok(result.value()).build();
     }
 

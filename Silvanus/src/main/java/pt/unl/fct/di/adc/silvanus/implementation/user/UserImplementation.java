@@ -109,7 +109,9 @@ public class UserImplementation implements Users {
             System.out.println(role.getRoleName());
             Entity userRole = Entity.newBuilder(userRoleKey)
                     .set("role_name", role.getRoleName())
-                    .set("role_priority", role.getPriority()).build();
+                    .set("role_priority", role.getPriority())
+                    .set("place_of_influence", "")
+                    .build();
             this.cache.put(user_id, role);
 
             Entity roleCredentialsEntity = txn.get(roleCredentialsKey);
@@ -658,13 +660,20 @@ public class UserImplementation implements Users {
                         JSON.decode(lastLogout.getString("map_center_location"), LatLng.class),
                         lastLogout.getDouble("map_zoom"));
 
+        String roleName = role.getDisplayName();
+        String influence = roleEntiry.getString("place_of_influence");
+
+        if (!influence.equals("")){
+            roleName = String.format(roleName, "de " + influence);
+        }
+
         //TODO Change the way to return result
         UserInfoVisible result = new UserInfoVisible(
                 userEntity.getString("usr_username"),
                 userEntity.getString("usr_email"),
                 info,
                 stateEntity.getString("usr_state"),
-                role.getDisplayName(),
+                roleName,
                 role.getRoleColor(),
                 logoutData,
                 new LoggedInVisibleData(Arrays.asList(role.getMenus()))

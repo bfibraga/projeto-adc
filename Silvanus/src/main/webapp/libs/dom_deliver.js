@@ -182,6 +182,62 @@ function handleTerrainPendingCard(name, xmlDoc, params){
     
 }
 
+function terrainOnPending(id, element){
+    const elemName = "elems/terrain_on_pending_card.html"; 
+    let params = [id, element];
+
+    LoadHTMLDoc(elemName, handleTerrainOnPendingCard, params);
+}
+
+function handleTerrainOnPendingCard(name, xmlDoc, params){
+    elems[name] = parser.parseFromString(xmlDoc, "text/html");
+
+    const terrain = params[1];
+    let target = document.getElementById("pending_terrain_accept_list_scrollpsy");
+    let count = target.getAttribute("data-app-value");
+    target.setAttribute("data-app-value", String(parseInt(count)+1));
+
+    elems[name].querySelector(".col-12").setAttribute("data-app-terrain-id", params[0]);
+
+    elems[name].querySelector(".btn-success").setAttribute("data-user", terrain.credentials.userID);
+    elems[name].querySelector(".btn-success").setAttribute("data-terrain", terrain.credentials.name);
+
+    elems[name].querySelector(".btn-danger").setAttribute("data-terrain", terrain.credentials.name);
+
+    addEvent(target, 'click', function (event) {
+        console.log(event.target);
+        let parent = event.target.parentElement;
+        while (parent.getAttribute("data-app-terrain-id") === null){
+            parent = parent.parentElement;
+        }
+        //console.log(parent);
+        //console.log(parent.getAttribute("data-app-terrain-id"));
+        if (parent.getAttribute("data-app-terrain-id") === params[0]){
+            console.log('Button Clicked');
+
+            if (event.target.classList.contains("terrain-on-pending")){
+                loadTerrainOnPendingInfo(params[0]);
+            }
+
+            if (event.target.classList.contains("btn-success")){
+                console.log("clicked on button success")
+                approveTerrain(event.target.getAttribute("data-user"), event.target.getAttribute("data-terrain"))
+            }
+
+            if (event.target.classList.contains("btn-danger")){
+                console.log("clicked on button danger");
+                denyTerrain(event.target.getAttribute("data-terrain"))
+            }
+        }
+      });
+
+    const status = String(terrain.credentials.townhall) + " / " + String(terrain.credentials.district);
+    elems[name].querySelector(".card-title").insertAdjacentHTML("beforeend", terrain.credentials.name);
+    elems[name].querySelector(".card-text").insertAdjacentHTML("beforeend", status);
+
+    target.insertAdjacentHTML("beforeend", elems[name].body.innerHTML);
+}
+
 function communityMember(username, email, avatar){
     const elemName = "elems/community-member.html"; 
     let params = [username, email, avatar, "list_community_members"];

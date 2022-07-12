@@ -5,6 +5,7 @@ import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainData;
 
 import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.*;
 
+import javax.print.attribute.standard.Media;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -105,6 +106,16 @@ public interface RestParcel {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     Response listPendingTerrainUser(@CookieParam(TOKEN) String token, @QueryParam("user") @DefaultValue(" ") String idOfUser);
+
+    @GET
+    @Path("/list/pending/county/{county}")
+    @Produces(MediaType.APPLICATION_JSON)
+    Response listPendingTerrainCounty(@CookieParam(TOKEN) String token, @PathParam("county") String county);
+
+    @GET
+    @Path("/list/pending/district/{district}")
+    @Produces(MediaType.APPLICATION_JSON)
+    Response listPendingTerrainDistrict(@CookieParam(TOKEN) String token, @PathParam("district") String district);
 
     /**
      * This method is used to list all the terrains in a certain county (concelho). Those terrains
