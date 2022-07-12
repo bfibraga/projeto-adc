@@ -6,7 +6,7 @@
     --text-secundary: rgb(150,150,150);
     --bg-primary: #f8f9fa;
     --bg-secundary: rgb(210,210,210);
-    --item-primary: rgb(141, 218, 132);
+    --item-primary: rgb(91, 159, 91);
     --item-secundary: #c29661;
 
     --header-offcanvas-height: 4rem;
@@ -65,6 +65,10 @@ main{
     color: var(--item-secundary);
 }
 
+.app-nav-item:nth-last-child(0){
+    margin-top: auto;
+}
+
 .app-nav-link{
     display: flex;
     align-items: center;
@@ -97,47 +101,12 @@ main{
     transition: 200ms ease;
   }
   
-  div[data-app-pending="false"]{
+  .offcanvas-body[data-app-menu-active="false"]{
     display: none;
   }
-
-  :root{
-    --loader-color: black;
-  }
   
-  .loader-in {
-    width: 40px;
-    height: 40px;
-    display: inline-block;
-    position: relative;
-  }
-  
-  .loader-in::after,
-  .loader-in::before {
-    content: '';  
-    box-sizing: border-box;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid var(--loader-color);
-    position: absolute;
-    left: 0;
-    top: 0;
-    animation: animloader 2s linear infinite;
-  }
-  .loader-in::after {
-    animation-delay: 1s;
-  }
-  
-  @keyframes animloader {
-    0% {
-      transform: scale(0);
-      opacity: 1;
-    }
-    100% {
-      transform: scale(1);
-      opacity: 0;
-    }
+  div[data-app-pending="false"]{
+    display: none;
   }
 
 /*---Small Screens---*/
@@ -198,15 +167,9 @@ main{
     }
 
     #request-terrain-offcanvas{
-        --size : 45%;
+        --size : 45vh;
         height: var(--size) !important;
-        top: calc(100% - var(--size) - var(--nav-bar-len));
-    }
-
-    #terrain-properties{
-        --size : 45%;
-        height: var(--size) !important;
-        top: calc(100% - var(--size) - var(--nav-bar-len));
+        top: calc(100vh - var(--size) - var(--nav-bar-len));
     }
 
     .offcanvas[data-expand="false"]{
@@ -217,13 +180,6 @@ main{
         transform: rotate(180deg);
     }
 
-    .app-popup .position-absolute {
-        bottom: var(--nav-bar-len) !important;
-    }
-
-    #usr_list_notification{
-        max-width: fit-content;
-    }
 }
 
 /*---Large Screens---*/
@@ -264,10 +220,6 @@ main{
         transition: scale 200ms ease-in-out;
     }
 
-    .app-nav-item:nth-last-child(2){
-        margin-top: auto;
-    }
-
     .app-nav-item{
         width: 100%;
     }
@@ -288,7 +240,7 @@ main{
     }
 
     #request-terrain-offcanvas{
-        --size : 30%;
+        --size : 50vh;
         width: var(--size) !important;
     }
 
@@ -296,17 +248,4 @@ main{
         display: none;
     }
 
-    #terrain-properties{
-        --size : 50%;
-        width: var(--size) !important;
-    }
-
-    .offcanvas-start{
-        --size : 85%;
-        width: var(--size) !important;
-    }
-
-    .app-popup .position-absolute {
-        bottom: 0 !important;
-    }
 }

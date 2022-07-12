@@ -50,7 +50,7 @@ public abstract class CacheManager<K> {
      * @return An object in cache of given type
      */
     public <O> O get(K key, String property, Class<O> class_object) {
-        Map<String, String> cache_result = this.get(key);
+        Map<String, String> cache_result = this.verifyEntry(key);
         String data_json = cache_result.get(hashProperty(property));
 
         if (data_json == null){
@@ -104,7 +104,7 @@ public abstract class CacheManager<K> {
     @SuppressWarnings("unchecked")
     public <V> void put(K key, String property, V value){
         //TODO Testing
-        Map<String, String> cache_result = this.get(key);
+        Map<String, String> cache_result = this.verifyEntry(key);
         cache_result.put(hashProperty(property), JSON.encode(value));
         this.cache.put(key.toString(), cache_result);
     }
@@ -114,8 +114,9 @@ public abstract class CacheManager<K> {
      * @param key - Given key to remove a object from a property
      * @param property - Given property to remove
      */
+    @SuppressWarnings("unchecked")
     public void remove(K key, String property){
-        Map<String, String> cache_result = this.get(key);
+        Map<String, String> cache_result = this.verifyEntry(key);
         cache_result.remove(hashProperty(property));
         this.cache.remove(key.toString());
     }
@@ -130,7 +131,7 @@ public abstract class CacheManager<K> {
      * @return Collection of given key
      */
     @SuppressWarnings("unchecked")
-    private Map<String, String> get(K key){
+    private Map<String, String> verifyEntry(K key){
         if (key == null) {
             return null;
         }

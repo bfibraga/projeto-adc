@@ -1,9 +1,10 @@
 package pt.unl.fct.di.adc.silvanus.util.cache;
 
 import pt.unl.fct.di.adc.silvanus.data.user.*;
-import pt.unl.fct.di.adc.silvanus.implementation.user.perms.UserRole;
 
-
+enum UserProperties {
+    ALL, CREDENTIALS, INFO, ROLE, STATE;
+}
 
 /**
  * User Cache manager

@@ -5,13 +5,12 @@ import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
 import pt.unl.fct.di.adc.silvanus.implementation.NotificationImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestNotifications;
-import pt.unl.fct.di.adc.silvanus.implementation.user.UserImplementation;
+import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
-import java.util.List;
 import java.util.Set;
 
 @Path(RestNotifications.PATH)
@@ -33,7 +32,7 @@ public class NotificationResource implements RestNotifications {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        Result<List<UserInfoVisible>> userResult = userImplementation.getUser(token, data.getReceiver());
+        Result<Set<UserInfoVisible>> userResult = userImplementation.getUser(token, data.getReceiver());
 
         if (!userResult.isOK() || userResult.value().isEmpty()){
             return Response.status(userResult.error()).entity(userResult.statusMessage()).build();
@@ -54,10 +53,10 @@ public class NotificationResource implements RestNotifications {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        Result<List<UserInfoVisible>> userResult = userImplementation.getUser(token, userID);
+        Result<Set<UserInfoVisible>> userResult = userImplementation.getUser(token, userID);
 
-        if (userResult.value().isEmpty()){
-            return Response.status(Response.Status.FORBIDDEN).entity(userResult.statusMessage()).build();
+        if (!userResult.isOK() || userResult.value().isEmpty()){
+            return Response.status(userResult.error()).entity(userResult.statusMessage()).build();
         }
 
         Result<Set<Notification>> res = notificationImplementation.list(userID);

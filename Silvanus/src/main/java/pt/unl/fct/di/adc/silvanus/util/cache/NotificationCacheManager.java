@@ -2,7 +2,9 @@ package pt.unl.fct.di.adc.silvanus.util.cache;
 
 import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
 
-
+enum NotificationProperties {
+    ALL
+}
 
 /**
  * Notification Cache manager

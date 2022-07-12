@@ -28,15 +28,16 @@ public interface Result<T> {
 	 * 
 	 * @return
 	 */
-	ResultMessage statusMessage();
+	String statusMessage();
 
 	/**
 	 * Convenience method for returning non error results of the given type
 	 * 
+	 * @param Class of value of the result
 	 * @return the value of the result
 	 */
-	static <T> ResultOK<T> ok(T result, String okMessage) {
-		return new ResultOK<>(result, okMessage);
+	static <T> ResultOK<T> ok(T result) {
+		return new ResultOK<>(result);
 	}
 
 	/**
@@ -45,7 +46,7 @@ public interface Result<T> {
 	 * @return non-error result
 	 */
 	static <T> ResultOK<T> ok() {
-		return new ResultOK<>(null, "");
+		return new ResultOK<>(null);
 	}
 
 	/**

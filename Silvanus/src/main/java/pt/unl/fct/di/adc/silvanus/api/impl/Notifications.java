@@ -17,4 +17,6 @@ public interface Notifications {
 
     //TODO Review all this support functions
     boolean canSendMoreNotifications(String senderID, String receiverID);
+
+    boolean userExists(String user_username);
 }

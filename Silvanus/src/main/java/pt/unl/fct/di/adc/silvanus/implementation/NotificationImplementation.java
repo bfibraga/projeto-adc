@@ -1,16 +1,18 @@
 package pt.unl.fct.di.adc.silvanus.implementation;
 
 import com.google.cloud.datastore.*;
+import com.google.gson.Gson;
 import pt.unl.fct.di.adc.silvanus.data.notification.Notification;
 import pt.unl.fct.di.adc.silvanus.resources.NotificationResource;
+import pt.unl.fct.di.adc.silvanus.resources.ParcelaResource;
 import pt.unl.fct.di.adc.silvanus.api.impl.Notifications;
-import pt.unl.fct.di.adc.silvanus.util.cache.CacheManager;
-import pt.unl.fct.di.adc.silvanus.util.cache.NotificationCacheManager;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
 
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.core.Response;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class NotificationImplementation implements Notifications {
@@ -26,10 +28,7 @@ public class NotificationImplementation implements Notifications {
 
     private final KeyFactory notificationKeyFactory = datastore.newKeyFactory().setKind(NOTIFICATION_TABLE_NAME);
 
-    private final CacheManager<String> cache = new NotificationCacheManager<>();
-
-    public NotificationImplementation() {
-    }
+    public NotificationImplementation() {}
 
     @Override
     public Result<Void> send(Notification data) {
@@ -52,8 +51,6 @@ public class NotificationImplementation implements Notifications {
                 return Result.error(Response.Status.FORBIDDEN, "Não e possivel enviar mais mensagens neste sentido.");
             }
 
-            this.cache.remove(data.getReceiver());
-
             Entity transaction = Entity.newBuilder(notificationKey)
                     .set(PROPERTY_ID_OF_SENDER, data.getSender())
                     .set(PROPERTY_ID_OF_RECEIVER, data.getReceiver())
@@ -73,21 +70,13 @@ public class NotificationImplementation implements Notifications {
     @Override
     public Result<Set<Notification>> list(String userID) {
         LOG.fine("Query was started.");
-
-        Set<Notification> result = this.cache.get(userID, "list", Set.class);
-
-        if (result == null){
-            result = new HashSet<>();
-        } else {
-            return Result.ok(result, "List Notifications of " + userID);
-        }
-
         Query<Entity> query;
         QueryResults<Entity> results;
 
         query = Query.newEntityQueryBuilder().setKind(NOTIFICATION_TABLE_NAME).setFilter(
                 StructuredQuery.CompositeFilter.and(StructuredQuery.PropertyFilter.eq(PROPERTY_ID_OF_RECEIVER, userID))).build();
         results = datastore.run(query);
+        Set<Notification> result = new HashSet<>();
         while (results.hasNext()) {
             Entity tmp = results.next();
 
@@ -97,9 +86,7 @@ public class NotificationImplementation implements Notifications {
 
             result.add(notification);
         }
-
-        this.cache.put(userID, "list", result);
-        return Result.ok(result, "Listed Notifications");
+        return Result.ok(result);
     }
 
     @Override
@@ -113,7 +100,6 @@ public class NotificationImplementation implements Notifications {
                 LOG.severe("A notificacao pretendida nao foi encontrada. Verifique se todos os campos estao bem feitos.");
                 return Result.error(Response.Status.NOT_FOUND, "Notificacao nao encontrada.");
             }
-
             txn.delete(notificationKey);
             txn.commit();
             return Result.ok();
@@ -142,4 +128,16 @@ public class NotificationImplementation implements Notifications {
         }
         return i < MAXIMUM_NUMBER_OF_MESSAGES;
     }
+
+    public boolean userExists(String user_username) {
+        LOG.fine("Query was started.");
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        query = Query.newEntityQueryBuilder().setKind("UserCredentials").setFilter(
+                StructuredQuery.CompositeFilter.and(StructuredQuery.PropertyFilter.eq("usr_username", user_username))).build();
+        results = datastore.run(query);
+        return results.hasNext();
+    }
+
 }

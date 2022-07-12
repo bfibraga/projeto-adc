@@ -2,11 +2,7 @@ package pt.unl.fct.di.adc.silvanus.tests;
 
 import io.jsonwebtoken.Claims;
 import org.testng.annotations.Test;
-import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 
 public class TOKENTests {
 
@@ -27,7 +23,7 @@ public class TOKENTests {
     public void test2(){
         String userID = "userID1";
 
-        String token1 = TOKEN.createNewJWS(userID, 1, new HashSet<>());
+        String token1 = TOKEN.createNewJWS(userID);
 
         assert !token1.trim().equals("");
 

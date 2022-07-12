@@ -1,8 +1,10 @@
 package pt.unl.fct.di.adc.silvanus.util.cache;
 
-import pt.unl.fct.di.adc.silvanus.data.terrain.TerrainData;
+import pt.unl.fct.di.adc.silvanus.data.parcel.ParcelaData;
 
-
+enum ParcelProperties {
+    ALL
+}
 
 /**
  * Parcel Cache manager
@@ -24,7 +26,7 @@ public class ParcelCacheManager<K> extends CacheManager<K> {
      * @param key - Given key to insert the object
      * @param data - ParcelaData to insert
      */
-    public void put(K key, TerrainData data){
+    public void put(K key, ParcelaData data){
         this.put(key, ParcelProperties.ALL.name(), data);
     }
 }

@@ -1,23 +1,26 @@
 package pt.unl.fct.di.adc.silvanus.resources;
 
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import io.jsonwebtoken.Claims;
+import pt.unl.fct.di.adc.silvanus.api.rest.RestInterface;
 import pt.unl.fct.di.adc.silvanus.data.user.LoginData;
-import pt.unl.fct.di.adc.silvanus.data.user.UserStateData;
-import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInData;
-import pt.unl.fct.di.adc.silvanus.data.user.result.LoggedInVisibleData;
-import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 import pt.unl.fct.di.adc.silvanus.data.user.result.UserInfoVisible;
-import pt.unl.fct.di.adc.silvanus.implementation.user.UserImplementation;
+import pt.unl.fct.di.adc.silvanus.implementation.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.api.rest.RestUsers;
+import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.TOKEN;
 import pt.unl.fct.di.adc.silvanus.util.result.Result;
+import pt.unl.fct.di.adc.silvanus.api.rest.RestInterface;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Path(RestUsers.PATH)
@@ -38,13 +41,12 @@ public class UsersResource implements RestUsers {
 
 		//TODO Testing
 		//Build not essential entities
-		/*Queue queue = QueueFactory.getDefaultQueue();
+		Queue queue = QueueFactory.getDefaultQueue();
 		String url = String.format("%s%s%s", RestInterface.PATH, RestUsers.PATH, "/build");
 		System.out.println(url);
 		queue.add(TaskOptions.Builder.withUrl(url)
 						.param("userData", JSON.encode(data))
-				.param("secret", TOKEN.createNewJWS("silvanus:build", 1000, new HashSet<>())));*/
-
+				.param("secret", TOKEN.createNewJWS("silvanus:build", 1000, new String[]{})));
 		return Response.ok().cookie(TOKEN.cookie(result.value())).build();
 	}
 
@@ -74,18 +76,18 @@ public class UsersResource implements RestUsers {
 		LoginData data = identifier.matches(LoginData.EMAIL_REGEX) ?
 				new LoginData(LoginData.NOT_DEFINED, identifier, password) :
 				new LoginData(identifier, LoginData.NOT_DEFINED, password);
-		Result<LoggedInData> result = impl.login(data);
+		Result<String> result = impl.login(data);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).cookie(TOKEN.cookie(null)).build();
 		}
 
 		//Add http-only cookie
-		return Response.ok().cookie(TOKEN.cookie(result.value().getToken())).entity(result.value().getStateData()).build();
+		return Response.ok().cookie(TOKEN.cookie(result.value())).build();
 	}
 
 	@Override
-	public Response logout(String token, LogoutData data) {
+	public Response logout(String token) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -93,7 +95,7 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		Result<Void> result = impl.logout(jws.getSubject(), data);
+		Result<Void> result = impl.logout(jws.getSubject());
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -103,7 +105,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response promote(String token, String username, String new_role, String placeOfInfluence) {
+	public Response promote(String token, String username, String new_role) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -111,11 +113,7 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		/*Set<String> scope = jws.get("scope", HashSet.class);
-
-		System.out.println(scope);*/
-
-		Result<Void> result = impl.promote(jws.getSubject(), username, new_role, placeOfInfluence);
+		Result<Void> result = impl.promote(token, username, new_role);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -134,7 +132,7 @@ public class UsersResource implements RestUsers {
 		}
 
 		//TODO Alter getUser implementation
-		Result<List<UserInfoVisible>> result = impl.getUser(jws.getSubject(), identifier);
+		Result<Set<UserInfoVisible>> result = impl.getUser(jws.getSubject(), identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -157,7 +155,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response remove(String token, String identifier) {
+	public Response remove(String token, String username) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -165,17 +163,17 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		Result<Void> result =  impl.remove(jws.getSubject(), identifier);
+		Result<Void> result = impl.remove(token, username);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
-		return Response.ok().entity("User " + identifier + " was sucessfully removed").build();
+		return Response.ok().entity("User " + username + "was sucessfully removed").build();
 	}
 
 	@Override
-	public Response activate(String token, String identifier, String code, boolean value) {
+	public Response activate(String token, String identifier) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -183,24 +181,13 @@ public class UsersResource implements RestUsers {
 			return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
 		}
 
-		Result<Void> result = impl.activate(jws.getSubject(), identifier, code, value);
+		Result<Void> result = impl.activate(token, identifier);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();
 		}
 
 		return Response.ok().entity("User was sucessfully activated").build();
-	}
-
-	@Override
-	public Response newCode(String identifier) {
-		Result<String> result = impl.newActivationCode(identifier);
-
-		if (!result.isOK()){
-			return Response.status(result.error()).entity(result.statusMessage()).build();
-		}
-
-		return Response.ok().entity(result.value()).build();
 	}
 
 	@Override

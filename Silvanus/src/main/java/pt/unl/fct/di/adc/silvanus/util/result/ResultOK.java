@@ -1,5 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.util.result;
 
+import com.google.gson.Gson;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 
 import javax.ws.rs.core.Response;
@@ -8,11 +9,8 @@ public class ResultOK<T> implements Result<T> {
 
 	final T result;
 
-	final String okMessage;
-
-	public ResultOK(T result, String okMessage) {
+	public ResultOK(T result) {
 		this.result = result;
-		this.okMessage = okMessage;
 	}
 
 	@Override
@@ -30,9 +28,14 @@ public class ResultOK<T> implements Result<T> {
 		return Response.Status.OK;
 	}
 
+	public String toString() {
+		String[] fields = {this.value().toString(),this.statusMessage()};
+		return JSON.encode(fields);
+	}
+
 	@Override
-	public ResultMessage statusMessage() {
-		return new ResultMessage(Response.Status.OK.getStatusCode(), okMessage);
+	public String statusMessage() {
+		return "OK";
 	}
 
 }

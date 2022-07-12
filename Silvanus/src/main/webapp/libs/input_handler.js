@@ -143,3 +143,7 @@ function nextStep(){
   input_fields["curr_step"].classList.remove("d-none");
 }
 
+function loadAvatar(event){
+  const avatar = document.getElementById("usr_avatar");
+  avatar.src = URL.createObjectURL(event.target.files[0])
+}

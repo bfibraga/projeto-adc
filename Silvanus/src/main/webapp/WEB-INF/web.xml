@@ -52,7 +52,7 @@
 
 	<servlet-mapping>
 		<servlet-name>storage-servlet</servlet-name>
-		<url-pattern>/files/*</url-pattern>
+		<url-pattern>/gcs/*</url-pattern>
 	</servlet-mapping>
 	<security-constraint>
 		<web-resource-collection>

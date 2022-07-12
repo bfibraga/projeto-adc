@@ -1,6 +1,7 @@
 package pt.unl.fct.di.adc.silvanus.data.user;
 
-import pt.unl.fct.di.adc.silvanus.implementation.user.perms.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.cloud.storage.Acl;
 
 public class UserData {
 
@@ -12,23 +13,14 @@ public class UserData {
 	private String role;
 	private UserStateData state;
 
-	public UserData() {
-		this(new LoginData(), "", new UserInfoData());
-	}
-
-	public UserData(
-			LoginData credentials,
-			String confirm_password,
-			UserInfoData info) {
-		this(credentials, confirm_password, info, "End-User", new UserStateData());
-	}
+	public UserData() {}
 
 	public UserData(
 			LoginData credentials,
 			String confirm_password,
 			String role,
 			UserInfoData info) {
-		this(credentials, confirm_password, info, role, new UserStateData());
+		this(credentials, confirm_password, info, UserRole.compareType(role).getRoleName(), new UserStateData());
 	}
 
 	public UserData(
@@ -53,15 +45,12 @@ public class UserData {
 	}
 
 	public UserInfoData getInfo() {
-		if (this.info == null){
-			this.info = new UserInfoData();
-		}
 		return this.info;
 	}
 
 	public String getRole() {
 		if (this.role == null){
-			this.role = UserRole.ENDUSER.getRoleName();
+			this.role = UserRole.USER.getRoleName();
 		}
 		return this.role;
 	}
@@ -75,22 +64,23 @@ public class UserData {
 
 	public String getID(){
 		LoginData data = this.getCredentials();
-		return data.getID();
+		return data.getUsername().hashCode() + SEPARATOR +
+				data.getEmail().hashCode();
+	}
+
+	private boolean validField(String keyword) {
+		return keyword !=null && !keyword.trim().equals("");
 	}
 
 	public boolean validation() {
-		LoginData loginData = this.getCredentials();
-		UserInfoData infoData = this.getInfo();
-		UserStateData stateData = this.getUserStateData();
+		LoginData data = this.getCredentials();
+		boolean valid =
+				validField(data.getUsername())
+						&& validField(data.getEmail())
+						&& validField(data.getPassword())
+						&& data.getPassword().equals(confirm_password);
 
-		boolean loginValid = loginData.validation()
-				&& loginData.getPassword().equals(confirm_password);
-
-		boolean infoValid = infoData.validation();
-
-		boolean stateValid = stateData.validation();
-
-		return loginValid && infoValid && stateValid;
+		return valid;
 	}
 
 	@Override
