@@ -34,7 +34,7 @@ public class CommunityResource implements RestCommunity {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -43,7 +43,7 @@ public class CommunityResource implements RestCommunity {
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
 
-        return Response.ok().entity(result).build();
+        return Response.ok().entity(result.value()).build();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class CommunityResource implements RestCommunity {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
         data.setResponsible(jws.getSubject());
@@ -69,7 +69,7 @@ public class CommunityResource implements RestCommunity {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
@@ -82,21 +82,15 @@ public class CommunityResource implements RestCommunity {
     }
 
     @Override
-    public Response join(String token, String identifier, String name) {
+    public Response join(String token, String name) {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        //User of given identifier exists
-        Result<List<UserInfoVisible>> userResult = userImplementation.getUser(jws.getSubject(), identifier);
-
-        if (userResult.value().isEmpty())
-            return Response.status(Response.Status.NOT_FOUND).build();
-
-        Result<Void> result = identifier.trim().equals("") ? impl.join(jws.getSubject(), name) : impl.join(identifier, name);
+        Result<Void> result = impl.join(name, jws.getSubject());
 
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -105,21 +99,15 @@ public class CommunityResource implements RestCommunity {
     }
 
     @Override
-    public Response exit(String token, String identifier, String name) {
+    public Response exit(String token, String name) {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        //User of given identifier exists
-        Result<List<UserInfoVisible>> userResult = userImplementation.getUser(jws.getSubject(), identifier);
-
-        if (userResult.value().isEmpty())
-            return Response.status(Response.Status.NOT_FOUND).build();
-
-        Result<Void> result = identifier.trim().equals("") ? impl.exit(jws.getSubject(), name) : impl.exit(identifier, name);
+        Result<Void> result = impl.exit(name, jws.getSubject());;
 
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -132,7 +120,9 @@ public class CommunityResource implements RestCommunity {
         //Token verifycation
         Claims jws = TOKEN.verifyToken(token);
 
-        if (jws == null){
+        System.out.println(name);
+
+        if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 

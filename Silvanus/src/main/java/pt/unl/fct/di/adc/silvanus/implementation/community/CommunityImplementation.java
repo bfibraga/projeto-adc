@@ -53,11 +53,19 @@ public class CommunityImplementation implements Community {
 
         while (results.hasNext()) {
             Entity tmp = results.next();
+
             CommunityData communityData = null;
+
+            System.out.println(tmp.getString(COMMUNITY_NAME));
+            System.out.println(tmp.getString(COMMUNITY_RESPONSIBLE));
+
             // Since the community is always created with one element, it is dumb to check if it has zero elements. If it has, it is deleted.
-            List<String> membersOfCommunity = members(tmp.getString(tmp.getString(COMMUNITY_NAME))).value();
+
+            List<String> membersOfCommunity = members(tmp.getString(COMMUNITY_NAME)).value();
+
             communityData = new CommunityData(tmp.getString(COMMUNITY_NAME),
                     tmp.getString(COMMUNITY_RESPONSIBLE), membersOfCommunity);
+
             list.add(communityData);
         }
 
@@ -118,7 +126,7 @@ public class CommunityImplementation implements Community {
         if (nameOfCommunity == null || nameOfCommunity.isEmpty())
             return Result.error(Response.Status.NO_CONTENT, "Name is not valid.");
 
-        Key communityKey = communityKeyFactory.newKey(nameOfCommunity.hashCode());
+        Key communityKey = communityKeyFactory.newKey(String.format("%s", nameOfCommunity.hashCode()));
 
         Transaction txn = datastore.newTransaction();
 
@@ -130,6 +138,24 @@ public class CommunityImplementation implements Community {
 
             if (!community.getString(COMMUNITY_RESPONSIBLE).equals(creator))
                 return Result.error(Response.Status.FORBIDDEN, "This person can't delete this community.");
+
+            // TODO apagar todos os users que estao numa comunidade
+
+            Key k = communityMembersKeyFactory.addAncestor(PathElement.of(
+                            "Community", String.format("%s", nameOfCommunity.hashCode())))
+                    .newKey(datastore.get(communityKey).getString(COMMUNITY_RESPONSIBLE));
+
+
+            Query<Entity> query;
+            QueryResults<Entity> results;
+            query = Query.newEntityQueryBuilder().setKind("Members").setFilter(
+                    StructuredQuery.PropertyFilter.hasAncestor(k)).build();
+            results = datastore.run(query);
+
+            while (results.hasNext()) {
+                Entity tmp = results.next();
+                txn.delete(tmp.getKey());
+            }
 
             txn.delete(communityKey);
             txn.commit();
@@ -145,7 +171,7 @@ public class CommunityImplementation implements Community {
         if (nameOfCommunity == null || nameOfCommunity.isEmpty())
             return Result.error(Response.Status.NO_CONTENT, "Name is not valid.");
 
-        Key communityKey = communityKeyFactory.newKey(nameOfCommunity.hashCode());
+        Key communityKey = communityKeyFactory.newKey(String.format("%s", nameOfCommunity.hashCode()));
 
         if (datastore.get(communityKey) == null)
             return Result.error(Response.Status.NOT_FOUND, "The community was not found.");
@@ -154,20 +180,22 @@ public class CommunityImplementation implements Community {
 
         try {
             Entity community = datastore.get(communityKey);
+            long value = community.getLong(COMMUNITY_NUMBER_MEMBERS);
             community = Entity.newBuilder(communityKey)
                     .set(COMMUNITY_NAME, community.getString(COMMUNITY_NAME))
                     .set(COMMUNITY_RESPONSIBLE, community.getString(COMMUNITY_RESPONSIBLE))
-                    .set(COMMUNITY_NUMBER_MEMBERS, Integer.parseInt(community.getValue(COMMUNITY_NUMBER_MEMBERS).toString()) + 1)
+                    .set(COMMUNITY_NUMBER_MEMBERS, value + 1)
                     .build();
 
             txn.update(community);
 
             Key communityMemberKey = communityMembersKeyFactory.addAncestor(PathElement.of(
-                    "Community", nameOfCommunity.hashCode())).newKey(idOfUser);
+                            "Community", String.format("%s", nameOfCommunity.hashCode())))
+                    .newKey(idOfUser);
 
             Entity member = Entity.newBuilder(communityMemberKey)
                     .set("id_of_user", idOfUser)
-                    .set("name_of_community", nameOfCommunity)
+                    .set("name_of_community", nameOfCommunity.hashCode())
                     .build();
 
             txn.put(member);
@@ -186,7 +214,7 @@ public class CommunityImplementation implements Community {
         if (nameOfCommunity == null || nameOfCommunity.isEmpty())
             return Result.error(Response.Status.NO_CONTENT, "Name is not valid.");
 
-        Key communityKey = communityKeyFactory.newKey(nameOfCommunity.hashCode());
+        Key communityKey = communityKeyFactory.newKey(String.format("%s", nameOfCommunity.hashCode()));
 
         if (datastore.get(communityKey) == null)
             return Result.error(Response.Status.NOT_FOUND, "The community was not found.");
@@ -210,16 +238,25 @@ public class CommunityImplementation implements Community {
 
             Entity community = datastore.get(communityKey);
 
-            if (Integer.parseInt(community.getValue(COMMUNITY_NUMBER_MEMBERS).toString()) - 1 == 0)
+            long value = community.getLong(COMMUNITY_NUMBER_MEMBERS);
+            if (value - 1 == 0)
                 txn.delete(communityKey);
 
             else {
+
                 community = Entity.newBuilder(communityKey)
                         .set(COMMUNITY_NAME, community.getString(COMMUNITY_NAME))
                         .set(COMMUNITY_RESPONSIBLE, community.getString(COMMUNITY_RESPONSIBLE))
-                        .set(COMMUNITY_NUMBER_MEMBERS, Integer.parseInt(community.getValue(COMMUNITY_NUMBER_MEMBERS).toString()) - 1)
+                        .set(COMMUNITY_NUMBER_MEMBERS, value - 1)
                         .build();
+
                 txn.update(community);
+
+                Key communityMemberKey = communityMembersKeyFactory.addAncestor(PathElement.of(
+                                "Community", String.format("%s", nameOfCommunity.hashCode())))
+                        .newKey(idOfUser);
+
+                txn.delete(communityMemberKey);
             }
             txn.commit();
         } finally {
@@ -235,14 +272,22 @@ public class CommunityImplementation implements Community {
         if (nameOfCommunity == null || nameOfCommunity.isEmpty())
             return Result.error(Response.Status.NO_CONTENT, "Name is not valid.");
 
-        Key communityKey = communityKeyFactory.newKey(nameOfCommunity.hashCode());
+
+        Key communityKey = communityKeyFactory.newKey(String.format("%s", nameOfCommunity.hashCode()));
 
         if (datastore.get(communityKey) == null)
             return Result.error(Response.Status.NOT_FOUND, "The community was not found.");
 
+        Key k = communityMembersKeyFactory.addAncestor(PathElement.of(
+                        "Community", String.format("%s", nameOfCommunity.hashCode())))
+                .newKey(datastore.get(communityKey).getString(COMMUNITY_RESPONSIBLE));
+
+
         Query<Entity> query;
         QueryResults<Entity> results;
-        query = Query.newEntityQueryBuilder().setKind("Members").setFilter(StructuredQuery.PropertyFilter.eq("name_of_community", nameOfCommunity.hashCode())).build();
+        query = Query.newEntityQueryBuilder().setKind("Members").setFilter(
+                StructuredQuery.PropertyFilter.hasAncestor(k)).build();
+
         results = datastore.run(query);
 
         List<String> elements = new ArrayList<>();

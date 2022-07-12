@@ -10,6 +10,8 @@ public class TerrainInfoData {
     private Set<String> images;
     private List<LatLng> route;
 
+    private Set<String> documents;
+
     public TerrainInfoData(
             String description,
             String type_of_soil_coverage,
@@ -17,7 +19,7 @@ public class TerrainInfoData {
             String previous_use,
             String[] images,
             LatLng[] route
-    ){
+    ) {
         this.description = description;
         this.type_of_soil_coverage = type_of_soil_coverage;
         this.current_use = current_use;
@@ -34,18 +36,20 @@ public class TerrainInfoData {
             String current_use,
             String previous_use,
             Set<String> images,
-            List<LatLng> route
-    ){
+            List<LatLng> route,
+            Set<String> documents
+    ) {
         this.description = description;
         this.type_of_soil_coverage = type_of_soil_coverage;
         this.current_use = current_use;
         this.previous_use = previous_use;
         this.images = images;
         this.route = route;
+        this.documents = documents;
     }
 
-    public TerrainInfoData(){
-        this("","","","", new HashSet<>(), new ArrayList<>());
+    public TerrainInfoData() {
+        this("", "", "", "", new HashSet<>(), new ArrayList<>(), new HashSet<>());
     }
 
     public String getDescription() {
@@ -72,8 +76,12 @@ public class TerrainInfoData {
         return route;
     }
 
+    public Set<String> getDocuments() {
+        return documents;
+    }
+
     @Override
     public String toString() {
-        return String.format("%s:\n\tDescription:%s\n\tType of Soil:%s\n\tCurrent Use:%s\n\tPrevious Use:%s\n\tImages:%s\n\tRoute:%s\n", this.getClass().getName(), getDescription(), getType_of_soil_coverage(), getCurrent_use(), getPrevious_use(),getImages(),getRoute());
+        return String.format("%s:\n\tDescription:%s\n\tType of Soil:%s\n\tCurrent Use:%s\n\tPrevious Use:%s\n\tImages:%s\n\tRoute:%s\n", this.getClass().getName(), getDescription(), getType_of_soil_coverage(), getCurrent_use(), getPrevious_use(), getImages(), getRoute());
     }
 }

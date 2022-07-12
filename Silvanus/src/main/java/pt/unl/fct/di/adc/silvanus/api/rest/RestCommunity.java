@@ -22,22 +22,22 @@ public interface RestCommunity {
     Response create(@CookieParam(RestInterface.TOKEN) String token, CommunityData data);
 
     @DELETE
-    @Path("/delete/{community_name}")
+    @Path("/delete")
     @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
-    Response delete(@CookieParam(RestInterface.TOKEN) String token, @PathParam("community_name") String name);
+    Response delete(@CookieParam(RestInterface.TOKEN) String token, @QueryParam("community_name") String name);
 
     @PUT
-    @Path("/join/{community_name}")
+    @Path("/join")
     @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
-    Response join(@CookieParam(RestInterface.TOKEN) String token, @QueryParam(RestInterface.IDENTIFIER) @DefaultValue(" ") String identifier, @PathParam("community_name") String name);
+    Response join(@CookieParam(RestInterface.TOKEN) String token, @QueryParam("community_name") String name);
 
     @PUT
-    @Path("/exit/{community_name}")
+    @Path("/exit")
     @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
-    Response exit(@CookieParam(RestInterface.TOKEN) String token, @QueryParam(RestInterface.IDENTIFIER) @DefaultValue(" ") String identifier, @PathParam("community_name") String name);
+    Response exit(@CookieParam(RestInterface.TOKEN) String token, @QueryParam("community_name") String name);
 
     @GET
-    @Path("/{community_name}/members")
+    @Path("/members")
     @Produces(MediaType.APPLICATION_JSON + RestInterface.CHARSET)
-    Response listMembers(@CookieParam(RestInterface.TOKEN) String token, @PathParam("community_name") String name);
+    Response listMembers(@CookieParam(RestInterface.TOKEN) String token, @QueryParam("community_name") String name);
 }

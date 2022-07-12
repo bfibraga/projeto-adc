@@ -12,6 +12,7 @@ import pt.unl.fct.di.adc.silvanus.data.terrain.chunks.IslandChunk;
 import pt.unl.fct.di.adc.silvanus.data.terrain.result.ChunkResultData;
 import pt.unl.fct.di.adc.silvanus.data.terrain.result.PolygonDrawingData;
 import pt.unl.fct.di.adc.silvanus.data.terrain.result.TerrainResultData;
+import pt.unl.fct.di.adc.silvanus.implementation.user.UserImplementation;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 import pt.unl.fct.di.adc.silvanus.util.PolygonUtils;
 import pt.unl.fct.di.adc.silvanus.util.Random;
@@ -68,7 +69,7 @@ public class TerrainImplementation implements Parcel {
     public static final String ENTITY_PROPERTY_BOTTOM_MOST_POINT = "bottom_most_point";
 
 
-    //TODO Transferir esta parte para cache
+    // TODO Transferir esta parte para cache
     private Map<String, IslandChunk> chunksIslands;
 
     private static final Logger LOG = Logger.getLogger(TerrainImplementation.class.getName());
@@ -142,7 +143,7 @@ public class TerrainImplementation implements Parcel {
         TerrainOwner owner = terrainData.getOwner();
         TerrainInfoData info = terrainData.getInfo();
 
-        //TODO Send entity for ownership of this terrain and chunks the parcel is locate
+        // TODO Send entity for ownership of this terrain and chunks the parcel is locate
         Transaction txn = datastore.newTransaction();
         try {
 
@@ -154,7 +155,7 @@ public class TerrainImplementation implements Parcel {
                     .set("owner_smartphone", owner.getSmartphone())
                     .build();
 
-            //TODO Testing
+            // TODO Testing
             Entity chunkEntity;
             /*for (String chunk : result) {
                 Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
@@ -233,7 +234,7 @@ public class TerrainImplementation implements Parcel {
             result.addAll(madeira.polygon(points));
         } catch (OutOfChunkBounds ignored) {
         }
-        //TODO Add Azores
+        // TODO Add Azores
         try {
             result.addAll(portugal.polygon(points));
         } catch (OutOfChunkBounds e) {
@@ -333,7 +334,7 @@ public class TerrainImplementation implements Parcel {
         int lineFirstCoordinate = 0;
         int collumnFirstCoordinate = 0;
         Coordinate firstCoordinate = terrain.getCoordinates()[0];
-        //TODO Improve time complexity and refactor
+        // TODO Improve time complexity and refactor
         /*for (int i = 1; i <= NUMBER_OF_COLLUMNS_IN_CONTINENTE; i++) { // Searching through the collumns
             double leftLongitude = LEFT_MOST_LONGITUDE_CONTINENTE + (sizeX * (i - 1));
             double rightLongitude = LEFT_MOST_LONGITUDE_CONTINENTE + (sizeX * i);
@@ -487,17 +488,17 @@ public class TerrainImplementation implements Parcel {
 
             ChunkResultData chunkResultData = this.chunkCacheManager.get(chunkID, "data", ChunkResultData.class);
 
-            if (chunkResultData == null){
+            if (chunkResultData == null) {
                 chunkResultData = queryTerrainsInChunk(chunk.getX(), chunk.getY()).value();
             }
 
             System.out.println(chunkResultData.getChunk());
             Set<PolygonDrawingData> polygonDrawingData = chunkResultData.getData();
             System.out.println(polygonDrawingData);
-            for (PolygonDrawingData data: polygonDrawingData) {
+            for (PolygonDrawingData data : polygonDrawingData) {
                 Polygon selected = PolygonUtils.polygon(data.getPoints());
                 boolean intersects = polygon.intersects(selected);
-                if (intersects){
+                if (intersects) {
                     return Result.ok(String.valueOf(true), "Intersecta com um terreno existente");
                 }
                 /*Geometry intersection = selected.intersection(polygon.getBoundary());
@@ -551,7 +552,7 @@ public class TerrainImplementation implements Parcel {
 
     @Override
     public Result<Void> approveTerrain(String ownerTerrain, String nameTerrain) {
-        Entity terrainToBeApproved = checkIfTerrainIsInWaitList(ownerTerrain, nameTerrain);
+        Entity terrainToBeApproved = checkIfTerrainIsInWaitList(nameTerrain);
         if (terrainToBeApproved == null)
             return Result.error(Response.Status.NOT_FOUND, "Terrain was not found.");
         Result<Void> result = denyTerrain(ownerTerrain, nameTerrain);
@@ -577,19 +578,16 @@ public class TerrainImplementation implements Parcel {
     /**
      * Checks if a terrain (identified by the string "ownerTerrain/nameTerrain") is in the waitlist
      *
-     * @param ownerTerrain owner of the terrain
-     * @param nameTerrain  name of the terrain
+     * @param nameTerrain name of the terrain
      * @return the terrain as an Entity object if it exists, null otherwise
      */
-    private Entity checkIfTerrainIsInWaitList(String ownerTerrain, String nameTerrain) {
+    private Entity checkIfTerrainIsInWaitList(String nameTerrain) {
         Query<Entity> query;
         QueryResults<Entity> results;
         // Queries the "wait list" for the terrain (as an Entity)
         query = Query.newEntityQueryBuilder().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME)
-                .setFilter(StructuredQuery.CompositeFilter.and(
-                        StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_ID_OWNER, ownerTerrain),
-                        StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_NAME_OF_TERRAIN, nameTerrain)
-                )).build();
+                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_NAME_OF_TERRAIN, nameTerrain)
+                ).build();
         results = datastore.run(query);
         if (!results.hasNext()) {
             LOG.severe("A parcela não foi encontrada.");
@@ -605,7 +603,7 @@ public class TerrainImplementation implements Parcel {
 
     @Override
     public Result<Void> denyTerrain(String ownerTerrain, String nameTerrain) {
-        Entity terrainToBeApproved = checkIfTerrainIsInWaitList(ownerTerrain, nameTerrain);
+        Entity terrainToBeApproved = checkIfTerrainIsInWaitList(nameTerrain);
         if (terrainToBeApproved == null)
             return Result.error(Response.Status.NOT_FOUND, "Terrain was not found.");
         Transaction txn = datastore.newTransaction();
@@ -703,6 +701,7 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
                             JSON.decode(tmp.getString("images"), String[].class),
                             JSON.decode(tmp.getString("route"), LatLng[].class)
+                            // TODO documentos ,tmp.getString()
                     )
             );
             list.add(resultData);
@@ -862,7 +861,7 @@ public class TerrainImplementation implements Parcel {
         Set<PolygonDrawingData> result = new HashSet<>();
         Key chunkKey = datastore.newKeyFactory().setKind("Chunk").newKey(chunk);
         Entity selectedChunk = datastore.get(chunkKey);
-        if (selectedChunk != null){
+        if (selectedChunk != null) {
             List<String> parcelsIDs = JSON.decode(selectedChunk.getString("parcels_id"), List.class);
             System.out.println("Parcel ID's: " + parcelsIDs);
 
@@ -901,7 +900,7 @@ public class TerrainImplementation implements Parcel {
 
     public Result<ChunkResultData> queryTerrainsInChunk(int chunkX, int chunkY) {
         double[] chunkSize = new double[2];
-        int[] chunkCoords = new int[]{chunkX,chunkY};
+        int[] chunkCoords = new int[]{chunkX, chunkY};
         LatLng topRight = new LatLng();
         LatLng bottomLeft;
         try {
@@ -932,7 +931,7 @@ public class TerrainImplementation implements Parcel {
 
         Transaction txn = datastore.newTransaction();
 
-        try{
+        try {
             if (selectedChunk == null) {
                 selectedChunk = Entity.newBuilder(chunkKey)
                         .set("parcels_id", "")
@@ -941,13 +940,13 @@ public class TerrainImplementation implements Parcel {
                 txn.commit();
             }
         } finally {
-            if (txn.isActive()){
+            if (txn.isActive()) {
                 txn.rollback();
             }
         }
 
         List<String> parcelsIDs = JSON.decode(selectedChunk.getString("parcels_id"), List.class);
-        if (parcelsIDs.size() <= 0){
+        if (parcelsIDs.size() <= 0) {
             resultData = new ChunkResultData(chunk, topRight, bottomLeft, result);
             chunkCacheManager.put(chunk, "data", resultData);
 
@@ -1058,6 +1057,158 @@ public class TerrainImplementation implements Parcel {
             list.add(resultData);
         }
         return Result.ok(list, "");
+    }
+
+    // TODO BRAGA
+    public Result<List<TerrainResultData>> getAllTerrainsToBeApprovedInCounty(String county) {
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        query = Query.newEntityQueryBuilder().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME)
+                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN, county))
+                .build();
+
+        results = datastore.run(query);
+
+        if (!results.hasNext())
+            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
+
+        List<TerrainResultData> list = new ArrayList<>();
+
+        while (results.hasNext()) {
+            Entity tmp = results.next();
+            Key ownerKey = datastore.newKeyFactory().setKind("TerrainOwner").newKey(tmp.getKey().getNameOrId().toString());
+            Entity owner = datastore.get(ownerKey);
+            LatLng[] points = JSON.decode(tmp.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
+
+            TerrainResultData resultData = new TerrainResultData(
+                    points,
+                    new LatLng(),
+                    Random.color(),
+                    new TerrainIdentifierData(
+                            tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_SECTION_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_NUMBER_ARTICLE_OF_TERRAIN)
+                    ),
+                    new TerrainOwner(
+                            owner.getString("owner_name"),
+                            owner.getString("owner_id"),
+                            owner.getString("owner_address"),
+                            owner.getString("owner_telephone"),
+                            owner.getString("owner_smartphone")
+                    ),
+                    new TerrainInfoData(
+                            tmp.getString(ENTITY_PROPERTY_DESCRIPTION_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
+                            tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
+                            tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
+                            JSON.decode(tmp.getString("images"), String[].class),
+                            JSON.decode(tmp.getString("route"), LatLng[].class)
+                    )
+            );
+            list.add(resultData);
+        }
+        return Result.ok(list, "");
+    }
+
+    // TODO BRAGA
+    public Result<List<TerrainResultData>> getAllTerrainsToBeApprovedInDistrict(String district) {
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        query = Query.newEntityQueryBuilder().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME)
+                .setFilter(StructuredQuery.PropertyFilter.eq(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN, district))
+                .build();
+
+        results = datastore.run(query);
+
+        if (!results.hasNext())
+            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
+
+        List<TerrainResultData> list = new ArrayList<>();
+
+        while (results.hasNext()) {
+            Entity tmp = results.next();
+            Key ownerKey = datastore.newKeyFactory().setKind("TerrainOwner").newKey(tmp.getKey().getNameOrId().toString());
+            Entity owner = datastore.get(ownerKey);
+            LatLng[] points = JSON.decode(tmp.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
+
+            TerrainResultData resultData = new TerrainResultData(
+                    points,
+                    new LatLng(),
+                    Random.color(),
+                    new TerrainIdentifierData(
+                            tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_SECTION_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_NUMBER_ARTICLE_OF_TERRAIN)
+                    ),
+                    new TerrainOwner(
+                            owner.getString("owner_name"),
+                            owner.getString("owner_id"),
+                            owner.getString("owner_address"),
+                            owner.getString("owner_telephone"),
+                            owner.getString("owner_smartphone")
+                    ),
+                    new TerrainInfoData(
+                            tmp.getString(ENTITY_PROPERTY_DESCRIPTION_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
+                            tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
+                            tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
+                            JSON.decode(tmp.getString("images"), String[].class),
+                            JSON.decode(tmp.getString("route"), LatLng[].class)
+                    )
+            );
+            list.add(resultData);
+        }
+        return Result.ok(list, "");
+    }
+
+    // TODO BRAGA
+    public Result<Void> newApproveTerrain(String idUser, String idTerrain) {
+        if (idTerrain == null || idTerrain.isEmpty())
+            return Result.error(Response.Status.NO_CONTENT, "The id of the terrain is null/empty.");
+
+        Key terrainKey = datastore.newKeyFactory().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME).newKey(idTerrain);
+
+        if (datastore.get(terrainKey) == null)
+            return Result.error(Response.Status.BAD_REQUEST, "The terrain was not found.");
+
+        Entity terrainToBeApproved = datastore.get(terrainKey);
+
+        Key roleKey = datastore.newKeyFactory().setKind("UserRole").newKey(idUser);
+
+        Entity userRole = datastore.get(roleKey);
+
+        if (userRole.getString("role_name").equals("End-User")) {
+            return Result.error(Response.Status.BAD_REQUEST, "This user can't approve this terrain.");
+        }
+
+        if (userRole.getString("role_name").equals("Func-Cons")) {
+            if (!userRole.getString("place_of_influence").equals(terrainToBeApproved.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN))) {
+                return Result.error(Response.Status.BAD_REQUEST, "This user can't approve this terrain.");
+            }
+        }
+        if (userRole.getString("role_name").equals("Func-Dist")) {
+            if (!userRole.getString("place_of_influence").equals(terrainToBeApproved.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN))) {
+                return Result.error(Response.Status.BAD_REQUEST, "This user can't approve this terrain.");
+            }
+        }
+
+        Transaction txn = datastore.newTransaction();
+        try {
+            Entity parcelaApproved = Entity.newBuilder(terrainKey, terrainToBeApproved).build();
+            txn.put(parcelaApproved);
+            txn.delete(terrainKey);
+            txn.commit();
+        } finally {
+            if (txn.isActive())
+                txn.rollback();
+        }
+        return Result.ok();
     }
 
 
