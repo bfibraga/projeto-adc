@@ -38,7 +38,7 @@ public class CommunityResource implements RestCommunity {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        Result<CommunityData> result = impl.list(identifier);
+        Result<List<CommunityData>> result = impl.list();
 
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -54,6 +54,7 @@ public class CommunityResource implements RestCommunity {
         if (jws == null){
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
+        data.setResponsible(jws.getSubject());
 
         Result<Void> result = impl.create(data);
 
@@ -72,7 +73,7 @@ public class CommunityResource implements RestCommunity {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        Result<Void> result = impl.delete(name);
+        Result<Void> result = impl.delete(name, jws.getSubject());
 
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();
@@ -135,7 +136,7 @@ public class CommunityResource implements RestCommunity {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        Result<Void> result = impl.members(jws.getSubject(), name);
+        Result<List<String>> result = impl.members(name);
 
         if (!result.isOK())
             return Response.status(result.error()).entity(result.statusMessage()).build();

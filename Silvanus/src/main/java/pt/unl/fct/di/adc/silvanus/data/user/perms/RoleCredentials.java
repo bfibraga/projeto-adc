@@ -14,7 +14,7 @@ public class RoleCredentials {
         this.permissions = new HashSet<>();
         for (Map.Entry<String, Value<?>> entry : permissions.entrySet()){
             //?
-            System.out.println(entry.getValue().get());
+            //System.out.println(entry.getValue().get());
             if (entry.getValue().get().equals(true)){
                 this.permissions.add(entry.getKey());
             }

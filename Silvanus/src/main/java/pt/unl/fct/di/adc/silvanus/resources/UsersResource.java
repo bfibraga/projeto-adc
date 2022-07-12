@@ -103,7 +103,7 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public Response promote(String token, String username, String new_role) {
+	public Response promote(String token, String username, String new_role, String placeOfInfluence) {
 		//Token verifycation
 		Claims jws = TOKEN.verifyToken(token);
 
@@ -115,7 +115,7 @@ public class UsersResource implements RestUsers {
 
 		System.out.println(scope);*/
 
-		Result<Void> result = impl.promote(jws.getSubject(), username, new_role);
+		Result<Void> result = impl.promote(jws.getSubject(), username, new_role, placeOfInfluence);
 
 		if (!result.isOK()) {
 			return Response.status(result.error()).entity(result.statusMessage()).build();

@@ -17,7 +17,7 @@ public interface Users {
 	
 	Result<Void> logout(String token, LogoutData data);
 	
-	Result<Void> promote(String token, String identifier, String new_role);
+	Result<Void> promote(String token, String identifier, String new_role, String placeOfInfluence);
 
 	Result<List<UserInfoVisible>> getUser(String token, String identifier);
 
