@@ -4,11 +4,11 @@ import javax.ws.rs.core.Response;
 
 public class ResultERROR<T> implements Result<T> {
 	final Response.Status error;
-	final String response;
+	final ResultMessage response;
 
 	ResultERROR(Response.Status error, String response) {
 		this.error = error;
-		this.response = response;
+		this.response = new ResultMessage(error.getStatusCode(), response);
 	}
 
 	@Override
@@ -25,17 +25,13 @@ public class ResultERROR<T> implements Result<T> {
 	public Response.Status error() {
 		return error;
 	}
-	
-	public String response() {
-		return response;
-	}
 
 	public String toString() {
 		return "(" + error() + ")";
 	}
 
 	@Override
-	public String statusMessage() {
+	public ResultMessage statusMessage() {
 		return response;
 	}
 }

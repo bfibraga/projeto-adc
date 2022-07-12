@@ -1,10 +1,10 @@
 package pt.unl.fct.di.adc.silvanus.api.rest;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import pt.unl.fct.di.adc.silvanus.data.user.result.LogoutData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserData;
 import pt.unl.fct.di.adc.silvanus.data.user.UserInfoData;
 
@@ -40,13 +40,13 @@ public interface RestUsers {
 	@Path("/logout")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response logout(@CookieParam(TOKEN) String cookie);
+	Response logout(@CookieParam(TOKEN) String cookie, LogoutData data);
 	
 	@PUT
 	@Path("/promote/{" + IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response promote(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String username, @QueryParam(ROLE) String new_role);
+	Response promote(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String username, @QueryParam(ROLE) @DefaultValue(DEFAULT_VALUE) String new_role, @QueryParam("PlaceOfInfluence") @DefaultValue(DEFAULT_VALUE) String placeOfInfluence);
 	
 	@GET
 	@Path("/info")
@@ -59,16 +59,21 @@ public interface RestUsers {
 	Response refresh_token(@CookieParam(TOKEN) String cookie);
 	
 	@DELETE
-	@Path("/remove/{" + IDENTIFIER + "}")
+	@Path("/remove")
 	@Consumes(MediaType.APPLICATION_JSON)
-	Response remove(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String username);
+	Response remove(@CookieParam(TOKEN) String cookie, @QueryParam(IDENTIFIER) @DefaultValue(" ") String username);
 	
 	@PUT
 	@Path("/activate/{" + IDENTIFIER + "}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON + CHARSET)
-	Response activate(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier);
-	
+	Response activate(@CookieParam(TOKEN) String cookie, @PathParam(IDENTIFIER) String identifier, @QueryParam("code") @DefaultValue(" ") String code, @QueryParam("value") @DefaultValue("true") boolean value);
+
+	@GET
+	@Path("/code/{"+ IDENTIFIER + "}")
+	@Produces(MediaType.APPLICATION_JSON + CHARSET)
+	Response newCode(@PathParam(IDENTIFIER) String identifier);
+
 	@PUT
 	@Path("/change/password")
 	@Consumes(MediaType.APPLICATION_JSON)

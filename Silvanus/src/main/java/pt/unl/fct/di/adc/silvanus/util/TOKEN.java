@@ -5,10 +5,13 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import pt.unl.fct.di.adc.silvanus.data.user.auth.TokenParams;
 
 import javax.ws.rs.core.NewCookie;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -40,10 +43,13 @@ public class TOKEN {
      * @param operation_level - Level of the operation that can perform with this token
      * @return JWT for given user
      */
-    public static String createNewJWS(String user_id, int operation_level, String[] scope){
+    public static String createNewJWS(String user_id, int operation_level, Set<String> scope){
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         Date expiration = new Date(nowMillis + (DEFAULT_USER_EXPIRATION)/operation_level);
+
+        //New TokenParam
+        TokenParams tokenParams = new TokenParams(operation_level, scope);
 
         //Let's set the JWT Claims
         JwtBuilder builder = Jwts.builder()
@@ -51,7 +57,6 @@ public class TOKEN {
                 .setSubject(user_id)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
-                .claim("op-level", operation_level)
                 .claim("scope", scope)
                 .signWith(key);
 
@@ -100,7 +105,8 @@ public class TOKEN {
                 .setExpiration(expirationDate) //a java.util.Date
                 .setIssuedAt(creationDate) // for example, now
                 .signWith(key)
-                .setId(UUID.randomUUID().toString());
+                .setId(UUID.randomUUID().toString())
+                .setSubject(UUID.randomUUID().toString());
         return refresh_token.compact();
     }
 

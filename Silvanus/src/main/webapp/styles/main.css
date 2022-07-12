@@ -293,3 +293,54 @@ h1,p,label,a{
 .dropdown{
   transition: 200ms ease;
 }
+
+#no_pending_requests{
+  display: none;
+}
+
+[data-app-value="0"] #no_pending_requests{
+  display:block !important;
+}
+
+.toast::marker{
+  display: none;
+  list-style: none;
+}
+
+[data-app-menu-active="false"]{
+  display: none !important;
+}
+
+.app-menu-header{
+  transform-origin: center;
+  position: absolute;
+  height: 4rem;
+  width: 100%;
+  padding-left: 1rem;
+}
+
+.app-menu-body{
+  position: absolute;
+  top: 4rem;
+  overflow: scroll;
+}
+
+.app-menu-text{
+  margin-top: 1rem;
+}
+
+a {
+  text-decoration: none;
+  color: #6eae65 !important;
+}
+
+a.disabled{
+  color:gray !important;
+}
+
+.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
+  background-color: #90ca87 !important;
+  border: none !important; /*Author: António Duarte 58278*/
+}
+
+

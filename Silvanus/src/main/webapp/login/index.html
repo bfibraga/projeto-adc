@@ -18,10 +18,6 @@
     
 </head>
 <body id="main" class="bg-normal">
-  
-  <div id="loader" class="overlay none">
-    <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
-  </div>
   <!--
     <div id="bg-image" class="bg-image bg-light position-absolute"></div>
   -->
@@ -33,85 +29,66 @@
   -->
   
   <!-- Main Login Menu -->
-  <form id="login" class="position-absolute center light rounded-3 shadow-sm" style="width: 25rem; height: 35rem;">
-    <!-- Logo Image -->
-        <img id="logo" src="../media/imgs/logo.png" class="center-images d-block" style="height: 5rem; margin-top: 2rem; transition: 100ms linear;">
-        
-        <!-- Login Message -->
-        <h1 class="text-center" style="margin-top: 2.5rem; margin-bottom: 3rem; font-size: 2rem;">Bem-vindo de volta! &#128075</h1>
-        
-        <!-- Username Input -->
-        <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
-          <input id="usr_identifier" type="text" class="form-control rounded-pill" placeholder="Identificador">
-        </div>
-
-        <!-- Password Input -->
-        <div class="input-group center-x" style="width: 20em; margin-bottom: 2em;">
-          <input id="usr_password" type="password" class="form-control rounded-pill" placeholder="Palavra-passe">
-          <a id="password-visible" class="position-absolute center-y" style="right:2rem; bottom:0.01rem ; z-index: 0;">
-            <svg id="check-password" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-fill position-absolute" viewBox="0 0 16 16">
-              <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-              <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-            </svg>
-            <svg id="hide-password" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-slash-fill position-absolute invisible" viewBox="0 0 16 16">
-              <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/>
-              <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/>
-            </svg>
-          </a>
-        </div>
-
-        <!--
-          <div  class="progress invisible" style="width: 20rem; margin-left: 1.7rem;  margin-bottom: 1rem;">
-          <div id="password-progress" class="progress-bar progress-bar-striped progress-bar-animated rounded bg-danger"></div>
-          </div>
-        -->
-        <div class="d-flex flex-row justify-content-center">
-          <input class="form-check-input" type="checkbox" id="check_me" name="option1" value="something" checked>
-          <label class="form-check-label" style="margin-left:0.8rem; margin-right: 8rem; font-size: 0.8rem;">Lembrar-me <br> desta conta</label>
-          <a class="text-center" href="#" style="font-size: 0.8rem;">Esqueci-me da <br> palavra-passe</a>
-        </div>
-        
-        <!-- Error Message -->
-        <p id="validation_error" class="text-center error-msg" style="height: 0.5rem; margin-bottom: 3rem; margin-top: 1rem;">
+  <main class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <form id="login" class="light rounded-3 shadow-sm d-flex flex-column justify-content-center align-items-center" style="padding: 1.5rem 1.5rem 1.5rem 1.5rem;">
+      <!-- Logo Image -->
+          <img id="logo" src="../media/imgs/logo.png" class="center-images d-block" style="height: 5rem; margin-top: 2rem; transition: 100ms linear;">
           
-        </p>
-
-        <!-- Submit Button -->
-        <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
-          <input type="button" style="width: 20rem;" onclick="login()" id="button-submit" class="btn btn-primary center-x rounded-pill" value="Login">
-        </div>
-        <a class="position-absolute center-x text-center" href="../register/index.html" style="font-size: 0.8rem;">Não tem conta registada?</a>
-  </form>
-  
-  <!-- Forgot Password Menu -->
-  <form id="forgot-password" class="position-absolute center light rounded-3 shadow-sm d-none" style="width: 25rem; height: 27rem;">
-    <!-- Logo Image -->
-        <p class="text-center" style="font-size: 4.8rem;">&#128270</p>
-        <!-- Login Message -->
-        <h1 class="text-center" style="margin-top: 2.5rem; margin-bottom: 3rem; font-size: 1.8rem;">Esqueceu da palavra-passe?</h1>
-        
-        <!-- Username Input -->
-        <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
-          <input id="usr_identifier" type="text" class="form-control rounded-pill" placeholder="Identificador">
-        </div>
-
-        <!--
-          <div  class="progress invisible" style="width: 20rem; margin-left: 1.7rem;  margin-bottom: 1rem;">
-          <div id="password-progress" class="progress-bar progress-bar-striped progress-bar-animated rounded bg-danger"></div>
+          <!-- Login Message -->
+          <h1 class="text-center" style="margin-top: 2.5rem; margin-bottom: 3rem; font-size: 2rem;">Bem-vindo de volta! &#128075</h1>
+          
+          <!-- Username Input -->
+          <div class="input-group" style="width: 20rem; margin-bottom: 1rem; font-size: 200;">
+            <input id="usr_identifier" type="text" class="form-control rounded-pill usr-fields" placeholder="Identificador">
           </div>
-        -->
-        
-        <!-- Error Message -->
-        <p id="validation_error" class="text-center error-msg" style="height: 0.5rem; margin-bottom: 3rem; margin-top: 1rem;">
-        </p>
+  
+          <!-- Password Input -->
+          <div class="input-group mb-3" style="width: 20em;">
+            <input id="usr_password" type="password" class="form-control rounded-pill usr-fields" placeholder="Palavra-passe">
+            <a id="password-visible" class="position-absolute center-y" style="right:2rem; bottom:0.01rem ; z-index: 0;">
+              <svg id="check-password" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-fill position-absolute" viewBox="0 0 16 16">
+                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+              </svg>
+              <svg id="hide-password" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-slash-fill position-absolute invisible" viewBox="0 0 16 16">
+                <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/>
+                <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/>
+              </svg>
+            </a>
+          </div>
+  
+          <!--
+            <div  class="progress invisible" style="width: 20rem; margin-left: 1.7rem;  margin-bottom: 1rem;">
+            <div id="password-progress" class="progress-bar progress-bar-striped progress-bar-animated rounded bg-danger"></div>
+            </div>
+          -->
 
-      <script src="../libs/request_handler.js"></script>
-        <!-- Submit Button -->
-        <div class="input-group center-x" style="width: 20rem; margin-bottom: 1rem;">
-          <input type="button" style="width: 20rem;" onclick="location.href='./index.html'" id="button-submit" class="btn btn-primary center-x rounded-pill" value="Reconfigurar a minha palavra-passe">
-        </div>
-        <a class="position-absolute center-x text-center" href="../register/index.html" style="font-size: 0.8rem;">Não tem conta registada?</a>
-  </form>
+          <a class="" href="../forgot-password/" style="font-size: 0.8rem;">Esqueci-me da palavra-passe</a>
+
+          <!--<div class="d-flex flex-row justify-content-center align-items-center">
+            <input class="form-check-input" type="checkbox" id="check_me" name="option1" value="something" checked>
+            <label class="form-check-label" style="margin-left:0.8rem; margin-right: 8rem; font-size: 0.8rem;">Lembrar-me <br> desta conta</label>
+          </div>-->
+          
+          <!-- Error Message -->
+          <p id="validation_error" class="text-center error-msg" style="height: 0.5rem; margin-bottom: 3rem; margin-top: 1rem;">
+            
+          </p>
+  
+          <!-- Submit Button -->
+          <div class="input-group" style="width: 20rem; margin-bottom: 1rem;">
+            <button class="btn btn-primary rounded-pill" style="width: 20rem;" onclick="loader('true');login()" id="button-submit" type="button" disabled value="Login">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" data-app-menu-active="false"></span>
+              <span class="btn-text" data-app-menu-active="true">Login</span>
+            </button>
+          </div>
+          
+          <a class="" href="../register/index.html" style="font-size: 0.8rem;">Não tem conta registada?</a>
+    </form>
+    
+  </main>
+  <script src="./main.js"></script>
   <script src="../libs/input_handler.js"></script>
+  <script src="../libs/request_handler.js"></script>
 </body>
 </html>

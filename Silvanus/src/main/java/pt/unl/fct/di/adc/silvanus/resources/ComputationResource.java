@@ -14,7 +14,6 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.gson.Gson;
-import pt.unl.fct.di.adc.silvanus.data.utils.TimeData;
 import pt.unl.fct.di.adc.silvanus.util.JSON;
 
 @Path("/utils")
@@ -32,14 +31,6 @@ public class ComputationResource {
 	public Response getCurrentTime() {
 		LOG.fine("Replying to date request.");
 		return Response.ok().entity(g.toJson(fmt.format(new Date()))).build();
-	}
-
-	@POST
-	@Path("/time/v2")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response getTime(TimeData data) {
-		LOG.fine("Replying to date request.");
-		return Response.ok().entity(JSON.encode(data)).build();
 	}
 
 	@GET
