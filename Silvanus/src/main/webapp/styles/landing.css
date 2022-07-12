@@ -31,6 +31,14 @@ html, body {
   transition: 1s;
 }
 
+.mobileApp div{
+
+  transform: rotate(-90deg);
+  top: 20vh !important ;
+  right: -5vh !important;
+  transition: 1s;
+}
+
 
 
 }
@@ -52,6 +60,10 @@ html, body {
 
   .mobileApp:hover {
     transform: translate(35%, 0vh);
+    transition: 1s;
+  }
+
+  .mobileApp div{
     transition: 1s;
   }
 
