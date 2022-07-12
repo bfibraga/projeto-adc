@@ -1,5 +1,4 @@
 html, body {
-  background-color: #8CED65;
   background-image: url("../media/imgs/landing4.svg");
   background-repeat: no-repeat;
   background-size: cover;
@@ -22,12 +21,13 @@ html, body {
 
 
   transform-origin: 70% 45%;
-  transform: translate(0, 95vh) rotate(90deg);
+  transform: translate(0, 95%) rotate(90deg);
+  transition:1s;
 
 }
   
 .mobileApp:hover, .mobileApp:active {
-  transform: translate(0, 60vh) rotate(90deg); 
+  transform: translate(0, 60%) rotate(90deg); 
   transition: 1s;
 }
 
@@ -46,11 +46,12 @@ html, body {
     width: 790px;
 
     transform-origin: 70% 45%;
-    transform: translate(90vh, 0vh);
+    transform: translate(80%, 0vh);
+    transition:1s;
   }
 
   .mobileApp:hover {
-    transform: translate(35vh, 0vh);
+    transform: translate(35%, 0vh);
     transition: 1s;
   }
 
