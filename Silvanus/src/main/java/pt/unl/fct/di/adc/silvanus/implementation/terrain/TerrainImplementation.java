@@ -724,7 +724,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
                             JSON.decode(tmp.getString("images"), String[].class),
-                            JSON.decode(tmp.getString("route"), LatLng[].class)
+                            JSON.decode(tmp.getString("route"), LatLng[].class),
+                            tmp.getDouble(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA)
                             // TODO documentos ,tmp.getString()
                     )
             );
@@ -779,7 +780,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
                             JSON.decode(tmp.getString("images"), String[].class),
-                            JSON.decode(tmp.getString("route"), LatLng[].class)
+                            JSON.decode(tmp.getString("route"), LatLng[].class),
+                            tmp.getDouble(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA)
                     )
             );
             list.add(resultData);
@@ -1077,7 +1079,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
                             JSON.decode(tmp.getString("images"), String[].class),
-                            JSON.decode(tmp.getString("route"), LatLng[].class)
+                            JSON.decode(tmp.getString("route"), LatLng[].class),
+                            tmp.getDouble(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA)
                     )
             );
             list.add(resultData);
@@ -1132,7 +1135,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
                             JSON.decode(tmp.getString("images"), String[].class),
-                            JSON.decode(tmp.getString("route"), LatLng[].class)
+                            JSON.decode(tmp.getString("route"), LatLng[].class),
+                            tmp.getDouble(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA)
                     )
             );
             list.add(resultData);
@@ -1187,7 +1191,8 @@ public class TerrainImplementation implements Parcel {
                             tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
                             tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
                             JSON.decode(tmp.getString("images"), String[].class),
-                            JSON.decode(tmp.getString("route"), LatLng[].class)
+                            JSON.decode(tmp.getString("route"), LatLng[].class),
+                            tmp.getDouble(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA)
                     )
             );
             list.add(resultData);
@@ -1238,6 +1243,59 @@ public class TerrainImplementation implements Parcel {
                 txn.rollback();
         }
         return Result.ok();
+    }
+
+    public Result<List<TerrainResultData>> getAllApprovedTerrains() {
+        Query<Entity> query;
+        QueryResults<Entity> results;
+
+        query = Query.newEntityQueryBuilder().setKind(PARCELAS_TO_BE_APPROVED_TABLE_NAME).build();
+
+        results = datastore.run(query);
+
+        if (!results.hasNext())
+            return Result.error(Response.Status.NO_CONTENT, "No terrains were found.");
+
+        List<TerrainResultData> list = new ArrayList<>();
+
+        while (results.hasNext()) {
+            Entity tmp = results.next();
+            Key ownerKey = datastore.newKeyFactory().setKind("TerrainOwner").newKey(tmp.getKey().getNameOrId().toString());
+            Entity owner = datastore.get(ownerKey);
+            LatLng[] points = JSON.decode(tmp.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class);
+
+            TerrainResultData resultData = new TerrainResultData(
+                    points,
+                    new LatLng(),
+                    Random.color(),
+                    new TerrainIdentifierData(
+                            tmp.getString(ENTITY_PROPERTY_ID_OWNER),
+                            tmp.getString(ENTITY_PROPERTY_NAME_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_CONSELHO_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_DISTRITO_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_SECTION_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_NUMBER_ARTICLE_OF_TERRAIN)
+                    ),
+                    new TerrainOwner(
+                            owner.getString("owner_name"),
+                            owner.getString("owner_id"),
+                            owner.getString("owner_address"),
+                            owner.getString("owner_telephone"),
+                            owner.getString("owner_smartphone")
+                    ),
+                    new TerrainInfoData(
+                            tmp.getString(ENTITY_PROPERTY_DESCRIPTION_OF_TERRAIN),
+                            tmp.getString(ENTITY_PROPERTY_TYPE_OF_SOIL_COVERAGE),
+                            tmp.getString(ENTITY_PROPERTY_CURRENT_USE_OF_SOIL),
+                            tmp.getString(ENTITY_PROPERTY_PREVIOUS_USE_OF_SOIL),
+                            JSON.decode(tmp.getString("images"), String[].class),
+                            JSON.decode(tmp.getString("route"), LatLng[].class),
+                            tmp.getDouble(ENTITY_PROPERTY_APPROXIMATE_AREA_OF_PARCELA)
+                    )
+            );
+            list.add(resultData);
+        }
+        return Result.ok(list, "");
     }
 
 

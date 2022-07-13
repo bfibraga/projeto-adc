@@ -1,5 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.implementation.community;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
 import pt.unl.fct.di.adc.silvanus.api.impl.Community;
 import pt.unl.fct.di.adc.silvanus.data.community.CommunityData;
@@ -299,4 +300,23 @@ public class CommunityImplementation implements Community {
 
         return Result.ok(elements, "");
     }
+/*
+    public Result<Void> sendMessage(String userToSend, String messageToSend, String community) {
+        if (community == null || community.isEmpty())
+            return Result.error(Response.Status.NO_CONTENT, "Name is not valid.");
+        if (userToSend == null || userToSend.isEmpty())
+            return Result.error(Response.Status.NO_CONTENT, "User is not valid.");
+        if (messageToSend == null || messageToSend.isEmpty())
+            return Result.error(Response.Status.NO_CONTENT, "Message is not valid.");
+
+
+        Key communityKey = communityKeyFactory.newKey(String.format("%s", community.hashCode()));
+
+        if (datastore.get(communityKey) == null)
+            return Result.error(Response.Status.NOT_FOUND, "The community was not found.");
+
+        long time = Timestamp.now().getSeconds();
+    }
+
+ */
 }

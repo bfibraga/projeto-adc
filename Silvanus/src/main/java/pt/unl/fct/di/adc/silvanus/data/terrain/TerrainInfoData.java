@@ -10,6 +10,8 @@ public class TerrainInfoData {
     private Set<String> images;
     private List<LatLng> route;
 
+    private double area;
+
     private Set<String> documents;
 
     public TerrainInfoData(
@@ -18,7 +20,8 @@ public class TerrainInfoData {
             String current_use,
             String previous_use,
             String[] images,
-            LatLng[] route
+            LatLng[] route,
+            double area
     ) {
         this.description = description;
         this.type_of_soil_coverage = type_of_soil_coverage;
@@ -28,6 +31,7 @@ public class TerrainInfoData {
         Collections.addAll(this.images, images);
         this.route = new ArrayList<>();
         Collections.addAll(this.route, route);
+        this.area = area;
     }
 
     public TerrainInfoData(
@@ -37,7 +41,8 @@ public class TerrainInfoData {
             String previous_use,
             Set<String> images,
             List<LatLng> route,
-            Set<String> documents
+            Set<String> documents,
+            double area
     ) {
         this.description = description;
         this.type_of_soil_coverage = type_of_soil_coverage;
@@ -46,10 +51,11 @@ public class TerrainInfoData {
         this.images = images;
         this.route = route;
         this.documents = documents;
+        this.area = area;
     }
 
     public TerrainInfoData() {
-        this("", "", "", "", new HashSet<>(), new ArrayList<>(), new HashSet<>());
+        this("", "", "", "", new HashSet<>(), new ArrayList<>(), new HashSet<>(), 0);
     }
 
     public String getDescription() {
@@ -78,6 +84,10 @@ public class TerrainInfoData {
 
     public Set<String> getDocuments() {
         return documents;
+    }
+
+    public double getArea() {
+        return area;
     }
 
     @Override
