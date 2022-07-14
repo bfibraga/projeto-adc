@@ -9,7 +9,7 @@ public class UserStateData {
     private Set<String> confirmed;
 
     public UserStateData(){
-        this("INACTIVE", new String[]{});
+        this("ACTIVE", new String[]{});
     }
 
     public UserStateData(String set, String[] confirmed_user){

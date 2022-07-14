@@ -205,11 +205,13 @@ function handleTerrainOnPendingCard(name, xmlDoc, params){
     elems[name].querySelector(".btn-danger").setAttribute("data-terrain", terrain.credentials.name);
 
     addEvent(target, 'click', function (event) {
-        console.log(event.target);
+        //console.log(event.target);
         let parent = event.target.parentElement;
         while (parent.getAttribute("data-app-terrain-id") === null){
             parent = parent.parentElement;
         }
+        console.log(event.target);
+
         //console.log(parent);
         //console.log(parent.getAttribute("data-app-terrain-id"));
         if (parent.getAttribute("data-app-terrain-id") === params[0]){
@@ -218,16 +220,16 @@ function handleTerrainOnPendingCard(name, xmlDoc, params){
             if (event.target.classList.contains("terrain-on-pending")){
                 loadTerrainOnPendingInfo(params[0]);
             }
+        }
 
-            if (event.target.classList.contains("btn-success")){
-                console.log("clicked on button success")
-                approveTerrain(event.target.getAttribute("data-user"), event.target.getAttribute("data-terrain"))
-            }
+        if (event.target.classList.contains("btn-success")){
+            console.log("clicked on button success")
+            approveTerrain(event.target.getAttribute("data-user"), event.target.getAttribute("data-terrain"))
+        }
 
-            if (event.target.classList.contains("btn-danger")){
-                console.log("clicked on button danger");
-                denyTerrain(event.target.getAttribute("data-terrain"))
-            }
+        if (event.target.classList.contains("btn-danger")){
+            console.log("clicked on button danger");
+            denyTerrain(event.target.getAttribute("data-user"), event.target.getAttribute("data-terrain"))
         }
       });
 
@@ -342,9 +344,13 @@ function handleListUser(name, xmlDoc, params){
     if (user.loggedinData.menus.includes("menu05")){
         elems[name].querySelector(".usr_role_unchanged").setAttribute("data-app-menu-active", "false");
         elems[name].querySelector(".usr_role").setAttribute("data-app-menu-active", "true");
+        elems[name].querySelector(".promote-user-influence").setAttribute("data-app-menu-active", "true");
+        elems[name].querySelector(".promote-user").setAttribute("data-app-menu-active", "true");
     } else {
         elems[name].querySelector(".usr_role_unchanged").setAttribute("data-app-menu-active", "true");
         elems[name].querySelector(".usr_role").setAttribute("data-app-menu-active", "false");
+        elems[name].querySelector(".promote-user-influence").setAttribute("data-app-menu-active", "false");
+        elems[name].querySelector(".promote-user").setAttribute("data-app-menu-active", "false");
     }
 
     elems[name].querySelector(".usr_role_unchanged").insertAdjacentHTML("beforeend", profile.role_name);
@@ -415,7 +421,6 @@ function handlePromote(){
 function listInferiorRoles(role_name){
     let result = [];
     const parts = role_name.split(" ");
-    console.log(parts);
     switch (parts[0]){
         case "Administrador":
             result.push("Administrador");
@@ -428,8 +433,6 @@ function listInferiorRoles(role_name){
                     result.push("Funcionario Distrito");
                 case "Concelho":
                     result.push("Funcionario Concelho");
-                default:
-                    //TODO ????
             }
         case "Utilizador":
             result.push("Utilizador");

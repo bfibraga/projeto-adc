@@ -1,6 +1,33 @@
 const base_uri = window.location.origin;
 
-let perfil;
+let perfil =     {
+	"username": "",
+	"email": "",
+	"info": {
+		"name": "",
+		"visibility": "PUBLIC",
+		"nif": "",
+		"address": "",
+		"telephone": "",
+		"smartphone": "",
+		"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/placeholder/avatar"
+	},
+	"state": "ACTIVE",
+	"role_name": "",
+	"role_color": "#000000",
+	"logoutData": {
+		"center": {
+			"lat": 38.659782,
+			"lng": -9.202765
+		},
+		"zoom": 15.0
+	},
+	"loggedinData": {
+		"time": "",
+		"menus": [
+		]
+	}
+};
 let terrain_list = [];
 let terrain_on_pending = [];
 
@@ -49,6 +76,10 @@ async function register(){
 
 		const avatar_image = getAvatarImageContent();
 
+		if (avatar_image["content"] === ""){
+			
+		}
+
 		let form = new FormData();
 		form.append("file", avatar_image["content"]);
 		form.append("destination", u_username);
@@ -62,7 +93,8 @@ async function register(){
 		});
 		console.log(avatar_response);
 
-		window.location.replace(base_uri + "/verification");
+		window.location.replace(base_uri + "/app");
+
 	} catch (error){
 
 		const error_elems = document.getElementsByClassName("error-msg");
@@ -154,7 +186,7 @@ async function getInfo(debug, user){
 					"lng": -9.202765
 				},
 				"credentials": {
-					"userID": "",
+					"userID": "mekie",
 					"name": "tereeren gd isqbdcibcqobqwob",
 					"townhall": "Carregal do Sal",
 					"district": "Viseu",
@@ -218,7 +250,7 @@ async function getInfo(debug, user){
 						"lng": -9.202765
 					},
 					"credentials": {
-						"userID": "",
+						"userID": "nani",
 						"name": "tereeren gd isqbdcibcqobqwob",
 						"townhall": "Carregal do Sal",
 						"district": "Viseu",
@@ -270,8 +302,64 @@ async function getInfo(debug, user){
 			const element = avatar_elems.item(i);
 			element.src = "https://storage.googleapis.com/projeto-adc.appspot.com/test/hello/there/not_avatar";
 		}*/
+		/*listUserProfile({
+			"username": "bfibraga",
+			"email": "brunobfi2000@gmail.com",
+			"info": {
+				"name": "Bruno Braga",
+				"visibility": "PUBLIC",
+				"nif": "1234",
+				"address": "Rua de Braga",
+				"telephone": "212 212 212",
+				"smartphone": "932290047",
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
+			},
+			"state": "ACTIVE",
+			"role_name": "Administrador",
+			"role_color": "#6aa84f",
+			"logoutData": {
+				"center": {
+					"lat": 38.656372,
+					"lng": -9.196873
+				},
+				"zoom": 14
+			},
+			"loggedinData": {
+				"time": "2022-07-10 23:13:10",
+				"menus": []
+			}
+		},
+		{
+			"username": "bfibraga",
+			"email": "brunobfi2000@gmail.com",
+			"info": {
+				"name": "Bruno Braga",
+				"visibility": "PUBLIC",
+				"nif": "1234",
+				"address": "Rua de Braga",
+				"telephone": "212 212 212",
+				"smartphone": "932290047",
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
+			},
+			"state": "ACTIVE",
+			"role_name": "Administrador",
+			"role_color": "#6aa84f",
+			"logoutData": {
+				"center": {
+					"lat": 38.656372,
+					"lng": -9.196873
+				},
+				"zoom": 14
+			},
+			"loggedinData": {
+				"time": "2022-07-10 23:13:10",
+				"menus": [
+					"menu05"
+				]
+			}
+		}
+		);
 
-		/*
 		listUserProfile({
 			"username": "bfibraga",
 			"email": "brunobfi2000@gmail.com",
@@ -312,7 +400,65 @@ async function getInfo(debug, user){
 				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
 			},
 			"state": "ACTIVE",
-			"role_name": "Funcionario",
+			"role_name": "Funcionario Governo",
+			"role_color": "#6aa84f",
+			"logoutData": {
+				"center": {
+					"lat": 38.656372,
+					"lng": -9.196873
+				},
+				"zoom": 14
+			},
+			"loggedinData": {
+				"time": "2022-07-10 23:13:10",
+				"menus": [
+					"menu05"
+				]
+			}
+		}
+		);
+		
+		listUserProfile({
+			"username": "bfibraga",
+			"email": "brunobfi2000@gmail.com",
+			"info": {
+				"name": "Bruno Braga",
+				"visibility": "PUBLIC",
+				"nif": "1234",
+				"address": "Rua de Braga",
+				"telephone": "212 212 212",
+				"smartphone": "932290047",
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
+			},
+			"state": "ACTIVE",
+			"role_name": "Administrador",
+			"role_color": "#6aa84f",
+			"logoutData": {
+				"center": {
+					"lat": 38.656372,
+					"lng": -9.196873
+				},
+				"zoom": 14
+			},
+			"loggedinData": {
+				"time": "2022-07-10 23:13:10",
+				"menus": []
+			}
+		},
+		{
+			"username": "bfibraga",
+			"email": "brunobfi2000@gmail.com",
+			"info": {
+				"name": "Bruno Braga",
+				"visibility": "PUBLIC",
+				"nif": "1234",
+				"address": "Rua de Braga",
+				"telephone": "212 212 212",
+				"smartphone": "932290047",
+				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
+			},
+			"state": "ACTIVE",
+			"role_name": "Funcionario Distrito de Setubal",
 			"role_color": "#6aa84f",
 			"logoutData": {
 				"center": {
@@ -369,7 +515,7 @@ async function getInfo(debug, user){
 				"avatar": "https://storage.googleapis.com/projeto-adc.appspot.com/android/avatar"
 			},
 			"state": "ACTIVE",
-			"role_name": "Funcionario",
+			"role_name": "Funcionario Conselho de Almada",
 			"role_color": "#6aa84f",
 			"logoutData": {
 				"center": {
@@ -400,6 +546,7 @@ async function getInfo(debug, user){
 		console.log(role_parts);
 		const influence = String(role_parts[role_parts.length-1]);
 
+		console.log(role_parts[role_parts.length-1]);
 		if (role_parts[1] === "Concelho"){
 			getPendingByCounty(influence);
 		}
@@ -566,18 +713,13 @@ async function changing_att(){
 	}
 }
 
-async function promote(username, role, influence){
+async function promote(username, new_role, influence){
 	const confirm_elem = document.getElementById('confirmPromotion');
 	toggleMenu(confirm_elem.querySelector(".spinner-border"));
 	toggleMenu(confirm_elem.querySelector(".confirm-promote"));
 
 	try{
-		const response = await axios.put("/api/user/promote/" + username, {
-			params:{
-				"role": role,
-				"PlaceOfInfluence": influence
-			}
-		});
+		const response = await axios.put("/api/user/promote/" + username + "?role=" + new_role + "&PlaceOfInfluence=" + influence);
 		console.log(response);
 	} catch (error){
 		console.log(error);
@@ -604,7 +746,6 @@ async function time(){
 
 async function listNotification(){
 	try {
-		console.log(perfil);
 		const response = await axios.get("/api/notification/list/" + perfil.username);
 		console.log(response.data);
 		response.data.forEach(element => {
@@ -618,10 +759,27 @@ async function listNotification(){
 	}
 }
 
+async function sendNotification(sender, receiver, description){
+	try {
+		const response = await axios.post("/api/notification/send",
+		{
+			"sender": sender,
+			"receiver": receiver,
+			"description": description
+		});
+	} catch (error){
+		console.log(error);
+	} finally {
+		console.log("Executed successfully");
+	}
+}
+
 //--- Terrain ----
 
 async function submitTerrain(points_data, route_data) {
-	
+
+	document.getElementById("register_terrain_spinner").setAttribute("data-app-menu-active", "true");
+
 	//TODO Remake this function
 	let parcela = points_data;
 
@@ -636,6 +794,7 @@ async function submitTerrain(points_data, route_data) {
 
 		let checked = document.getElementById("this_acc_terrain_option").checked;
 		console.log(checked);
+		
 		let owner = checked ? 
 		{
 			"name": String(perfil.info.name),
@@ -723,12 +882,50 @@ async function submitTerrain(points_data, route_data) {
 		const status = String(credentials.townhall) + " " + String(credentials.district);
 		terrainPendingCard(credentials.name, status, info.description);
 
+		console.log("Executed successfully");
+
+		//Disable drawing tools, hide offcanvas and clear fields
+		/*var request_terrain_offcanvas = document.getElementById('request-terrain-offcanvas');
+		var bsRequestTerrainOffcanvas = new bootstrap.Offcanvas(request_terrain_offcanvas);
+		
+		bsRequestTerrainOffcanvas.hide();*/
+
+		document.getElementById("route_definition_menu").setAttribute("data-app-menu-active", "false");
+
+		var terrain_properties_offcanvas = document.getElementById('terrain-properties');
+		var bsTerrainPropertiesOffcanvas = new bootstrap.Offcanvas(terrain_properties_offcanvas);
+		
+		bsTerrainPropertiesOffcanvas.show();
+
+		clearRequestTerrainFields();
+		togglePolygonDrawingControl(false);
+		setPolygon(null, null);
+
 	} catch (error){
 		//alert(error);
 		console.log(error);
 	} finally {
-		console.log("Executed successfully");
+		document.getElementById("register_terrain_spinner").setAttribute("data-app-menu-active", "false");
 	}
+}
+
+function clearRequestTerrainFields(){
+	document.getElementById("name-terrain").value = "";
+	document.getElementById("townhall-terrain").value = "";
+	document.getElementById("district-terrain").value = "";
+	document.getElementById("section-terrain").value = "";
+	document.getElementById("number-article-terrain").value = "";
+
+	document.getElementById("other_acc_fullname_input").value = "";
+	document.getElementById("other_acc_id_input").value = "";
+	document.getElementById("other_acc_address_input").value = "";
+	document.getElementById("other_acc_telephone_input").value = "";
+	document.getElementById("other_acc_smartphone_input").value = "";
+
+	document.getElementById("description-terrain").value = "";
+	document.getElementById("type-terrain").value = "";
+	document.getElementById("current-use-terrain").value = "";
+	document.getElementById("previous-use-terrain").value = "";
 }
 
 async function getOwnTerrain(){
@@ -941,13 +1138,16 @@ function loadTerrainOnPendingInfo(id){
 
 }
 
-
 async function approveTerrain(username, terrain_name){
 	try{
 		let response = await axios.put("/api/parcel/approve/" + username + "?terrain=" + terrain_name);
 		const data = response.data;
 		console.log(data);
 		
+		await Promise.all([
+			sendNotification(perfil.username, username, "Terreno " + terrain_name + " foi aprovado por " + perfil.username)
+		]);
+
 	} catch (error){
 		//alert(error);
 		console.log(error);
@@ -956,12 +1156,16 @@ async function approveTerrain(username, terrain_name){
 	}
 }
 
-async function denyTerrain(terrain_name){
+async function denyTerrain(username, terrain_name){
 	try{
-		let response = await axios.put("/api/parcel/deny/user?terrain" + terrain_name);
+		let response = await axios.put("/api/parcel/deny/" + username + "?terrain" + terrain_name);
 		const data = response.data;
 		console.log(data);
 		
+		await Promise.all([
+			sendNotification(perfil.username, username, "Terreno " + terrain_name + " foi reprovado por " + perfil.username)
+		]);
+
 	} catch (error){
 		//alert(error);
 		console.log(error);

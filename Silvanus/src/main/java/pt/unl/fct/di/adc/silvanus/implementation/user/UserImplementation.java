@@ -132,7 +132,9 @@ public class UserImplementation implements Users {
             this.cache.put(user_id, userInfoData);
 
             // Verification of this user
-            String verified = JSON.encode(new HashSet<>());
+            Set<String> verified_set = new HashSet<>();
+            verified_set.add(data.getID());
+            String verified = JSON.encode(verified_set);
             UserStateData userStateData = data.getUserStateData();
             Entity userPermission = Entity.newBuilder(userPermissionKey)
                     .set("usr_state", userStateData.getSet())
