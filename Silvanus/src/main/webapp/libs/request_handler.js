@@ -41,6 +41,9 @@ function checkUndefined(keyword) {
 }
 
 async function register(){
+	let loader = document.getElementById("register_spinner");
+	loader.setAttribute("data-app-menu-active", "true");
+
 	try{
 		let u_username = String(document.getElementById("usr_identifier").value);
 		let u_email = String(document.getElementById("usr_email").value);
@@ -95,7 +98,7 @@ async function register(){
 
 		window.location.replace(base_uri + "/app");
 
-	} catch (error){
+	} catch (error) {
 
 		const error_elems = document.getElementsByClassName("error-msg");
 
@@ -107,6 +110,8 @@ async function register(){
 		console.log(error);
 	
 	} finally {
+		//loader("false");
+		loader.setAttribute("data-app-menu-active", "false");
 	}
 }
 
@@ -115,6 +120,7 @@ async function activate(){
 }
 
 async function login(){
+	loader("true");
 	try{
 		let u_identifier = String(document.getElementById("usr_identifier").value);
 		let u_password = checkUndefined(String(document.getElementById("usr_password").value));
@@ -816,7 +822,7 @@ async function submitTerrain(points_data, route_data) {
 		const url = "terrains/" + credentials.district + "/" + credentials.townhall + "/" + username  + "/" +  credentials.name;
 
 		const image_content = getImageFiles();
-		let content = image_content["content"];
+		const content = image_content["content"];
 		let image_uris = [];
 
 		for (let i = 0; i < content.length; i++) {
@@ -860,11 +866,11 @@ async function submitTerrain(points_data, route_data) {
 		let response = await axios.post("/api/parcel/create", parcel);
 		console.log(response);
 
-		const documentation_data = getDocumentationFiles();
+		const documents_data = getDocumentationFiles();
 
-		content = documentation_data["content"]
-		for (let i = 0; i < content.length; i++) {
-			const file_content = content[i];
+		const document_content = documents_data["content"];
+		for (let i = 0; i < document_content.length; i++) {
+			const file_content = document_content[i];
 			
 			let form = new FormData();
 			form.append("file", file_content);
@@ -892,15 +898,16 @@ async function submitTerrain(points_data, route_data) {
 
 		document.getElementById("route_definition_menu").setAttribute("data-app-menu-active", "false");
 
-		var terrain_properties_offcanvas = document.getElementById('terrain-properties');
+		/* terrain_properties_offcanvas = document.getElementById('terrain-properties');
 		var bsTerrainPropertiesOffcanvas = new bootstrap.Offcanvas(terrain_properties_offcanvas);
 		
-		bsTerrainPropertiesOffcanvas.show();
+		bsTerrainPropertiesOffcanvas.show();*/
 
 		clearRequestTerrainFields();
 		togglePolygonDrawingControl(false);
 		setPolygon(null, null);
 
+		addPolygon(parcela, "#222222");
 	} catch (error){
 		//alert(error);
 		console.log(error);
@@ -1044,7 +1051,7 @@ async function loadChunk(pos){
 		saveChunk(chunk, true);
 		array.forEach(element => {
 			addPolygon(element.points, element.color);
-			addMarker(element.center);
+			//addMarker(element.center);
 		});
 		//addCluster();
 

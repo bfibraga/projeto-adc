@@ -426,7 +426,7 @@ function listInferiorRoles(role_name){
             result.push("Administrador");
         case "Funcionario":
             //TODO Make for townhall and district
-            switch(parts[1]){
+            switch(parts[1]) {
                 case "Governo":
                     result.push("Funcionario Governo");
                 case "Distrito":

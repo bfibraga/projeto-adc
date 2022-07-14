@@ -589,8 +589,16 @@ public class TerrainImplementation implements Parcel {
         Transaction txn = datastore.newTransaction();
 
         try {
+
             txn.add(parcelaApproved);
             txn.commit();
+
+            List<Chunk<String>> chunks = this.locateChunks(JSON.decode(terrainToBeApproved.getString(ENTITY_PROPERTY_COORDINATES), LatLng[].class));
+
+            for (Chunk<String> chunk: chunks) {
+                this.chunkCacheManager.remove(chunk.getID());
+            }
+
             LOG.info("Parcela foi inserida na tabela final.");
         } finally {
             if (txn.isActive()) txn.rollback();

@@ -37,13 +37,22 @@ const PORTUGAL_BOUND = {
     east: -6.17,
 };
 
+const fct_center = {lat:  38.659784, lng:  -9.202765};
+const fct_zoom = 15;
+
+const macao_center = {
+    lat: 39.613428,
+    lng: -7.977220
+}
+const macao_zoom = 10.0;
+
 function initMap() 
 {
-    var map_center = {lat:  38.659784, lng:  -9.202765};
+    var map_center = macao_center;
 
     map = new google.maps.Map(document.getElementById('map'), {
         center: map_center,
-        zoom: 15,
+        zoom: 11.5,
         mapId: 'c5f91d16484f03de',
         restriction: {
             latLngBounds: {
@@ -427,7 +436,7 @@ function toggleRouteDrawingControl(value, confirmed){
     const visible = confirmed ? map : null;
     route_drawing_tools.setMap(visible);
     setRoute(visible, registed_route);
-    setMenuID("route_definition_menu",String(value));
+    //setMenuID("route_definition_menu",String(value));
 } 
 
 function clearTemporaryData(){

@@ -29,7 +29,7 @@
     <link href="../styles/card.css" rel="stylesheet">
 
 </head>
-<body id="main" class="" onload='getInfo(true, "")'>
+<body id="main" class="" onload='getInfo(false, "")'>
   <div id="loader" class="overlay" style="z-index: 100000;" data-app-menu-active="true">
     <div class="lds-ring center"><div></div><div></div><div></div><div></div></div>
   </div>
@@ -59,8 +59,8 @@
           </span>
         </a>
       </li>
-
-      <li id="community-app-nav-item" class="app-nav-item" onclick="toggleDrawing(false)">
+      <!-- 
+        <li id="community-app-nav-item" class="app-nav-item" onclick="toggleDrawing(false)">
         <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#community">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
             <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
@@ -72,6 +72,8 @@
           </span>
         </a>
       </li>
+       -->
+      
 
       <!-- <li class="app-nav-item" onclick="toggleDrawing(false)">
         <a class="app-nav-link grow" data-bs-toggle="offcanvas" data-bs-target="#search-user" aria-controls="offcanvasScrolling" data-tooltip="Pesquisar">
@@ -246,16 +248,10 @@
         </div>
         <div class="col-md-7 col-sm-12">
           <div class="row flex-row">
-            <div class="col-4">
+            <div class="col-12">
               <div class="bg-success bg-opacity-25 rounded-3 p-3 m-1 shadow-sm">
                 <h5 class="text-center">Terrenos</h5>
                 <p class="display-6 text-center nmr_terrain">0</p>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="bg-info bg-opacity-25 rounded-3 p-3 m-1 shadow-sm">
-                <h5 class="text-center">Área Total</h5>
-                <p class="display-6 text-center">0</p>
               </div>
             </div>
             <div class="col-12">
@@ -295,7 +291,7 @@
     </div>
     
     <div id="usr_change_password" class="offcanvas-body" data-app-menu-active="false">
-      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
+      <div class="light rounded-3 p-3 shadow-sm">
         <div class="d-flex flex-row justify-content-center mb-3">
           <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
             <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
@@ -338,39 +334,11 @@
         <div class="light rounded-3 p-3 shadow-sm mt-3"></div>
       </div>
     </div>
-    
-    
-    <div id="usr_change_password" class="offcanvas-body" data-app-menu-active="false">
-      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
-        <div class="d-flex flex-row justify-content-center mb-3">
-          <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
-            <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-          </div>
-        </div>
-        <h3 id="usr_username">Username
-        </h3>
-        <h5 id="usr_email" class="">Email</h5>
-        <div id="usr_roles_change_password">
-        </div>
-      </div>
-      <div class="light rounded-3 p-3 mt-3 shadow-sm">
-        <h6>Palavra-passe nova</h6>
-        <input id="usr_new_password_change_password" class="form-control rounded-pill"></input>
-        <br>
-        <div class="d-flex flex-column justify-content-center">
-          <div class="d-flex flex-row justify-content-center">
-            <a id="btn_callback_change_usr_profile" onclick="toggleChangeProfileMenu('usr_change_password', 'usr_menu')" href="#" class="btn btn-danger m-3 btn-change-usr-profile" onclick="">Cancelar</a>
-            <a href="#" class="btn btn-primary m-3" onclick="change_password()">Alterar</a>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Toast Handler-->
-    </div>
   </div>
 
   <!-- Statistics Offcanvas -->
-  <div class="offcanvas offcanvas-start bg-light rounded-3 border-0 shadow-sm" style="" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-5" id="stats" aria-labelledby="offcanvasScrollingLabel">
+  <!-- 
+    <div class="offcanvas offcanvas-start bg-light rounded-3 border-0 shadow-sm" style="" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-5" id="stats" aria-labelledby="offcanvasScrollingLabel">
     <div class="offcanvas-header position-relative light shadow-sm">
       <h4 class="ms-3">Estatísticas</h4>
       <a type="button" class="btn-close text-reset position-absolute end-0 translate-middle-x" data-bs-dismiss="offcanvas" aria-label="Close"></a>
@@ -415,35 +383,9 @@
       </div>
 
     </div>
-
-    <div id="usr_change_password" class="offcanvas-body" data-app-menu-active="false">
-      <div id="usr_credentials_scrollspy" class="light rounded-3 p-3 shadow-sm">
-        <div class="d-flex flex-row justify-content-center mb-3">
-          <div class="avatar-wrapper" data-user="" style="width: 8rem; height: 8rem;">
-            <img id="usr_avatar_perfil" src="../media/imgs/user.png" class="rounded-circle shadow-sm" style="">
-          </div>
-        </div>
-        <h3 id="usr_username">Username
-        </h3>
-        <h5 id="usr_email" class="">Email</h5>
-        <div id="usr_roles_change_password">
-        </div>
-      </div>
-      <div class="light rounded-3 p-3 mt-3 shadow-sm">
-        <h6>Palavra-passe nova</h6>
-        <input id="usr_new_password_change_password" class="form-control rounded-pill"></input>
-        <br>
-        <div class="d-flex flex-column justify-content-center">
-          <div class="d-flex flex-row justify-content-center">
-            <a id="btn_callback_change_usr_profile" onclick="toggleChangeProfileMenu('usr_change_password', 'usr_menu')" href="#" class="btn btn-danger m-3 btn-change-usr-profile" onclick="">Cancelar</a>
-            <a href="#" class="btn btn-primary m-3" onclick="change_password()">Alterar</a>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Toast Handler-->
-    </div>
   </div>
+   -->
+  
 
   <!-- Help Offcanvas -->
   <div class="offcanvas offcanvas-bottom rounded-3 bg-light" style="z-index: 10; height: 100vh;" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="help-offcanvas" aria-labelledby="offcanvasScrollingLabel">
@@ -476,7 +418,7 @@
     </div>
     <div class="offcanvas-body ">
       <div class="row">
-        <div class="col-md-4 col-sm-12">
+        <div class="col-md-6 col-sm-12">
           <div class="row flex-column">
             <div class="col-12">
               <div id="usr_list_terrain_scollspy" class="row light rounded-3 m-1 p-3 shadow-sm">
@@ -492,7 +434,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-5 col-sm-12">
+        <div class="col-md-6 col-sm-12">
           <div class="row flex-column" id="usr_terrain_menu">
             <div class="col-12">
               <div id="usr_pending_terrain_scrollpsy" class="row light rounded-3 m-1 p-3 shadow-sm" data-app-value=0>
@@ -527,7 +469,8 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3 col-sm-12">
+        <!-- 
+          <div class="col-md-3 col-sm-12">
           <div class="row flex-column">
             <div class="col-12">
               <div class="light rounded-3 m-1 p-3 shadow-sm">
@@ -541,7 +484,7 @@
                           <path d="M12 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
                         </svg>
                         <div class="form-check form-switch ms-3">
-                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault1">
                         </div>
                       </div>
                       
@@ -567,6 +510,8 @@
             </div>
           </div>
         </div>
+         -->
+        
       </div>
       <div class="row" >
         <div class="col-md-6 col-sm-12">
