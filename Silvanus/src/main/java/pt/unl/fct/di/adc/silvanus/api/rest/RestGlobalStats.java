@@ -9,9 +9,14 @@ import static pt.unl.fct.di.adc.silvanus.api.rest.RestInterface.*;
 public interface RestGlobalStats {
 
     @GET
-    @Path("/current_use")
+    @Path("/county_stats")
     @Produces(MediaType.APPLICATION_JSON + CHARSET)
-    Response fetchGlobalStats(@CookieParam(TOKEN) String token);
+    Response fetchCountyStats(@CookieParam(TOKEN) String token);
+
+    @GET
+    @Path("/district_stats")
+    @Produces(MediaType.APPLICATION_JSON + CHARSET)
+    Response fetchDistrictStats(@CookieParam(TOKEN) String token);
 
     @GET
     @Path("{userID}/get_area")

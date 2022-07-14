@@ -21,14 +21,31 @@ public class GlobalStatsResource implements RestGlobalStats {
     }
 
     @Override
-    public Response fetchGlobalStats(String token) {
+    public Response fetchCountyStats(String token) {
         Claims jws = TOKEN.verifyToken(token);
 
         if (jws == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
         }
 
-        Result<List<Stat>> result = impl.getStatsOnTypeOfTerrain();
+        Result<List<Stat>> result = impl.getStatsOnCountyOfTerrains();
+
+        if (!result.isOK()) {
+            return Response.status(result.error()).entity(result.statusMessage()).build();
+        }
+
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response fetchDistrictStats(String token) {
+        Claims jws = TOKEN.verifyToken(token);
+
+        if (jws == null) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid Token").build();
+        }
+
+        Result<List<Stat>> result = impl.getStatsOnDistrictOfTerrains();
 
         if (!result.isOK()) {
             return Response.status(result.error()).entity(result.statusMessage()).build();

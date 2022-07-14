@@ -1,7 +1,6 @@
 package pt.unl.fct.di.adc.silvanus.implementation.global_stats;
 
 import com.google.cloud.datastore.*;
-import org.apache.http.client.entity.EntityBuilder;
 import pt.unl.fct.di.adc.silvanus.api.impl.GlobalStats;
 import pt.unl.fct.di.adc.silvanus.data.global_stats.Stat;
 import pt.unl.fct.di.adc.silvanus.data.terrain.result.TerrainResultData;
@@ -36,7 +35,7 @@ public class GlobalStatsImplementation implements GlobalStats {
     }
 
     @Override
-    public Result<List<Stat>> getStatsOnTypeOfTerrain() {
+    public Result<List<Stat>> getStatsOnCountyOfTerrains() {
         Result<List<TerrainResultData>> result = terrainImplementation.getAllApprovedTerrains();
 
         if (!result.isOK())
@@ -48,17 +47,45 @@ public class GlobalStatsImplementation implements GlobalStats {
         Map<String, Double> statMap = new HashMap<>();
 
         for (TerrainResultData terrain : terrains) {
-            String type = terrain.getInfo().getCurrent_use();
-
-            if (!listOfTypes.contains(type))
-                type = "Outro";
+            String type = terrain.getCredentials().getTownhall();
 
             if (statMap.containsKey(type)) {
                 double value = statMap.get(type);
                 statMap.put(type, value + 1);
+            } else {
+                statMap.put(type, 0.0);
             }
 
-            else {
+            numberTerrains++;
+        }
+
+        List<Stat> statList = new ArrayList<>();
+        for (Map.Entry<String, Double> stat : statMap.entrySet()) {
+            Stat tmp = new Stat(stat.getKey(), stat.getValue() / numberTerrains);
+            statList.add(tmp);
+        }
+        return Result.ok(statList, "");
+    }
+
+    @Override
+    public Result<List<Stat>> getStatsOnDistrictOfTerrains() {
+        Result<List<TerrainResultData>> result = terrainImplementation.getAllApprovedTerrains();
+
+        if (!result.isOK())
+            return Result.error(result.error(), result.statusMessage().getMessage());
+
+        List<TerrainResultData> terrains = result.value();
+
+        int numberTerrains = 0;
+        Map<String, Double> statMap = new HashMap<>();
+
+        for (TerrainResultData terrain : terrains) {
+            String type = terrain.getCredentials().getDistrict();
+
+            if (statMap.containsKey(type)) {
+                double value = statMap.get(type);
+                statMap.put(type, value + 1);
+            } else {
                 statMap.put(type, 0.0);
             }
 
@@ -96,7 +123,7 @@ public class GlobalStatsImplementation implements GlobalStats {
 
     @Override
     public Result<Void> sendDataToDB() {
-        Result<List<Stat>> result = getStatsOnTypeOfTerrain();
+        Result<List<Stat>> result = getStatsOnCountyOfTerrains();
         List<Stat> terrains = result.value();
         Transaction txn = datastore.newTransaction();
         try {
@@ -112,8 +139,7 @@ public class GlobalStatsImplementation implements GlobalStats {
             }
 
             txn.commit();
-        }
-        finally {
+        } finally {
             if (txn.isActive())
                 txn.rollback();
         }
